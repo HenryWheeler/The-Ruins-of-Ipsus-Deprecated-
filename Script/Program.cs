@@ -26,6 +26,7 @@ namespace RoguelikeTest
         private static readonly int inventoryHeight = 70;
         private static RLConsole inventoryConsole;
 
+        public static Player player;
         public static void Main()
         {
             rootConsole = new RLRootConsole("ascii_8x8.png", screenWidth, screenHeight, 8, 8, 1.5f, "RogueLike Test");
@@ -40,15 +41,32 @@ namespace RoguelikeTest
 
             MapGenerator.CreateMap(mapWidth, mapHeight, 5, 12, 15, new Random());
             Room room = MapGenerator.rooms[MapGenerator.random.Next(0, MapGenerator.rooms.Count - 1)];
-            Player player = new Player(rootConsole)
+            player = new Player(rootConsole)
             {
                 x = room.x,
                 y = room.y,
             };
             Map.map[room.x, room.y].actor = player;
             player.FOV();
+            TurnManager.AddActor(player);
 
-            TurnManager turnManager = new TurnManager(rootConsole);
+            MonsterData monsterData = new MonsterData()
+            {
+                x = room.x + 1,
+                y = room.y + 1,
+                character = 'E',
+                bColor = RLColor.Black,
+                fColor = RLColor.Red,
+                sight = 5,
+                speedCap = 1,
+                hpCap = 10,
+                name = "Enemy",
+                opaque = false,
+                ai = new ChaseAI(),
+            };
+            Monster monster = new Monster(monsterData);
+            Map.map[room.x + 1, room.y + 1].actor = monster;
+            TurnManager.AddActor(monster);
             rootConsole.Run();
         }
     }

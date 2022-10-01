@@ -73,9 +73,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Script\ActorBase.cs" />
+    <Compile Include="Script\AStar.cs" />
+    <Compile Include="Script\DijkstraMaps.cs" />
     <Compile Include="Script\IDraw.cs" />
     <Compile Include="Script\Map.cs" />
     <Compile Include="Script\MapGenerator.cs" />
+    <Compile Include="Script\Monster.cs" />
     <Compile Include="Script\Player.cs" />
     <Compile Include="Script\Program.cs" />
     <Compile Include="Script\Renderer.cs" />
