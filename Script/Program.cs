@@ -37,6 +37,7 @@ namespace RoguelikeTest
             inventoryConsole = new RLConsole(inventoryWidth, inventoryHeight);
 
             Renderer renderer = new Renderer(rootConsole, mapConsole, messageConsole, statConsole, inventoryConsole);
+            Log log = new Log(messageConsole);
             rootConsole.SetWindowState(RLWindowState.Maximized);
 
             MapGenerator.CreateMap(mapWidth, mapHeight, 5, 12, 15, new Random());
@@ -58,8 +59,9 @@ namespace RoguelikeTest
                 bColor = RLColor.Black,
                 fColor = RLColor.Red,
                 sight = 5,
-                speedCap = 1,
+                actMax = .8f,
                 hpCap = 10,
+                ac = 10,
                 name = "Enemy",
                 opaque = false,
                 ai = new ChaseAI(),
@@ -67,6 +69,25 @@ namespace RoguelikeTest
             Monster monster = new Monster(monsterData);
             Map.map[room.x + 1, room.y + 1].actor = monster;
             TurnManager.AddActor(monster);
+
+            MonsterData monsterData2 = new MonsterData()
+            {
+                x = room.x - 1,
+                y = room.y - 1,
+                character = 'E',
+                bColor = RLColor.Black,
+                fColor = RLColor.Red,
+                sight = 5,
+                actMax = .8f,
+                hpCap = 10,
+                ac = 10,
+                name = "Enemy",
+                opaque = false,
+                ai = new ChaseAI(),
+            };
+            Monster monster2 = new Monster(monsterData2);
+            Map.map[room.x - 1, room.y - 1].actor = monster2;
+            TurnManager.AddActor(monster2);
             rootConsole.Run();
         }
     }

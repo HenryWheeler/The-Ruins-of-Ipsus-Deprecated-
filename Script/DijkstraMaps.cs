@@ -11,7 +11,7 @@ namespace RoguelikeTest
         public static Dictionary<string, Node[,]> maps = new Dictionary<string, Node[,]>();
         public static void CreateMap(Node point, string name)
         {
-            int timesToRun = 15;
+            int timesToRun = 50;
             int current = 0;
             Node[,] map = new Node[80, 70];
             foreach (Tile tile in Map.map)
@@ -29,14 +29,17 @@ namespace RoguelikeTest
                 {
                     if (node != null && node.v == current)
                     {
-                        for (int y = node.y - 1; y < node.y + 1; y++)
+                        for (int y = node.y - 1; y <= node.y + 1; y++)
                         {
-                            for (int x = node.x - 1; y < node.x + 1; x++)
+                            for (int x = node.x - 1; x <= node.x + 1; x++)
                             {
-                                if (CheckBounds(x, y))
+                                if (CheckBounds(x, y) && Map.map[x, y].walkable)
                                 {
-                                    if (map[x, y].v > current) map[x, y].v = current + 1;
-                                    else continue;
+                                    if (Map.map[x, y].actor == null)
+                                    {
+                                        if (map[x, y].v > current) map[x, y].v = current + 1;
+                                        else continue;
+                                    } else if (map[x, y].v > current) map[x, y].v = current + 25;
                                 }
                                 else continue;
                             }
@@ -57,6 +60,34 @@ namespace RoguelikeTest
             if (x <= 0 || x >= 80 || y <= 0 || y >= 70) return false;
             else return true;
         }
+        public static Node PathFromMap(int _x, int _y, string mapName)
+        {
+            Node[,] map;
+            if (maps.ContainsKey(mapName)) map = maps[mapName];
+            else return null;
+
+            Node start = map[_x, _y];
+            Node target = start;
+
+            for (int y = start.y - 1; y <= start.y + 1; y++)
+            {
+                for (int x = start.x - 1; x <= start.x + 1; x++)
+                {
+                    if ((y == start.y - 1 && x == start.x - 1) || (y == start.y - 1 && x == start.x + 1) || (y == start.y + 1 && x == start.x - 1) || (y == start.y + 1 && x == start.x + 1))
+                    {
+                        if (map[x, y].v + .5f < target.v) { target = map[x, y]; target.v += .5f; }
+                        else continue;
+                    }
+                    else
+                    {
+                        if (map[x, y].v < target.v) target = map[x, y];
+                        else continue;
+                    }
+                }
+            }
+
+            return target;
+        }
     }
     public class Node
     {
@@ -68,6 +99,7 @@ namespace RoguelikeTest
         }
         public int x { get; set; }
         public int y { get; set; }
-        public int v { get; set; }
+        public float v { get; set; }
+        public Node previous { get; set; }
     }
 }

@@ -21,13 +21,15 @@ namespace RoguelikeTest
             fColor = RLColor.Green;
             bColor = RLColor.Black;
             name = "Player";
-            sight = 30;
-            speedCap = 1;
+            sight = 10;
+            actMax = 1;
             hpCap = 500;
             hp = hpCap;
+            ac = 10;
         }
-        public override void StartTurn() { turnActive = true; }
-        public override void EndTurn() { turnActive = false; TurnManager.ActorTurnEnd(); }
+        public override void Death() { }
+        public override void StartTurn() { turnActive = true; Log.DisplayLog(); Log.ClearStoredLog(); }
+        public override void EndTurn() { MakeMap(); turnActive = false; TurnManager.ProgressActorTurn(this); }
         public void Update(object sender, UpdateEventArgs e)
         {
             RLKeyPress keyPress = rootConsole.Keyboard.GetKeyPress();
@@ -35,19 +37,19 @@ namespace RoguelikeTest
             {
                 switch (keyPress.Key)
                 {
-                    case RLKey.Up: Move(0, -1); break;
-                    case RLKey.Down: Move(0, 1); break;
-                    case RLKey.Left: Move(-1, 0); break;
-                    case RLKey.Right: Move(1, 0); break;
-                    case RLKey.Keypad8: Move(0, -1); break;
-                    case RLKey.Keypad9: Move(1, -1); break;
-                    case RLKey.Keypad6: Move(1, 0); break;
-                    case RLKey.Keypad3: Move(1, 1); break;
-                    case RLKey.Keypad2: Move(0, 1); break;
-                    case RLKey.Keypad1: Move(-1, 1); break;
-                    case RLKey.Keypad4: Move(-1, 0); break;
-                    case RLKey.Keypad7: Move(-1, -1); break;
-                    case RLKey.Space: MakeMap(); break;
+                    case RLKey.Up: Log.ClearLogDisplay(); Move(0, -1); break;
+                    case RLKey.Down: Log.ClearLogDisplay(); Move(0, 1); break;
+                    case RLKey.Left: Log.ClearLogDisplay(); Move(-1, 0); break;
+                    case RLKey.Right: Log.ClearLogDisplay(); Move(1, 0); break;
+                    case RLKey.Keypad8: Log.ClearLogDisplay(); Move(0, -1); break;
+                    case RLKey.Keypad9: Log.ClearLogDisplay(); Move(1, -1); break;
+                    case RLKey.Keypad6: Log.ClearLogDisplay(); Move(1, 0); break;
+                    case RLKey.Keypad3: Log.ClearLogDisplay(); Move(1, 1); break;
+                    case RLKey.Keypad2: Log.ClearLogDisplay(); Move(0, 1); break;
+                    case RLKey.Keypad1: Log.ClearLogDisplay(); Move(-1, 1); break;
+                    case RLKey.Keypad4: Log.ClearLogDisplay(); Move(-1, 0); break;
+                    case RLKey.Keypad7: Log.ClearLogDisplay(); Move(-1, -1); break;
+                    case RLKey.Space: Log.ClearLogDisplay(); EndTurn(); break;
                 }
             }
         }
@@ -58,8 +60,12 @@ namespace RoguelikeTest
                 new Node(x, y, 0)
             };
             DijkstraMaps.CreateMap(new Node(x, y, 0), "Player");
-
-            foreach (Node node in DijkstraMaps.maps["Player"])
+            // ShowMap("Player");
+        }
+        public void ShowMap(string name)
+        {
+            Node[,] map = DijkstraMaps.maps[name];
+            foreach (Node node in map)
             {
                 if (node != null)
                 {
@@ -69,7 +75,12 @@ namespace RoguelikeTest
                         case 1: Map.map[node.x, node.y].character = '1'; break;
                         case 2: Map.map[node.x, node.y].character = '2'; break;
                         case 3: Map.map[node.x, node.y].character = '3'; break;
-                        case 1000: Map.map[node.x, node.y].character = '4'; break;
+                        case 4: Map.map[node.x, node.y].character = '4'; break;
+                        case 5: Map.map[node.x, node.y].character = '5'; break;
+                        case 6: Map.map[node.x, node.y].character = '6'; break;
+                        case 7: Map.map[node.x, node.y].character = '7'; break;
+                        case 8: Map.map[node.x, node.y].character = '8'; break;
+                        case 9: Map.map[node.x, node.y].character = '9'; break;
                     }
                 }
             }
@@ -83,7 +94,8 @@ namespace RoguelikeTest
                 x += _x; y += _y;
                 Map.map[x, y].actor = this;
                 FOV();
-                CheckTurn();
+                Log.AddToStoredLog("Player moved to tile (" + x.ToString() + ", " + y.ToString() + ")."); 
+                EndTurn();
             }
         }
         public void Clear() { ShadowcastFOV.ClearSight(); }

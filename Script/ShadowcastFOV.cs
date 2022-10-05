@@ -19,7 +19,7 @@ namespace RoguelikeTest
         public static void Compute(int x, int y, int rangeLimit)
         {
             SetVisible(x, y);
-            for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, rangeLimit, 1, new Slope(1, 1), new Slope(0, 1));
+            for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, rangeLimit * 10, 1, new Slope(1, 1), new Slope(0, 1));
         }
         struct Slope // represents the slope Y/X as a rational number
         {
@@ -52,7 +52,7 @@ namespace RoguelikeTest
                         case 7: tx += x; ty += y; break;
                     }
 
-                    bool inRange = rangeLimit < 0 || GetDistance(oX, oY, tx, ty) <= rangeLimit;
+                    bool inRange = rangeLimit < 0 || CMath.Distance(oX, oY, tx, ty) <= rangeLimit;
                     if (inRange) SetVisible(tx, ty);
                     // NOTE: use the next line instead if you want the algorithm to be symmetrical
                     // if(inRange && (y != topY || top.Y*x >= top.X*y) && (y != bottomY || bottom.Y*x <= bottom.X*y)) SetVisible(tx, ty);
@@ -102,10 +102,6 @@ namespace RoguelikeTest
                 return false;
             }
             return true;
-        }
-        public static int GetDistance(int oX, int oY, int eX, int eY)
-        {
-            return ((oX - eX) * (oX - eX)) + ((oY - eY) * (oY - eY));
         }
         public static bool CheckBounds(int x, int y)
         {

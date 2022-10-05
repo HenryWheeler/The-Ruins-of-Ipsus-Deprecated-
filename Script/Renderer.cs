@@ -22,8 +22,6 @@ namespace RoguelikeTest
         }
         private void OnRootConsoleUpdate(object sender, UpdateEventArgs e)
         {
-            messageConsole.SetBackColor(0, 0, 155, 12, RLColor.Gray);
-            messageConsole.Print(1, 1, "Messages", RLColor.White);
             statConsole.SetBackColor(0, 0, 45, 70, RLColor.Brown);
             statConsole.Print(1, 1, "Stats", RLColor.White);
             inventoryConsole.SetBackColor(0, 0, 30, 70, RLColor.Cyan);
