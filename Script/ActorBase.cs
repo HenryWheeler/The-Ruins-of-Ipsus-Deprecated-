@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using RLNET;
 
-namespace RoguelikeTest
+namespace TheRuinsOfIpsus
 {
     [Serializable]
     public abstract class ActorBase : IDraw
@@ -22,7 +22,7 @@ namespace RoguelikeTest
         public float actLeft { get; set; }
         public float actMax { get; set; }
         public void Draw(RLConsole console) { console.Set(x, y, fColor, bColor, character); }
-        public void Attack(AtkData atkData, ActorBase target)
+        public void Attack(AtkData atkData, ActorBase target, ActorBase attacker)
         {
             string[] dataArray = atkData.dmgData.Split('-');
             int d1 = int.Parse(dataArray[0]);
@@ -41,7 +41,7 @@ namespace RoguelikeTest
                 }
                 dmg += d3;
 
-                target.OnHit(dmg);
+                target.OnHit(dmg, attacker);
 
                 Log.AddToStoredLog(name + " hit " + target.name + " for " + dmg + " damage!");
             }
@@ -49,11 +49,7 @@ namespace RoguelikeTest
 
             EndTurn();
         }
-        public void OnHit(int dmg)
-        {
-            hp -= dmg;
-            if (hp <= 0) Death();
-        }
+        public abstract void OnHit(int dmg, ActorBase attacker);
         public abstract void Death();
         public abstract void StartTurn();
         public abstract void EndTurn();

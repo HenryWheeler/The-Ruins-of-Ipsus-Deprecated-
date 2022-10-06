@@ -1,7 +1,7 @@
 ﻿using System;
 using RLNET;
 
-namespace RoguelikeTest
+namespace TheRuinsOfIpsus
 {
     public class Program
     {
@@ -18,18 +18,18 @@ namespace RoguelikeTest
         private static readonly int messageHeight = 12;
         private static RLConsole messageConsole;
         // The stat console is to the right of the map and display player and monster stats
-        private static readonly int statWidth = 45;
+        private static readonly int statWidth = 41;
         private static readonly int statHeight = 70;
         private static RLConsole statConsole;
         // Above the map is the inventory console which shows the players equipment, abilities, and items
-        private static readonly int inventoryWidth = 30;
+        private static readonly int inventoryWidth = 34;
         private static readonly int inventoryHeight = 70;
         private static RLConsole inventoryConsole;
 
         public static Player player;
         public static void Main()
         {
-            rootConsole = new RLRootConsole("ascii_8x8.png", screenWidth, screenHeight, 8, 8, 1.5f, "RogueLike Test");
+            rootConsole = new RLRootConsole("ascii_8x8.png", screenWidth, screenHeight, 8, 8, 1.5f, "The Ruins of Ipsus");
 
             mapConsole = new RLConsole(mapWidth, mapHeight);
             messageConsole = new RLConsole(messageWidth, messageHeight);
@@ -51,6 +51,9 @@ namespace RoguelikeTest
             player.FOV();
             TurnManager.AddActor(player);
 
+            Stats stats = new Stats(statConsole, player);
+            Stats.UpdateStats();
+
             MonsterData monsterData = new MonsterData()
             {
                 x = room.x + 1,
@@ -65,6 +68,7 @@ namespace RoguelikeTest
                 name = "Enemy",
                 opaque = false,
                 ai = new ChaseAI(),
+                maxMemory = 20,
             };
             Monster monster = new Monster(monsterData);
             Map.map[room.x + 1, room.y + 1].actor = monster;
@@ -84,10 +88,14 @@ namespace RoguelikeTest
                 name = "Enemy",
                 opaque = false,
                 ai = new ChaseAI(),
+                maxMemory = 20,
             };
             Monster monster2 = new Monster(monsterData2);
             Map.map[room.x - 1, room.y - 1].actor = monster2;
             TurnManager.AddActor(monster2);
+
+            Log.AddToStoredLog("Welcome to the Ruins of Ipsus"); Log.DisplayLog();
+
             rootConsole.Run();
         }
     }

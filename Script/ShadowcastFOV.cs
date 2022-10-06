@@ -2,7 +2,7 @@
 using RLNET;
 using System.Collections.Generic;
 
-namespace RoguelikeTest
+namespace TheRuinsOfIpsus
 {
     public static class ShadowcastFOV
     {

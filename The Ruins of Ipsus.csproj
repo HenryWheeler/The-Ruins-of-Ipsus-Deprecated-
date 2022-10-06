@@ -84,6 +84,7 @@
     <Compile Include="Script\Program.cs" />
     <Compile Include="Script\Renderer.cs" />
     <Compile Include="Script\ShadowcastFOV.cs" />
+    <Compile Include="Script\Stats.cs" />
     <Compile Include="Script\TurnManager.cs" />
   </ItemGroup>
   <ItemGroup>

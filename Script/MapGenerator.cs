@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using RLNET;
 
-namespace RoguelikeTest
+namespace TheRuinsOfIpsus
 {
     public class MapGenerator
     {
@@ -108,7 +108,7 @@ namespace RoguelikeTest
             {
                 for (int x = sX - 1; x <= eX + 1; x++)
                 {
-                    if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) return false;
+                    if (x < 1 || y < 1 || x >= mapWidth - 1|| y >= mapHeight - 1) return false;
                     if (Map.map[x, y].character == '.') return false;
                 }
             }

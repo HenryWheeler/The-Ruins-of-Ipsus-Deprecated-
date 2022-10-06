@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using RLNET;
 
-namespace RoguelikeTest
+namespace TheRuinsOfIpsus
 {
     [Serializable]
     public class Player : ActorBase
@@ -27,8 +27,9 @@ namespace RoguelikeTest
             hp = hpCap;
             ac = 10;
         }
+        public override void OnHit(int dmg, ActorBase attacker) { hp -= dmg; Stats.UpdateStats(); if (hp <= 0) Death(); }
         public override void Death() { }
-        public override void StartTurn() { turnActive = true; Log.DisplayLog(); Log.ClearStoredLog(); }
+        public override void StartTurn() { turnActive = true; Log.DisplayLog(); }
         public override void EndTurn() { MakeMap(); turnActive = false; TurnManager.ProgressActorTurn(this); }
         public void Update(object sender, UpdateEventArgs e)
         {
@@ -87,16 +88,24 @@ namespace RoguelikeTest
         }
         public void Move(int _x, int _y)
         {
-            if (Map.map[x + _x, y + _y].walkable && Map.map[x + _x, y + _y].actor == null)
+            if (Map.map[x + _x, y + _y].walkable)
             {
-                Clear();
-                Map.map[x, y].actor = null;
-                x += _x; y += _y;
-                Map.map[x, y].actor = this;
-                FOV();
-                Log.AddToStoredLog("Player moved to tile (" + x.ToString() + ", " + y.ToString() + ")."); 
-                EndTurn();
+                if (Map.map[x + _x, y + _y].actor == null)
+                {
+                    Clear();
+                    Map.map[x, y].actor = null;
+                    x += _x; y += _y;
+                    Map.map[x, y].actor = this;
+                    FOV();
+                    EndTurn();
+                }
+                else
+                {
+                    AtkData atkData = new AtkData("1-4-0-0");
+                    Attack(atkData, Map.map[x + _x, y + _y].actor, this);
+                }
             }
+            else { Log.AddToStoredLog("You cannot move there."); Log.DisplayLog(); }
         }
         public void Clear() { ShadowcastFOV.ClearSight(); }
         public void FOV() { ShadowcastFOV.Compute(x, y, sight); }

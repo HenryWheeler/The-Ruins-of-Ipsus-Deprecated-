@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using RLNET;
 
-namespace RoguelikeTest
+namespace TheRuinsOfIpsus
 {
     [Serializable]
     public class Monster : ActorBase
     {
-        public AI ai;
+        public AI ai { get; set; }
+        public int memory { get; set; }
+        public int maxMemory { get; set; }
         public Monster(MonsterData data)
         {
             x = data.x;
@@ -22,6 +24,7 @@ namespace RoguelikeTest
             name = data.name;
             actMax = data.actMax;
             data.ai.Set(this);
+            maxMemory = data.maxMemory;
         }
         public void Move(int _x, int _y)
         {
@@ -30,12 +33,12 @@ namespace RoguelikeTest
                 Map.map[x, y].actor = null;
                 x = _x; y = _y;
                 Map.map[x, y].actor = this;
-                Log.AddToStoredLog("Monster moved to tile (" + x.ToString() + ", " + y.ToString() + ").");
             }
             EndTurn();
         }
-        public override void Death() { Map.map[x, y].actor = null; TurnManager.RemoveActor(this); }
-        public override void StartTurn() { turnActive = true; ai.Action(this); }
+        public override void OnHit(int dmg, ActorBase attacker) { hp -= dmg; ai.OnHit(attacker); if (hp <= 0) Death(); }
+        public override void Death() { Map.map[x, y].actor = null; Log.AddToStoredLog(name + " has died."); TurnManager.RemoveActor(this); }
+        public override void StartTurn() { turnActive = true; ai.Action(); }
         public override void EndTurn() { turnActive = false; TurnManager.ProgressActorTurn(this); }
     }
     [Serializable]
@@ -54,32 +57,46 @@ namespace RoguelikeTest
         public string name { get; set; }
         public float actMax { get; set; }
         public AI ai { get; set; }
+        public int maxMemory { get; set; }
     }
     [Serializable]
     public abstract class AI
     {
+        public Monster aiHolder;
         public int action;
         public abstract void Set(Monster monster);
-        public abstract void Action(Monster monster);
-        public Node Path(Monster monster, string map) { return DijkstraMaps.PathFromMap(monster.x, monster.y, map);}
+        public abstract void Action();
+        public abstract void OnHit(ActorBase attacker);
+        public Node Path(string map) { return DijkstraMaps.PathFromMap(aiHolder.x, aiHolder.y, map);}
     }
     public class ChaseAI : AI
     {
         public ActorBase target;
-        public override void Set(Monster monster) { monster.ai = this; target = Program.player; }
-        public override void Action(Monster monster)
+        public override void Set(Monster monster) { monster.ai = this; aiHolder = monster; target = Program.player; }
+        public override void Action()
         {
-            Node targetNode = Path(monster, target.name);
-            if (targetNode != null)
+            if (target != null)
             {
-                if (CMath.Distance(target.x, target.y, targetNode.x, targetNode.y) == 0)
+                if (CMath.Sight(aiHolder.x, aiHolder.y, target.x, target.y, aiHolder.sight)) { aiHolder.memory = aiHolder.maxMemory; }
+                else { if (aiHolder.memory > 0) { aiHolder.memory--; } }
+                if (aiHolder.memory > 0)
                 {
-                    AtkData atkData = new AtkData("1-4-0-0");
-                    monster.Attack(atkData, target);
+                    Node targetNode = Path(target.name);
+                    if (targetNode != null)
+                    {
+                        if (CMath.Distance(target.x, target.y, targetNode.x, targetNode.y) == 0)
+                        {
+                            AtkData atkData = new AtkData("1-4-0-0");
+                            aiHolder.Attack(atkData, target, aiHolder);
+                        }
+                        else aiHolder.Move(targetNode.x, targetNode.y);
+                    }
+                    else aiHolder.EndTurn();
                 }
-                else monster.Move(targetNode.x, targetNode.y);
+                else aiHolder.EndTurn();
             }
-            else monster.EndTurn();
+            else aiHolder.EndTurn();
         }
+        public override void OnHit(ActorBase attacker) { target = attacker; }
     }
 }

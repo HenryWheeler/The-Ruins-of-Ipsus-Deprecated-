@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using RLNET;
-namespace RoguelikeTest
+
+namespace TheRuinsOfIpsus
 {
     public class TurnManager
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using RLNET;
 
-namespace RoguelikeTest
+namespace TheRuinsOfIpsus
 {
     interface IDraw
     {
