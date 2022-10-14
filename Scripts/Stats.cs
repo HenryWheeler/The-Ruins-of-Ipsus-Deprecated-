@@ -16,9 +16,9 @@ namespace TheRuinsOfIpsus
         {
             ClearStats();
             console.Print(2, 2, "Health: " + player.hp + "/" + player.hpCap, RLColor.White);
-            console.Print(2, 4, "Armor: " + player.ac, RLColor.White);
-            console.Print(2, 6, "Speed: " + player.actMax, RLColor.White);
-            console.Print(2, 8, "Sight: " + player.sight, RLColor.White);
+            console.Print(2, 5, "Armor: " + player.ac, RLColor.White);
+            console.Print(2, 8, "Speed: " + player.actMax, RLColor.White);
+            console.Print(2, 11, "Sight: " + player.sight, RLColor.White);
         }
         public static void ClearStats()
         {
@@ -32,5 +32,6 @@ namespace TheRuinsOfIpsus
                 }
             }
         }
+        public static void DisplayStats() { Renderer.CreateConsoleBorder(console); console.Print(14, 0, " The Rogue @ ", RLColor.White); }
     }
 }

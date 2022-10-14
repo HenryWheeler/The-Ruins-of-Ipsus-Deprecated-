@@ -11,42 +11,32 @@ namespace TheRuinsOfIpsus
         public Log(RLConsole _console) { console = _console; }
         public static void DisplayLog()
         {
+            ClearLogDisplay();
+
             if (storedLog.Count != 0)
             {
                 storedLog.Reverse();
 
                 string logOut = null;
-                foreach (string log in storedLog)
-                {
-                    logOut += log;
-                }
-                logOut += ".";
-                char[] outPut = logOut.ToCharArray();
+                foreach (string log in storedLog) { logOut += log; }
+                string[] outPut = logOut.Split(' ');
                 int y = 2;
-                int s = 0;
-                for (int c = 0; c < outPut.Length - 1; c++)
+                int c = 0;
+                foreach (string text in outPut)
                 {
-                    switch (c)
-                    {
-                        case 153: { y = 3; s = 153; break; }
-                        case 306: { y = 4; s = 306; break; }
-                        case 459: { y = 5; s = 459; break; }
-                        case 612: { y = 6; s = 612; break; }
-                        case 765: { y = 7; s = 765; break; }
-                        case 918: { y = 8; s = 918; break; }
-                        case 1071: { y = 9; s = 1071; break; }
-                        case 1224: { y = 10; s = 1224; break; }
-                    }
-                    console.Set(c + 1 - s, y, RLColor.White, RLColor.Black, outPut[c]);
+                    if (c + text.Length > console.Width - 4) { y += 2; c = 1; }
+                    console.Print(c + 1, y, text, RLColor.White);
+                    c += text.Length + 1;
                 }
                 ClearStoredLog();
             }
         }
-        public static void AddToStoredLog(string logAdd)
+        public static void AddToStoredLog(string logAdd, bool display = false)
         {
             string newString = null;
             newString = " " + logAdd;
             storedLog.Add(newString);
+            if (display) DisplayLog();
         }
         public static void ClearStoredLog() { storedLog.Clear(); }
         public static void ClearLogDisplay()

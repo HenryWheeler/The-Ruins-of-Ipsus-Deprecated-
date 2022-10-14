@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{74D6FE81-441C-4E97-A0F9-4A7B62FAFAD6}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>RoguelikeTest</RootNamespace>
-    <AssemblyName>RoguelikeTest</AssemblyName>
+    <RootNamespace>TheRuinsOfIpsus</RootNamespace>
+    <AssemblyName>TheRuinsofIpsus</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -48,7 +48,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject />
+    <StartupObject>TheRuinsOfIpsus.Program</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -70,22 +73,30 @@
     <Content Include="ascii_8x8.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Script\ActorBase.cs" />
-    <Compile Include="Script\CMath.cs" />
-    <Compile Include="Script\DijkstraMaps.cs" />
-    <Compile Include="Script\IDraw.cs" />
-    <Compile Include="Script\Log.cs" />
-    <Compile Include="Script\Map.cs" />
-    <Compile Include="Script\MapGenerator.cs" />
-    <Compile Include="Script\Monster.cs" />
-    <Compile Include="Script\Player.cs" />
-    <Compile Include="Script\Program.cs" />
-    <Compile Include="Script\Renderer.cs" />
-    <Compile Include="Script\ShadowcastFOV.cs" />
-    <Compile Include="Script\Stats.cs" />
-    <Compile Include="Script\TurnManager.cs" />
+    <Compile Include="Scripts\Abstracts\ActorBase.cs" />
+    <Compile Include="Scripts\Action.cs" />
+    <Compile Include="Scripts\Interfaces\IEquipable.cs" />
+    <Compile Include="Scripts\Interfaces\IUseable.cs" />
+    <Compile Include="Scripts\CMath.cs" />
+    <Compile Include="Scripts\DijkstraMaps.cs" />
+    <Compile Include="Scripts\Interfaces\IDescription.cs" />
+    <Compile Include="Scripts\Interfaces\IDraw.cs" />
+    <Compile Include="Scripts\Abstracts\ItemBase.cs" />
+    <Compile Include="Scripts\Inventory.cs" />
+    <Compile Include="Scripts\Log.cs" />
+    <Compile Include="Scripts\Look.cs" />
+    <Compile Include="Scripts\Map.cs" />
+    <Compile Include="Scripts\MapGenerator.cs" />
+    <Compile Include="Scripts\Monster.cs" />
+    <Compile Include="Scripts\Player.cs" />
+    <Compile Include="Scripts\Program.cs" />
+    <Compile Include="Scripts\Renderer.cs" />
+    <Compile Include="Scripts\ShadowcastFOV.cs" />
+    <Compile Include="Scripts\Stats.cs" />
+    <Compile Include="Scripts\TurnManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">

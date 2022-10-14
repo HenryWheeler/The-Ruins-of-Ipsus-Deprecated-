@@ -5,7 +5,7 @@ using RLNET;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public abstract class ActorBase : IDraw
+    public abstract class ActorBase : IDraw, IDescription
     {
         public bool turnActive = false;
         public int x { get; set; }
@@ -19,8 +19,11 @@ namespace TheRuinsOfIpsus
         public RLColor bColor { get; set; }
         public bool opaque { get; set; }
         public string name { get; set; }
+        public string description { get; set; }
         public float actLeft { get; set; }
         public float actMax { get; set; }
+        public List<ItemBase> inventory { get; set; }
+        public abstract string Describe();
         public void Draw(RLConsole console) { console.Set(x, y, fColor, bColor, character); }
         public void Attack(AtkData atkData, ActorBase target, ActorBase attacker)
         {

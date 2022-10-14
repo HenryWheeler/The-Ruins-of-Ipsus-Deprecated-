@@ -7,15 +7,6 @@ namespace TheRuinsOfIpsus
     public static class ShadowcastFOV
     {
         private static List<Tile> visibleTiles = new List<Tile>();
-        /// <param name="blocksLight">A function that accepts the X and Y coordinates of a tile and determines whether the
-        /// given tile blocks the passage of light. The function must be able to accept coordinates that are out of bounds.
-        /// </param>
-        /// <param name="setVisible">A function that sets a tile to be visible, given its X and Y coordinates. The function
-        /// must ignore coordinates that are out of bounds.
-        /// </param>
-        /// <param name="getDistance">A function that takes the X and Y coordinate of a point where X >= 0,
-        /// Y >= 0, and X >= Y, and returns the distance from the point to the origin.
-        /// </param>
         public static void Compute(int x, int y, int rangeLimit)
         {
             SetVisible(x, y);

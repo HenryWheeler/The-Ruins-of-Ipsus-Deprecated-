@@ -32,16 +32,7 @@ namespace TheRuinsOfIpsus
             {
                 for (int y = 0; y < mapHeight; y++)
                 {
-                    Map.map[x, y] = new Tile()
-                    {
-                        x = x,
-                        y = y,
-                        character = '#',
-                        fColor = RLColor.White,
-                        bColor = RLColor.Gray,
-                        opaque = true,
-                        walkable = false,
-                    };
+                    SetTile(x, y, '#', "Stone Wall", "A cold stone wall.", RLColor.White, RLColor.Gray, true, false);
                 }
             }
             for (int i = 0; i < roomsToGenerate; i++)
@@ -67,7 +58,7 @@ namespace TheRuinsOfIpsus
                     int _X = _x + x;
                     int _Y = _y + y;
 
-                    SetTile(_X, _Y, '.', RLColor.Brown, RLColor.Black, false, true);
+                    SetTile(_X, _Y, '.', "Stone Floor", "A simple stone floor.", RLColor.Brown, RLColor.Black, false, true);
                 }
             }
 
@@ -83,22 +74,22 @@ namespace TheRuinsOfIpsus
             {
                 for (int x = Math.Min(r1.x, r2.x); x <= Math.Max(r1.x, r2.x); x++)
                 {
-                    SetTile(x, r1.y, '.', RLColor.Brown, RLColor.Black, false, true);
+                    SetTile(x, r1.y, '.', "Stone Floor", "A simple stone floor.", RLColor.Brown, RLColor.Black, false, true);
                 }
                 for (int y = Math.Min(r1.y, r2.y); y <= Math.Max(r1.y, r2.y); y++)
                 {
-                    SetTile(r2.x, y, '.', RLColor.Brown, RLColor.Black, false, true);
+                    SetTile(r2.x, y, '.', "Stone Floor", "A simple stone floor.", RLColor.Brown, RLColor.Black, false, true);
                 }
             }
             else
             {
                 for (int y = Math.Min(r1.y, r2.y); y <= Math.Max(r1.y, r2.y); y++)
                 {
-                    SetTile(r1.x, y, '.', RLColor.Brown, RLColor.Black, false, true);
+                    SetTile(r1.x, y, '.', "Stone Floor", "A simple stone floor.", RLColor.Brown, RLColor.Black, false, true);
                 }
                 for (int x = Math.Min(r1.x, r2.x); x <= Math.Max(r1.x, r2.x); x++)
                 {
-                    SetTile(x, r2.y, '.', RLColor.Brown, RLColor.Black, false, true);
+                    SetTile(x, r2.y, '.', "Stone Floor", "A simple stone floor.", RLColor.Brown, RLColor.Black, false, true);
                 }
             }
         }
@@ -114,13 +105,9 @@ namespace TheRuinsOfIpsus
             }
             return true;
         }
-        private static void SetTile(int x, int y, char character, RLColor fColor, RLColor bColor, bool opaque, bool walkable)
+        private static void SetTile(int x, int y, char character, string name, string description, RLColor fColor, RLColor bColor, bool opaque, bool walkable)
         {
-            Map.map[x, y].character = character;
-            Map.map[x, y].fColor = fColor;
-            Map.map[x, y].bColor = bColor;
-            Map.map[x, y].opaque = opaque;
-            Map.map[x, y].walkable = walkable;
+            Map.map[x, y] = new Tile(x, y, character, name, description, fColor, bColor, opaque, walkable);
         }
     }
 }
