@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace TheRuinsOfIpsus
 {
-    public interface IEquipable
+    public class AMap
     {
-        void Equip(ActorBase actor);
-        void Unequip(ActorBase actor);
     }
 }

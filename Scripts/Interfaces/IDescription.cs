@@ -8,6 +8,7 @@ namespace TheRuinsOfIpsus
 {
     public interface IDescription
     {
+        string spacer { get; set; }
         string description { get; set; }
         string Describe();
     }

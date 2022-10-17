@@ -49,11 +49,22 @@ namespace TheRuinsOfIpsus
         public void Render(object sender, UpdateEventArgs e)
         {
             rootConsole.Clear();
-            RenderMap();
-            RenderLog();
-            RenderRogue();
-            RenderAction();
+            if (Program.gameActive)
+            {
+                RenderMap();
+                RenderLog();
+                RenderRogue();
+                RenderAction();
+            }
+            else { RenderMenu(); }
             rootConsole.Draw();
+        }
+        public void RenderMenu()
+        {
+            CreateConsoleBorder(rootConsole);
+            rootConsole.Print((rootConsole.Width / 2) - 7, (rootConsole.Height / 2) - 6, "New Game: [N]", RLColor.White);
+            rootConsole.Print((rootConsole.Width / 2) - 10, (rootConsole.Height / 2) - 3, "Load Save Game: [L]", RLColor.White);
+            rootConsole.Print((rootConsole.Width / 2) - 5, rootConsole.Height / 2, "Quit: [Q]", RLColor.White);
         }
         public void RenderMap()
         {

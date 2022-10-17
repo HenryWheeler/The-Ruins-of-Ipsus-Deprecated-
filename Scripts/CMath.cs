@@ -1,4 +1,5 @@
 ﻿using System;
+using RLNET;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,8 +7,11 @@ using System.Threading.Tasks;
 
 namespace TheRuinsOfIpsus
 {
-    public static class CMath
+    public class CMath
     {
+        public static Random seed { get; set; }
+        public static Random random { get; set; }
+        public CMath(int _seed) { seed = new Random(_seed); random = new Random(); }
         public static int Distance(int oX, int oY, int eX, int eY) { return ((oX - eX) * (oX - eX)) + ((oY - eY) * (oY - eY)); }
         public static bool Sight(int oX, int oY, int eX, int eY, int sight)
         {
@@ -45,6 +49,33 @@ namespace TheRuinsOfIpsus
                 }
                 while (Map.map[x, y].walkable == true);
                 return false;
+            }
+        }
+        public static void DisplayToConsole(RLConsole console, string logOut, int a, int b, int m = 0, int y = 2)
+        {
+            string[] outPut = logOut.Split(' ');
+            int c = 0;
+            foreach (string text in outPut)
+            {
+                if (text.Contains("+")) { y += 2 + m; c = a; }
+                else
+                {
+                    if (c + text.Length > console.Width - 4) { y += 2 + m; c = a; }
+                    console.Print(c + b, y, text, RLColor.White);
+                    c += text.Length + 1;
+                }
+            }
+        }
+        public static void ClearConsole(RLConsole console)
+        {
+            int h = console.Height - 2;
+            int w = console.Width - 2;
+            for (int y = (h); y >= 2; y--)
+            {
+                for (int x = 1; x < w + 1; x++)
+                {
+                    console.SetColor(x, y, RLColor.Black);
+                }
             }
         }
     }

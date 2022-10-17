@@ -15,8 +15,9 @@ namespace TheRuinsOfIpsus
         public static int selection = 0;
         public static int currentPage = 0;
         private static int maxItemPerPage = 25;
-        public static List<List<ItemBase>> inventoryDisplay = new List<List<ItemBase>>();
+        public static List<List<Item>> inventoryDisplay = new List<List<Item>>();
         public Inventory(RLConsole _console, Player _player) { console = _console; player = _player; }
+        public Inventory(Player _player) { player = _player; }
         public static bool GetItem(ActorBase actor, bool display = false)
         {
             Tile tile = Map.map[actor.x, actor.y];
@@ -28,26 +29,26 @@ namespace TheRuinsOfIpsus
             }
             else { if (display) Log.AddToStoredLog("There is nothing to pick up.", true); return false; }
         }
-        public static bool DropItem(ActorBase actor, ItemBase item, bool display = false)
+        public static bool DropItem(ActorBase actor, Item item, bool display = false)
         {
             Tile tile = Map.map[actor.x, actor.y];
             if (tile.item == null)
             {
-                if (display) Log.AddToStoredLog("You dropped the " + item.name + ".", true);
                 RemoveFromInventory(actor, item);
                 tile.item = item;
                 tile.item.x = tile.x;
                 tile.item.y = tile.y;
-                if (actor.name == "Player") { CloseInventory(); }
+                if (item.equipped) UnequipItem(actor, item, display);
+                if (display) { Refresh(); Log.AddToStoredLog("You dropped the " + item.name + ".", true); }
                 return true;
             }
             else { if (display) Log.AddToStoredLog("There is no room to drop this item.", true); return false; }
         }
-        public static void AddToInventory(ActorBase actor, ItemBase item)
+        public static void AddToInventory(ActorBase actor, Item item)
         {
             if (actor != null && item != null) actor.inventory.Add(item);
         }
-        public static void RemoveFromInventory(ActorBase actor, ItemBase item)
+        public static void RemoveFromInventory(ActorBase actor, Item item)
         {
             if (actor != null && item != null) actor.inventory.Remove(item);
         }
@@ -59,49 +60,92 @@ namespace TheRuinsOfIpsus
             RLKey key = RLKey.Unknown; Action.InventoryAction(player, key);
 
             if (player.inventory.Count == 0) { console.Print(2, 2, "Inventory is Empty.", RLColor.White); }
-            else { RefreshInventoryDisplay(); MoveSelection(0); }
+            else  { Refresh(); }
         }
-        public static void CloseInventory() 
+        public static void CloseInventory()
         {
             inventoryDisplay.Clear();
             inventoryOpen = false; player.turnActive = true;
-            Stats.DisplayStats(); 
-            RLKey key = RLKey.Unknown; Action.PlayerAction(player, key); 
-            Stats.UpdateStats(); 
+            Stats.DisplayStats();
+            RLKey key = RLKey.Unknown; Action.PlayerAction(player, key);
+            Stats.UpdateStats();
         }
-        public static void EquipItem(ActorBase actor, ItemBase item, bool display = false)
-        {
-            if (item.equipable)
-            {
-
-            }
-            else { if (display) { Log.AddToStoredLog("You cannot equip this item.", true); } }
-        }
-        public static void UnequipItem(ActorBase actor, ItemBase item, bool display = false)
-        {
-
-        }
-        public static void RefreshInventoryDisplay()
+        public static void Refresh()
         {
             inventoryDisplay.Clear();
             int itemCount = 0;
             int pageCount = 0;
-            inventoryDisplay.Add(new List<ItemBase>());
-            foreach (ItemBase item in player.inventory)
+            inventoryDisplay.Add(new List<Item>());
+            foreach (Item item in player.inventory)
             {
-                if (itemCount == maxItemPerPage - 1) { itemCount = 0; pageCount++; inventoryDisplay.Add(new List<ItemBase>()); }
+                if (itemCount == maxItemPerPage - 1) { itemCount = 0; pageCount++; inventoryDisplay.Add(new List<Item>()); }
                 inventoryDisplay[pageCount].Add(item);
                 itemCount++;
             }
+            DisplayInventory();
+        }
+        public static bool EquipItem(ActorBase actor, Item item, bool display = false)
+        {
+            foreach (EquipmentSlot slot in actor.bodyPlot)
+            {
+                if (slot.name == item.slot)
+                {
+                    if (slot != null) UnequipItem(actor, slot.item, display);
+                    slot.item = item;
+                    item.equipped = true;
+
+                    switch (item.type)
+                    {
+                        case 0: actor.ac += item.ac; break;
+                        case 1: actor.attacks.Add(item.atkData); break;
+                        case 2: break;
+                        case 3: break;
+                    }
+
+                    if (display) { Refresh(); Log.AddToStoredLog("You equipped " + item.name, true); }
+                    return true;
+                }
+            }
+            if (display) { Log.AddToStoredLog("You cannot unequip this item.", true); }
+            return false;
+        }
+        public static bool UnequipItem(ActorBase actor, Item item, bool display = false)
+        {
+            foreach (EquipmentSlot slot in actor.bodyPlot)
+            {
+                if (item != null)
+                {
+                    if (slot.name == item.slot)
+                    {
+                        slot.item = null;
+                        item.equipped = false;
+
+                        switch (item.type)
+                        {
+                            case 0: actor.ac -= item.ac; break;
+                            case 1: actor.attacks.Remove(item.atkData); break;
+                            case 2: break;
+                            case 3: break;
+                        }
+
+                        if (display) { Refresh(); Log.AddToStoredLog("You unequipped " + item.name, true); }
+                        return true;
+                    }
+                }
+            }
+            if (display) { Log.AddToStoredLog("You cannot equip this item.", true); }
+            return false;
         }
         public static void DisplayInventory()
         {
-            ClearInventoryDisplay();
+            CMath.ClearConsole(console);
             int x = 0;
-            foreach (ItemBase item in inventoryDisplay[currentPage])
+            foreach (Item item in inventoryDisplay[currentPage])
             {
-                if (selection == x) console.Print(2, (x * 3) + 2, "X " + item.name, RLColor.White);
-                else console.Print(2, (x * 3) + 2, item.name, RLColor.White);
+                string addOn = "";
+                if (item.equipped) addOn = " - Equipped"; 
+                if (selection == x) console.Print(2, (x * 3) + 2, "X " + item.name + addOn, RLColor.White);
+                else console.Print(2, (x * 3) + 2, item.name + addOn, RLColor.White);
                 x++;
             }
             console.Print(2, 80, "Page: " + (currentPage + 1) + "/" + inventoryDisplay.Count, RLColor.White);
@@ -129,18 +173,6 @@ namespace TheRuinsOfIpsus
                 }
                 Log.AddToStoredLog(inventoryDisplay[currentPage][selection].Describe(), true);
                 DisplayInventory();
-            }
-        }
-        public static void ClearInventoryDisplay()
-        {
-            int h = console.Height - 2;
-            int w = console.Width - 2;
-            for (int y = (h); y >= 2; y--)
-            {
-                for (int x = 1; x < w + 1; x++)
-                {
-                    console.SetColor(x, y, RLColor.Black);
-                }
             }
         }
     }

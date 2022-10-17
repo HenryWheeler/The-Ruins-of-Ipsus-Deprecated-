@@ -8,7 +8,8 @@ namespace TheRuinsOfIpsus
     {
         private static RLConsole console;
         private static List<string> storedLog = new List<string>();
-        public Log(RLConsole _console) { console = _console; }
+        private static string spacer { get; set; }
+        public Log(RLConsole _console) { console = _console; spacer = " + "; }
         public static void DisplayLog()
         {
             ClearLogDisplay();
@@ -19,22 +20,13 @@ namespace TheRuinsOfIpsus
 
                 string logOut = null;
                 foreach (string log in storedLog) { logOut += log; }
-                string[] outPut = logOut.Split(' ');
-                int y = 2;
-                int c = 0;
-                foreach (string text in outPut)
-                {
-                    if (c + text.Length > console.Width - 4) { y += 2; c = 1; }
-                    console.Print(c + 1, y, text, RLColor.White);
-                    c += text.Length + 1;
-                }
+                CMath.DisplayToConsole(console, logOut, 1, 1, 0, 0);
                 ClearStoredLog();
             }
         }
         public static void AddToStoredLog(string logAdd, bool display = false)
         {
-            string newString = null;
-            newString = " " + logAdd;
+            string newString = null; newString = spacer + logAdd;
             storedLog.Add(newString);
             if (display) DisplayLog();
         }

@@ -4,8 +4,12 @@ using RLNET;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public static class Map
+    public class Map
     {
+        public Map(Tile[,] tiles)
+        {
+            map = tiles;
+        }
         public static Tile[,] map;
     }
     [Serializable]
@@ -22,8 +26,9 @@ namespace TheRuinsOfIpsus
         public bool explored { get; set; }
         public bool visible { get; set; }
         public bool walkable { get; set; }
+        public string spacer { get; set; }
         public ActorBase actor = null;
-        public ItemBase item = null;
+        public Item item = null;
         public string Describe() { return name + ": " + description; }
         public void Draw(RLConsole console)
         {
@@ -44,6 +49,7 @@ namespace TheRuinsOfIpsus
             bColor = _bColor;
             opaque = _opaque;
             walkable = _walkable;
+            spacer = " + ";
         }
     }
     public class Room

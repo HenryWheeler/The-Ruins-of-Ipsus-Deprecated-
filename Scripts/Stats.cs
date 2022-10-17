@@ -11,17 +11,35 @@ namespace TheRuinsOfIpsus
     {
         public static Player player;
         public static RLConsole console;
-        public Stats(RLConsole _console, Player _player) { console = _console; player = _player; }
+        private static string spacer { get; set; }
+        private static string displayStats { get; set; }
+        public Stats(RLConsole _console, Player _player) { console = _console; player = _player; spacer = " + "; }
+        public Stats(Player _player) { player = _player; }
         public static void UpdateStats()
         {
             ClearStats();
-            console.Print(2, 2, "Health: " + player.hp + "/" + player.hpCap, RLColor.White);
-            console.Print(2, 5, "Armor: " + player.ac, RLColor.White);
-            console.Print(2, 8, "Speed: " + player.actMax, RLColor.White);
-            console.Print(2, 11, "Sight: " + player.sight, RLColor.White);
+
+            displayStats += "Health: " + player.hp + "/" + player.hpCap + spacer;
+            displayStats += "Armor: " + player.ac + spacer;
+            displayStats += "Speed: " + player.actMax + spacer;
+            displayStats += "Sight: " + player.sight + spacer + spacer;
+
+            displayStats += "Equipment: " + spacer + spacer;
+
+            foreach (EquipmentSlot slot in player.bodyPlot)
+            {
+                if (slot != null)
+                {
+                    if (slot.item != null) { displayStats += slot.name + ": " + slot.item.name + spacer; }
+                    else { displayStats += slot.name + ": Empty" + spacer; }
+                }
+            }
+
+            CMath.DisplayToConsole(console, displayStats, 0, 2, 1);
         }
         public static void ClearStats()
         {
+            displayStats = "";
             int h = console.Height - 2;
             int w = console.Width - 2;
             for (int y = (h); y >= 2; y--)

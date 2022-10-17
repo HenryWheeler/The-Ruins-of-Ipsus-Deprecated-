@@ -14,7 +14,7 @@ namespace TheRuinsOfIpsus
         public static int y { get; set; }
         public static bool looking = false;
         public static RLColor savedColor = RLColor.Black;
-        public Look(RLRootConsole _rootConsole) { player = Program.player; }
+        public Look(Player _player) { player = _player; }
         public static void StartLooking(int _x, int _y) { x = _x; y = _y; looking = true; player.turnActive = false; savedColor = RLColor.Black; Move(0, 0); RLKey key = RLKey.Unknown; Action.LookAction(key); }
         public static void StopLooking() { player.turnActive = true; looking = false; ChangeBackColor(x, y, savedColor); RLKey key = RLKey.Unknown; Action.PlayerAction(player, key); Log.ClearLogDisplay(); }
         public static void Move(int _x, int _y)

@@ -23,12 +23,39 @@ namespace TheRuinsOfIpsus
             hp = hpCap;
             ac = 10;
             description = "It's you.";
-            inventory = new List<ItemBase>();
+            inventory = new List<Item>();
+            bodyPlotName = "Basic_Humanoid";
+            bodyPlot = BodyPlots.bodyPlots[bodyPlotName];
+            attacks = new List<AtkData>();
 
             StartTurn();
             RLKey key = RLKey.Unknown;
             Action.PlayerAction(this, key);
         }
+        public Player(Player player, RLRootConsole _rootConsole)
+        {
+            rootConsole = _rootConsole;
+            rootConsole.Update += Update;
+
+            character = player.character;
+            fColor = player.fColor;
+            bColor = player.bColor;
+            name = player.name;
+            sight = player.sight;
+            actMax = player.actMax;
+            hpCap = player.hpCap;
+            hp = player.hp;
+            ac = player.ac;
+            description = player.description;
+            inventory = player.inventory;
+            bodyPlot = player.bodyPlot;
+            attacks = player.attacks;
+
+            StartTurn();
+            RLKey key = RLKey.Unknown;
+            Action.PlayerAction(this, key);
+        }
+        public Player() { rootConsole = Program.rootConsole; rootConsole.Update += Update; }
         public override string Describe() { return description; }
         public override void OnHit(int dmg, ActorBase attacker) { hp -= dmg; Stats.UpdateStats(); if (hp <= 0) Death(); }
         public override void Death() { }
@@ -67,8 +94,7 @@ namespace TheRuinsOfIpsus
                 }
                 else
                 {
-                    AtkData atkData = new AtkData("1-4-0-0");
-                    Attack(atkData, Map.map[x + _x, y + _y].actor, this);
+                    Attack(Map.map[x + _x, y + _y].actor, this, 0);
                 }
             }
             else { Log.AddToStoredLog("You cannot move there."); Log.DisplayLog(); }

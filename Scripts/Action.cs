@@ -11,9 +11,19 @@ namespace TheRuinsOfIpsus
     {
         private static RLConsole console { get; set; }
         public Action(RLConsole _console) { console = _console; }
+        private static string spacer = " + ";
+        public static void MenuAction(RLKey key, RLRootConsole console)
+        {
+            switch (key)
+            {
+                case RLKey.N: Menu.MakeSelection(0); break;
+                case RLKey.L: Menu.MakeSelection(1); break;
+                case RLKey.Q: Menu.MakeSelection(2); break;
+            }
+        }
         public static void PlayerAction(Player player, RLKey key)
         {
-            DisplayActions("Move: NumPad & Arrow Keys. End Turn: Period. Look: L. Open Inventory: I. Get Item: G.");
+            DisplayActions("Move: [NumPad/Arrow Keys]" + "     Debug Save Game: [S]" + spacer + "End Turn: [.]"  + "     Debug Load Game: [M]" + spacer + "Look: [L]" + spacer + "Open Inventory: [I]" + spacer + "Get Item: [G]");
 
             switch (key)
             {
@@ -33,11 +43,13 @@ namespace TheRuinsOfIpsus
                 case RLKey.L: Log.ClearLogDisplay(); Look.StartLooking(player.x, player.y); break;
                 case RLKey.I: Log.ClearLogDisplay(); Inventory.OpenInventory(); break;
                 case RLKey.G: Log.ClearLogDisplay(); if (Inventory.GetItem(player, true)) player.EndTurn(); break;
+                case RLKey.S: Log.ClearLogDisplay(); SaveDataManager.CreateSave(player); break;
+                case RLKey.M: Log.ClearLogDisplay(); SaveDataManager.LoadSave(player); break;
             }
         }
         public static void InventoryAction(Player player, RLKey key)
         {
-            DisplayActions("Close Inventory: I & Escape. Change Selection: NumPad & Arrow Keys. Drop Item: D");
+            DisplayActions("Close Inventory: [I/Escape]" + spacer + "Change Selection: [NumPad/Arrow Keys]" + spacer + "Drop Item: [D]" + spacer + "Equip/Unequip: [E]");
 
             switch (key)
             {
@@ -52,11 +64,22 @@ namespace TheRuinsOfIpsus
                 case RLKey.Right: Log.ClearLogDisplay(); Inventory.MovePage(1); break;
                 case RLKey.Keypad6: Log.ClearLogDisplay(); Inventory.MovePage(1); break;
                 case RLKey.D: Log.ClearLogDisplay(); if (player.inventory.Count != 0) { Inventory.DropItem(player, Inventory.inventoryDisplay[Inventory.currentPage][Inventory.selection], true); } break;
+                case RLKey.E:
+                    {
+                        Log.ClearLogDisplay(); if (player.inventory.Count != 0)
+                        {
+                            int first = Inventory.currentPage;
+                            int second = Inventory.selection; 
+                            if (Inventory.inventoryDisplay[first][second].equipped) { Inventory.UnequipItem(player, Inventory.inventoryDisplay[first][second], true); }
+                            else { Inventory.EquipItem(player, Inventory.inventoryDisplay[first][second], true); }
+                        }
+                        break;
+                    }
             }
         }
         public static void LookAction(RLKey key)
         {
-            DisplayActions("Stop Looking: L & Escape. Move: NumPad & Arrow Keys.");
+            DisplayActions("Stop Looking: [L/Escape]" + spacer + "Move: [NumPad/Arrow Keys]");
 
             switch (key)
             {
@@ -79,15 +102,7 @@ namespace TheRuinsOfIpsus
         public static void DisplayActions(string actions)
         {
             ClearActionDisplay();
-            string[] outPut = actions.Split(' ');
-            int y = 2;
-            int c = 0;
-            foreach (string text in outPut)
-            {
-                if (c + text.Length > console.Width - 4) { y += 2; c = 0; }
-                console.Print(c + 2, y, text, RLColor.White);
-                c += text.Length + 1;
-            }
+            CMath.DisplayToConsole(console, actions, 0, 2);
         }
         public static void ClearActionDisplay()
         {

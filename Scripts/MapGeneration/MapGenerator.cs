@@ -15,16 +15,16 @@ namespace TheRuinsOfIpsus
         public static Random random;
         public static List<Room> rooms;
         private static List<Room> currentRooms;
-        public static void CreateMap(int _mapWidth, int _mapHeight, int _minRoomSize, int _maxRoomSize, int _roomsToGenerate, Random _random)
+        public static void CreateMap(int _mapWidth, int _mapHeight, int _minRoomSize, int _maxRoomSize, int _roomsToGenerate)
         {
-            Map.map = new Tile[_mapWidth, _mapHeight];
+            Map map = new Map(new Tile[_mapWidth, _mapHeight]);
 
             mapWidth = _mapWidth;
             mapHeight = _mapHeight;
             maxRoomSize = _maxRoomSize;
             minRoomSize = _minRoomSize;
             roomsToGenerate = _roomsToGenerate;
-            random = _random;
+            random = CMath.seed;
             rooms = new List<Room>();
             currentRooms = new List<Room>();
 
