@@ -62,8 +62,10 @@ namespace TheRuinsOfIpsus
         public void RenderMenu()
         {
             CreateConsoleBorder(rootConsole);
+            rootConsole.Print((rootConsole.Width / 2) - 9, (rootConsole.Height / 3) - 15, "The Ruins Of Ipsus", RLColor.White);
             rootConsole.Print((rootConsole.Width / 2) - 7, (rootConsole.Height / 2) - 6, "New Game: [N]", RLColor.White);
-            rootConsole.Print((rootConsole.Width / 2) - 10, (rootConsole.Height / 2) - 3, "Load Save Game: [L]", RLColor.White);
+            if (SaveDataManager.savePresent) { rootConsole.Print((rootConsole.Width / 2) - 10, (rootConsole.Height / 2) - 3, "Load Save Game: [L]", RLColor.White); }
+            else { rootConsole.Print((rootConsole.Width / 2) - 10, (rootConsole.Height / 2) - 3, "Load Save Game: [L]", RLColor.Gray); }
             rootConsole.Print((rootConsole.Width / 2) - 5, rootConsole.Height / 2, "Quit: [Q]", RLColor.White);
         }
         public void RenderMap()

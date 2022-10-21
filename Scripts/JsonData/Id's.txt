@@ -1,0 +1,6 @@
+﻿Actor Id's:
+1. TestEnemy
+
+Item Id's:
+1. UnspecificArmor
+2. Banana

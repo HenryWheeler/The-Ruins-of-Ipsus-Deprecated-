@@ -23,7 +23,7 @@ namespace TheRuinsOfIpsus
         public static void MakeSelection(int selection)
         {
             if (selection == 0) { Program.NewGame(); }
-            else if (selection == 1) { }
+            else if (selection == 1 && SaveDataManager.savePresent) { SaveDataManager.LoadSave(); }
             else if (selection == 2) { rootConsole.Close(); }
         }
     }

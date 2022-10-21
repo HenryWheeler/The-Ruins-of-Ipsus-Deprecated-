@@ -20,8 +20,8 @@ namespace TheRuinsOfIpsus
         public char character { get; set; }
         public string name { get; set; }
         public string description { get; set; }
-        public RLColor fColor { get; set; }
-        public RLColor bColor { get; set; }
+        public string fColor { get; set; }
+        public string bColor { get; set; }
         public bool opaque { get; set; }
         public bool explored { get; set; }
         public bool visible { get; set; }
@@ -36,9 +36,9 @@ namespace TheRuinsOfIpsus
             else if (!visible && explored) console.Set(x, y, RLColor.Gray, RLColor.Black, character);
             else if (actor != null) actor.Draw(console);
             else if (item != null) item.Draw(console);
-            else console.Set(x, y, fColor, bColor, character);
+            else console.Set(x, y, ColorFinder.ColorPicker(fColor), ColorFinder.ColorPicker(bColor), character);
         }
-        public Tile(int _x, int _y, char _character, string _name, string _description, RLColor _fColor, RLColor _bColor, bool _opaque, bool _walkable)
+        public Tile(int _x, int _y, char _character, string _name, string _description, string _fColor, string _bColor, bool _opaque, bool _walkable)
         {
             x = _x;
             y = _y;

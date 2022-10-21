@@ -105,12 +105,16 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Icon.ico" />
+    <Content Include="RLNetLicense\RLNet1.0.6-LICENSE.txt" />
+    <Content Include="Scripts\JsonData\Id%27s.txt" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Scripts\Abstracts\ActorBase.cs" />
     <Compile Include="Scripts\Abstracts\AMap.cs" />
+    <Compile Include="Scripts\AIManager.cs" />
     <Compile Include="Scripts\BodyPlots.cs" />
     <Compile Include="Scripts\Action.cs" />
+    <Compile Include="Scripts\ColorFinder.cs" />
     <Compile Include="Scripts\Interfaces\IUseable.cs" />
     <Compile Include="Scripts\CMath.cs" />
     <Compile Include="Scripts\DijkstraMaps.cs" />
@@ -118,6 +122,7 @@
     <Compile Include="Scripts\Interfaces\IDraw.cs" />
     <Compile Include="Scripts\Item.cs" />
     <Compile Include="Scripts\Inventory.cs" />
+    <Compile Include="Scripts\JsonData\JsonDataManager.cs" />
     <Compile Include="Scripts\Log.cs" />
     <Compile Include="Scripts\Look.cs" />
     <Compile Include="Scripts\Map.cs" />
@@ -144,9 +149,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Scripts\SaveFiles\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\System.Text.Json.6.0.6\build\System.Text.Json.targets" Condition="Exists('packages\System.Text.Json.6.0.6\build\System.Text.Json.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

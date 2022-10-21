@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using RLNET;
 
 namespace TheRuinsOfIpsus
@@ -52,24 +53,35 @@ namespace TheRuinsOfIpsus
 
             Renderer renderer = new Renderer(rootConsole, mapConsole, mapWidth, mapHeight, messageConsole, messageWidth, messageHeight, rogueConsole, rogueWidth, rogueHeight, actionConsole, actionWidth, actionHeight);
             Log log = new Log(messageConsole);
-            CMath cMath = new CMath(0);
             Action action = new Action(actionConsole);
             BodyPlots bodyPlots = new BodyPlots();
             Menu update = new Menu(rootConsole);
+            SaveDataManager saveDataManager = new SaveDataManager();
+            AIManager aiManager = new AIManager();
+
+            JsonDataManager jsonDataManager = new JsonDataManager();
 
             rootConsole.Run();
         }
         public static void ReloadPlayer(Player _player)
         {
-            Stats stats = new Stats(_player);
-            Inventory inventory = new Inventory(_player);
-            Look look = new Look(_player);
-
-            Stats.DisplayStats();
             player = _player;
+            Stats stats = new Stats(rogueConsole, player);
+            Inventory inventory = new Inventory(rogueConsole, player);
+            Look look = new Look(player);
+
+            Map.map[player.x, player.y].actor = player;
+            Stats.UpdateStats();
+            TurnManager.AddActor(player);
+            player.Clear();
+            player.FOV();
+            RLKey key = RLKey.Unknown;
+            Action.PlayerAction(player, key);
+            player.StartTurn();
         }
         public static void NewGame()
         {
+            CMath cMath = new CMath(new Random().Next());
             MapGenerator.CreateMap(mapWidth, mapHeight, 5, 12, 15);
             Room room = MapGenerator.rooms[MapGenerator.random.Next(0, MapGenerator.rooms.Count - 1)];
             player = new Player(rootConsole)
@@ -84,26 +96,58 @@ namespace TheRuinsOfIpsus
             Stats.UpdateStats();
             Inventory inventory = new Inventory(rogueConsole, player);
 
+            //JsonDataManager.SaveActor(new Monster(1, 0, 0, 10, 10, 5, 'e', "Red", "Black", false, "Test Enemy", "A rowdy Test Enemy Looking for action!", .8f, "Chase_AI", 20, "Basic_Humanoid"));
+            //JsonDataManager.SaveItem(new Item(1, 0, 0, 0, '[', "Unspecific Armor", "Who knows what it is?!", "Blue", 3, "Torso", 0, null));
+            //JsonDataManager.SaveItem(new Item(2, 0, 0, 1, ')', "Banana", "A curved yellow fruit", "Yellow", 0, "Main_Hand", 0, new AtkData("Banana", 0, "1-4-0-0")));
             foreach (Tile tile in Map.map)
             {
                 if (tile.walkable && CMath.seed.Next(25) == 5)
                 {
-                    Item armor = new Item(tile.x, tile.y, 0, '[', "Unspecific Armor", "Who knows what it is?!", RLColor.Blue, 3, "Torso", 0, null);
+                    Item armor = new Item(JsonDataManager.items[1], tile.x, tile.y);
                     Map.map[tile.x, tile.y].item = armor;
                 }
                 else if (tile.walkable && CMath.seed.Next(25) == 6)
                 {
-                    Item weapon = new Item(tile.x, tile.y, 1, ')', "Banana", "A curved yellow fruit", RLColor.Yellow, 0, "Main_Hand", 0, new AtkData("Banana", 0, "1-4-0-0"));
+                    Item weapon = new Item(JsonDataManager.items[2], tile.x, tile.y);
                     Map.map[tile.x, tile.y].item = weapon;
                 }
                 else if (tile.walkable && CMath.seed.Next(15) == 10)
                 {
-                    Monster monster = new Monster(tile.x, tile.y, 10, 10, 5, 'e', RLColor.Red, RLColor.Black, false, "Test Enemy", "A rowdy Test Enemy Looking for action!", .8f, new ChaseAI(), 20, "Basic_Humanoid");
+                    Monster monster = new Monster(JsonDataManager.actors[1], tile.x, tile.y, BodyPlots.bodyPlots[JsonDataManager.actors[1].bodyPlotName], new List<Item>(), new List<AtkData>());
                     Map.map[tile.x, tile.y].actor = monster;
                     TurnManager.AddActor(monster);
                 }
             }
             Look look = new Look(player);
+            Log.AddToStoredLog("Welcome to the Ruins of Ipsus", true);
+
+            gameActive = true;
+        }
+        public static void LoadSave(SaveData saveData)
+        {
+            CMath cMath = new CMath(saveData.seed);
+            MapGenerator.CreateMap(mapWidth, mapHeight, 5, 12, 15);
+            ReloadPlayer(saveData.player);
+
+            foreach (VisibilitySaveData visData in saveData.visibility) { if (Map.map[visData.x, visData.y] != null && visData != null) { Map.map[visData.x, visData.y].explored = true; } }
+            foreach (ActorSaveData actor in saveData.actors) 
+            { 
+                if (Map.map[actor.x, actor.y] != null && actor != null) 
+                {
+                    Monster actorX = new Monster(JsonDataManager.actors[actor.id], actor.x, actor.y, actor.bodyPlot, actor.inventory, actor.attacks);
+                    Map.map[actor.x, actor.y].actor = actorX;
+                    TurnManager.AddActor(actorX);
+                } 
+            }
+            foreach (ItemSaveData item in saveData.items) 
+            { 
+                if (Map.map[item.x, item.y] != null && item != null) 
+                {
+                    Item itemX = new Item(JsonDataManager.items[item.id], item.x, item.y);
+                    Map.map[item.x, item.y].item = itemX; 
+                } 
+            }
+
             Log.AddToStoredLog("Welcome to the Ruins of Ipsus", true);
 
             gameActive = true;

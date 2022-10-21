@@ -13,9 +13,10 @@ namespace TheRuinsOfIpsus
             rootConsole = _rootConsole;
             rootConsole.Update += Update;
 
+            id = 0;
             character = '@';
-            fColor = RLColor.Green;
-            bColor = RLColor.Black;
+            fColor = "Green";
+            bColor = "Black";
             name = "Player";
             sight = 5;
             actMax = 1;
@@ -37,6 +38,9 @@ namespace TheRuinsOfIpsus
             rootConsole = _rootConsole;
             rootConsole.Update += Update;
 
+            x = player.x;
+            y = player.x;
+            id = 0;
             character = player.character;
             fColor = player.fColor;
             bColor = player.bColor;
@@ -47,13 +51,9 @@ namespace TheRuinsOfIpsus
             hp = player.hp;
             ac = player.ac;
             description = player.description;
-            inventory = player.inventory;
-            bodyPlot = player.bodyPlot;
-            attacks = player.attacks;
-
-            StartTurn();
-            RLKey key = RLKey.Unknown;
-            Action.PlayerAction(this, key);
+            inventory = new List<Item>(); inventory = player.inventory;
+            bodyPlot = new EquipmentSlot[player.bodyPlot.Length]; bodyPlot = bodyPlot = player.bodyPlot;
+            attacks = new List<AtkData>(); attacks = player.attacks;
         }
         public Player() { rootConsole = Program.rootConsole; rootConsole.Update += Update; }
         public override string Describe() { return description; }

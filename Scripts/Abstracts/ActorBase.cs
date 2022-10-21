@@ -8,6 +8,7 @@ namespace TheRuinsOfIpsus
     public abstract class ActorBase : IDraw, IDescription
     {
         public bool turnActive = false;
+        public int id { get; set; }
         public int x { get; set; }
         public int y { get; set; }
         public int hp { get; set; }
@@ -15,8 +16,8 @@ namespace TheRuinsOfIpsus
         public int ac { get; set; }
         public int sight { get; set; }
         public char character { get; set; }
-        public RLColor fColor { get; set; }
-        public RLColor bColor { get; set; }
+        public string fColor { get; set; }
+        public string bColor { get; set; }
         public bool opaque { get; set; }
         public string name { get; set; }
         public string description { get; set; }
@@ -28,7 +29,7 @@ namespace TheRuinsOfIpsus
         public EquipmentSlot[] bodyPlot { get; set; }
         public string bodyPlotName { get; set; }
         public abstract string Describe();
-        public void Draw(RLConsole console) { console.Set(x, y, fColor, bColor, character); }
+        public void Draw(RLConsole console) { console.Set(x, y, ColorFinder.ColorPicker(fColor), ColorFinder.ColorPicker(bColor), character); }
         public void Attack(ActorBase target, ActorBase attacker, int type)
         {
             List<AtkData> atkDataTotal = new List<AtkData>();

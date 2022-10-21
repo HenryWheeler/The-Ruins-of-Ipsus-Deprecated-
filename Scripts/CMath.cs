@@ -11,7 +11,8 @@ namespace TheRuinsOfIpsus
     {
         public static Random seed { get; set; }
         public static Random random { get; set; }
-        public CMath(int _seed) { seed = new Random(_seed); random = new Random(); }
+        public static int seedInt { get; set; }
+        public CMath(int _seed) { seed = new Random(_seed); random = new Random(); seedInt = _seed; }
         public static int Distance(int oX, int oY, int eX, int eY) { return ((oX - eX) * (oX - eX)) + ((oY - eY) * (oY - eY)); }
         public static bool Sight(int oX, int oY, int eX, int eY, int sight)
         {
