@@ -16,6 +16,7 @@ namespace TheRuinsOfIpsus
         public static int Distance(int oX, int oY, int eX, int eY) { return ((oX - eX) * (oX - eX)) + ((oY - eY) * (oY - eY)); }
         public static bool Sight(int oX, int oY, int eX, int eY, int sight)
         {
+            if (Map.outside) { sight = sight * 2; }
             int t;
             int x = oX; int y = oY;
             int delta_x = eX - oX; int delta_y = eY - oY;
@@ -35,7 +36,7 @@ namespace TheRuinsOfIpsus
                     t += abs_delta_y * 2;
                     if (x == eX && y == eY) { return true; }
                 }
-                while (Map.map[x, y].walkable == true);
+                while (!Map.map[x, y].opaque);
                 return false;
             }
             else
@@ -48,7 +49,7 @@ namespace TheRuinsOfIpsus
                     t += abs_delta_x * 2;
                     if (x == eX && y == eY) { return true; }
                 }
-                while (Map.map[x, y].walkable == true);
+                while (!Map.map[x, y].opaque);
                 return false;
             }
         }
@@ -66,6 +67,11 @@ namespace TheRuinsOfIpsus
                     c += text.Length + 1;
                 }
             }
+        }
+        public static bool CheckBounds(int x, int y)
+        {
+            if (x <= 0 || x >= 80 || y <= 0 || y >= 70) return false;
+            else return true;
         }
         public static void ClearConsole(RLConsole console)
         {

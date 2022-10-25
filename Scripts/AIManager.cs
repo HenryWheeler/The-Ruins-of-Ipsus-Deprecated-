@@ -12,6 +12,7 @@ namespace TheRuinsOfIpsus
         public AIManager()
         {
             aiDictionary.Add("Chase_AI", new ChaseAI());
+            aiDictionary.Add("Wander_AI", new WanderAI());
         }
     }
     [Serializable]
@@ -53,5 +54,16 @@ namespace TheRuinsOfIpsus
         }
         public override void OnHit(Monster actor, ActorBase attacker) { target = attacker; }
         public ChaseAI() { }
+    }
+    [Serializable]
+    public class WanderAI : AI
+    {
+        public ActorBase target;
+        public override void Action(Monster actor)
+        {
+            actor.Move(CMath.random.Next(-1, 2) + actor.x, CMath.random.Next(-1, 2) + actor.y);
+        }
+        public override void OnHit(Monster actor, ActorBase attacker) { target = attacker; }
+        public WanderAI() { }
     }
 }

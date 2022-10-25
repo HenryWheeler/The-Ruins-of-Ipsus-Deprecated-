@@ -23,7 +23,8 @@ namespace TheRuinsOfIpsus
         }
         public static void PlayerAction(Player player, RLKey key)
         {
-            DisplayActions("Move: [NumPad/Arrow Keys]" + "     Debug Save Game: [N]" + spacer + "End Turn: [.]"  + "     Debug Load Game: [M]" + "     Save & Quit: [J]" + spacer + "Look: [L]" + spacer + "Open Inventory: [I]" + spacer + "Get Item: [G]");
+            DisplayActions("Move: [NumPad/Arrow Keys]" + "     Debug Save Game: [N]" + spacer + "End Turn: [.]"  + "     Debug Load Game: [M]" + "     Save & Quit: [J]" + spacer 
+                + "Look: [L]" + "     Debug Reveal All: [V]" + spacer + "Open Inventory: [I]" + spacer + "Get Item: [G]");
 
             switch (key)
             {
@@ -46,6 +47,7 @@ namespace TheRuinsOfIpsus
                 case RLKey.N: Log.ClearLogDisplay(); SaveDataManager.CreateDebugSave(player); Log.AddToStoredLog("Debug Saved!", true); break;
                 case RLKey.M: Log.ClearLogDisplay(); SaveDataManager.LoadDebugSave(player); Log.AddToStoredLog("Debug Loaded!", true); break;
                 case RLKey.J: Log.ClearLogDisplay(); SaveDataManager.CreateSave(player); Program.rootConsole.Close(); break;
+                case RLKey.V: Log.ClearLogDisplay(); foreach(Tile tile in Map.map) { if (tile != null) { tile.visible = true; tile.explored = true; } } break;
             }
         }
         public static void InventoryAction(Player player, RLKey key)

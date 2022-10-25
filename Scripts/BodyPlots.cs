@@ -33,6 +33,14 @@ namespace TheRuinsOfIpsus
             basicHumanoidPlot[5] = usableSlots["Off_Hand"];
             basicHumanoidPlot[6] = usableSlots["Main_Hand"];
             bodyPlots.Add("Basic_Humanoid", basicHumanoidPlot);
+
+            EquipmentSlot[] basicCreaturePlot = new EquipmentSlot[5];
+            basicHumanoidPlot[0] = usableSlots["Head"];
+            basicHumanoidPlot[1] = usableSlots["Face"];
+            basicHumanoidPlot[2] = usableSlots["Torso"];
+            basicHumanoidPlot[3] = usableSlots["Legs"];
+            basicHumanoidPlot[4] = usableSlots["Feet"];
+            bodyPlots.Add("Basic_Creature", basicCreaturePlot);
         }
     }
     [Serializable]

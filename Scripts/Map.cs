@@ -11,6 +11,7 @@ namespace TheRuinsOfIpsus
             map = tiles;
         }
         public static Tile[,] map;
+        public static bool outside; 
     }
     [Serializable]
     public class Tile : IDraw, IDescription
@@ -33,7 +34,7 @@ namespace TheRuinsOfIpsus
         public void Draw(RLConsole console)
         {
             if (!visible && !explored) console.Set(x, y, RLColor.Black, RLColor.Black, character);
-            else if (!visible && explored) console.Set(x, y, RLColor.Gray, RLColor.Black, character);
+            else if (!visible && explored) console.Set(x, y, RLColor.Blend(RLColor.Black, RLColor.Gray, .5f), RLColor.Black, character);
             else if (actor != null) actor.Draw(console);
             else if (item != null) item.Draw(console);
             else console.Set(x, y, ColorFinder.ColorPicker(fColor), ColorFinder.ColorPicker(bColor), character);
@@ -51,10 +52,5 @@ namespace TheRuinsOfIpsus
             walkable = _walkable;
             spacer = " + ";
         }
-    }
-    public class Room
-    {
-        public int x;
-        public int y;
     }
 }

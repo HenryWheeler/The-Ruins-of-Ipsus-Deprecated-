@@ -83,39 +83,50 @@ namespace TheRuinsOfIpsus
         {
             CMath cMath = new CMath(new Random().Next());
             MapGenerator.CreateMap(mapWidth, mapHeight, 5, 12, 15);
-            Room room = MapGenerator.rooms[MapGenerator.random.Next(0, MapGenerator.rooms.Count - 1)];
+
+            List<Tile> tiles = new List<Tile>();
+
+            foreach (Tile tile in Map.map) { if (tile.walkable) { tiles.Add(tile); } }
+
+            Tile useTile = tiles[CMath.seed.Next(0, tiles.Count - 1)];
+
             player = new Player(rootConsole)
             {
-                x = room.x,
-                y = room.y,
+                x = useTile.x,
+                y = useTile.y,
             };
-            Map.map[room.x, room.y].actor = player;
+            Map.map[useTile.x, useTile.y].actor = player;
             player.FOV();
             TurnManager.AddActor(player);
             Stats stats = new Stats(rogueConsole, player);
             Stats.UpdateStats();
             Inventory inventory = new Inventory(rogueConsole, player);
 
-            //JsonDataManager.SaveActor(new Monster(1, 0, 0, 10, 10, 5, 'e', "Red", "Black", false, "Test Enemy", "A rowdy Test Enemy Looking for action!", .8f, "Chase_AI", 20, "Basic_Humanoid"));
-            //JsonDataManager.SaveItem(new Item(1, 0, 0, 0, '[', "Unspecific Armor", "Who knows what it is?!", "Blue", 3, "Torso", 0, null));
-            //JsonDataManager.SaveItem(new Item(2, 0, 0, 1, ')', "Banana", "A curved yellow fruit", "Yellow", 0, "Main_Hand", 0, new AtkData("Banana", 0, "1-4-0-0")));
+            //JsonDataManager.SaveActor(new Monster(2, 0, 0, 2, 4, 5, 'f', "Green", "Black", false, "Frog", "A small squat green creature", 2, "Wander_AI", 5, "Basic_Creature"));
+
             foreach (Tile tile in Map.map)
             {
-                if (tile.walkable && CMath.seed.Next(25) == 5)
+                if (tile.walkable && CMath.seed.Next(450) == 5)
                 {
                     Item armor = new Item(JsonDataManager.items[1], tile.x, tile.y);
                     Map.map[tile.x, tile.y].item = armor;
                 }
-                else if (tile.walkable && CMath.seed.Next(25) == 6)
+                else if (tile.walkable && CMath.seed.Next(300) == 6)
                 {
                     Item weapon = new Item(JsonDataManager.items[2], tile.x, tile.y);
                     Map.map[tile.x, tile.y].item = weapon;
                 }
-                else if (tile.walkable && CMath.seed.Next(15) == 10)
+                else if (tile.walkable && CMath.seed.Next(700) == 10)
                 {
                     Monster monster = new Monster(JsonDataManager.actors[1], tile.x, tile.y, BodyPlots.bodyPlots[JsonDataManager.actors[1].bodyPlotName], new List<Item>(), new List<AtkData>());
                     Map.map[tile.x, tile.y].actor = monster;
                     TurnManager.AddActor(monster);
+                }
+                else if (tile.walkable && CMath.seed.Next(500) == 70)
+                {
+                    Monster frog = new Monster(JsonDataManager.actors[2], tile.x, tile.y, BodyPlots.bodyPlots[JsonDataManager.actors[2].bodyPlotName], new List<Item>(), new List<AtkData>());
+                    Map.map[tile.x, tile.y].actor = frog;
+                    TurnManager.AddActor(frog);
                 }
             }
             Look look = new Look(player);

@@ -10,7 +10,8 @@ namespace TheRuinsOfIpsus
         public static void Compute(int x, int y, int rangeLimit)
         {
             SetVisible(x, y);
-            for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, rangeLimit * 10, 1, new Slope(1, 1), new Slope(0, 1));
+            if (Map.outside) { for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, rangeLimit * 250, 1, new Slope(1, 1), new Slope(0, 1)); }
+            else for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, rangeLimit * 10, 1, new Slope(1, 1), new Slope(0, 1));
         }
         struct Slope // represents the slope Y/X as a rational number
         {
@@ -78,7 +79,7 @@ namespace TheRuinsOfIpsus
         }
         public static void SetVisible(int x, int y)
         {
-            if (CheckBounds(x, y))
+            if (CMath.CheckBounds(x, y))
             {
                 Map.map[x, y].visible = true;
                 Map.map[x, y].explored = true;
@@ -87,17 +88,12 @@ namespace TheRuinsOfIpsus
         }
         public static bool BlocksLight(int x, int y)
         {
-            if (CheckBounds(x, y))
+            if (CMath.CheckBounds(x, y))
             {
                 if (Map.map[x, y].opaque) return true;
                 return false;
             }
             return true;
-        }
-        public static bool CheckBounds(int x, int y)
-        {
-            if (x <= 0 || x >= 80 || y <= 0 || y >= 70) return false;
-            else return true;
         }
     }
 }

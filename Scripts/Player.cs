@@ -15,7 +15,7 @@ namespace TheRuinsOfIpsus
 
             id = 0;
             character = '@';
-            fColor = "Green";
+            fColor = "White";
             bColor = "Black";
             name = "Player";
             sight = 5;

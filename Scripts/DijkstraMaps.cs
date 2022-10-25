@@ -11,7 +11,6 @@ namespace TheRuinsOfIpsus
         public static Dictionary<string, Node[,]> maps = new Dictionary<string, Node[,]>();
         public static void CreateMap(Node point, string name)
         {
-            int timesToRun = 50;
             int current = 0;
             Node[,] map = new Node[80, 70];
             foreach (Tile tile in Map.map)
@@ -23,8 +22,10 @@ namespace TheRuinsOfIpsus
             }
             map[point.x, point.y] = point;
 
-            while (current < timesToRun)
+            Node finalNode = null;
+            do
             {
+                finalNode = null;
                 foreach (Node node in map)
                 {
                     if (node != null && node.v == current)
@@ -37,9 +38,10 @@ namespace TheRuinsOfIpsus
                                 {
                                     if (Map.map[x, y].actor == null)
                                     {
-                                        if (map[x, y].v > current) map[x, y].v = current + 1;
+                                        if (map[x, y].v > current) { map[x, y].v = current + 1; finalNode = node; }
                                         else continue;
-                                    } else if (map[x, y].v > current) map[x, y].v = current + 25;
+                                    }
+                                    else if (map[x, y].v > current) { map[x, y].v = current + 25; finalNode = node; }
                                 }
                                 else continue;
                             }
@@ -47,7 +49,8 @@ namespace TheRuinsOfIpsus
                     }
                 }
                 current++;
-            }
+            } while (finalNode != null);
+
             AddMap(map, name);
         }
         private static void AddMap(Node[,] map, string name)
@@ -73,15 +76,18 @@ namespace TheRuinsOfIpsus
             {
                 for (int x = start.x - 1; x <= start.x + 1; x++)
                 {
-                    if ((y == start.y - 1 && x == start.x - 1) || (y == start.y - 1 && x == start.x + 1) || (y == start.y + 1 && x == start.x - 1) || (y == start.y + 1 && x == start.x + 1))
+                    if (CMath.CheckBounds(x, y))
                     {
-                        if (map[x, y].v + .5f < target.v) { target = map[x, y]; target.v += .5f; }
-                        else continue;
-                    }
-                    else
-                    {
-                        if (map[x, y].v < target.v) target = map[x, y];
-                        else continue;
+                        if ((y == start.y - 1 && x == start.x - 1) || (y == start.y - 1 && x == start.x + 1) || (y == start.y + 1 && x == start.x - 1) || (y == start.y + 1 && x == start.x + 1))
+                        {
+                            if (map[x, y].v + .5f < target.v) { target = map[x, y]; target.v += .5f; }
+                            else continue;
+                        }
+                        else
+                        {
+                            if (map[x, y].v < target.v) target = map[x, y];
+                            else continue;
+                        }
                     }
                 }
             }
