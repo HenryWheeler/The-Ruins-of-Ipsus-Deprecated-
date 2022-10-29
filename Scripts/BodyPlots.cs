@@ -19,12 +19,13 @@ namespace TheRuinsOfIpsus
             usableSlots.Add("Feet", new EquipmentSlot("Feet"));
             usableSlots.Add("Off_Hand", new EquipmentSlot("Off_Hand"));
             usableSlots.Add("Main_Hand", new EquipmentSlot("Main_Hand"));
+            usableSlots.Add("Missile", new EquipmentSlot("Missile"));
 
             InitializeBodyPlots();
         }
         private void InitializeBodyPlots()
         {
-            EquipmentSlot[] basicHumanoidPlot = new EquipmentSlot[7];
+            EquipmentSlot[] basicHumanoidPlot = new EquipmentSlot[8];
             basicHumanoidPlot[0] = usableSlots["Head"];
             basicHumanoidPlot[1] = usableSlots["Face"];
             basicHumanoidPlot[2] = usableSlots["Torso"];
@@ -32,6 +33,7 @@ namespace TheRuinsOfIpsus
             basicHumanoidPlot[4] = usableSlots["Feet"];
             basicHumanoidPlot[5] = usableSlots["Off_Hand"];
             basicHumanoidPlot[6] = usableSlots["Main_Hand"];
+            basicHumanoidPlot[7] = usableSlots["Missile"];
             bodyPlots.Add("Basic_Humanoid", basicHumanoidPlot);
 
             EquipmentSlot[] basicCreaturePlot = new EquipmentSlot[5];

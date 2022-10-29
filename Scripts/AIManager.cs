@@ -46,11 +46,11 @@ namespace TheRuinsOfIpsus
                         }
                         else actor.Move(targetNode.x, targetNode.y);
                     }
-                    else actor.EndTurn();
+                    else { actor.Move(CMath.random.Next(-1, 2) + actor.x, CMath.random.Next(-1, 2) + actor.y); }
                 }
-                else actor.EndTurn();
+                else { actor.Move(CMath.random.Next(-1, 2) + actor.x, CMath.random.Next(-1, 2) + actor.y); }
             }
-            else actor.EndTurn();
+            else { actor.Move(CMath.random.Next(-1, 2) + actor.x, CMath.random.Next(-1, 2) + actor.y); }
         }
         public override void OnHit(Monster actor, ActorBase attacker) { target = attacker; }
         public ChaseAI() { }

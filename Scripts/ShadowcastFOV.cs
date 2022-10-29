@@ -10,8 +10,8 @@ namespace TheRuinsOfIpsus
         public static void Compute(int x, int y, int rangeLimit)
         {
             SetVisible(x, y);
-            if (Map.outside) { for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, rangeLimit * 250, 1, new Slope(1, 1), new Slope(0, 1)); }
-            else for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, rangeLimit * 10, 1, new Slope(1, 1), new Slope(0, 1));
+            if (Map.outside) { for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, 50, 1, new Slope(1, 1), new Slope(0, 1)); }
+            else for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, rangeLimit, 1, new Slope(1, 1), new Slope(0, 1));
         }
         struct Slope // represents the slope Y/X as a rational number
         {

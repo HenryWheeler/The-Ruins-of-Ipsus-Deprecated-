@@ -1,6 +1,8 @@
 ﻿Actor Id's:
 1. TestEnemy
+2. Frog
 
 Item Id's:
 1. UnspecificArmor
 2. Banana
+3. Wooden Bow

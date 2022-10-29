@@ -18,7 +18,7 @@ namespace TheRuinsOfIpsus
             fColor = "White";
             bColor = "Black";
             name = "Player";
-            sight = 5;
+            sight = 7;
             actMax = 1;
             hpCap = 500;
             hp = hpCap;
@@ -28,6 +28,8 @@ namespace TheRuinsOfIpsus
             bodyPlotName = "Basic_Humanoid";
             bodyPlot = BodyPlots.bodyPlots[bodyPlotName];
             attacks = new List<AtkData>();
+            moveTypes = new List<int>(); moveTypes.Add(1);
+            canSwim = true;
 
             StartTurn();
             RLKey key = RLKey.Unknown;
@@ -51,9 +53,11 @@ namespace TheRuinsOfIpsus
             hp = player.hp;
             ac = player.ac;
             description = player.description;
+            canSwim = player.canSwim;
             inventory = new List<Item>(); inventory = player.inventory;
             bodyPlot = new EquipmentSlot[player.bodyPlot.Length]; bodyPlot = bodyPlot = player.bodyPlot;
             attacks = new List<AtkData>(); attacks = player.attacks;
+            moveTypes = new List<int>(); moveTypes = player.moveTypes;
         }
         public Player() { rootConsole = Program.rootConsole; rootConsole.Update += Update; }
         public override string Describe() { return description; }
@@ -69,6 +73,7 @@ namespace TheRuinsOfIpsus
                 if (turnActive) { Action.PlayerAction(this, keyPress.Key); }
                 else if (Look.looking) { Action.LookAction(keyPress.Key); }
                 else if (Inventory.inventoryOpen) { Action.InventoryAction(this, keyPress.Key); }
+                else if (TargetReticle.targeting) { Action.TargetAction(keyPress.Key); }
             }
         }
         public void MakeMap()
@@ -81,7 +86,23 @@ namespace TheRuinsOfIpsus
         }
         public void Move(int _x, int _y)
         {
-            if (Map.map[x + _x, y + _y].walkable)
+            if (CMath.CheckBounds(x + _x, y + _y) && moveTypes.Contains(Map.map[x + _x, y + _y].moveType))
+            {
+                if (Map.map[x + _x, y + _y].actor == null)
+                {
+                    Clear();
+                    Map.map[x, y].actor = null;
+                    x += _x; y += _y;
+                    Map.map[x, y].actor = this;
+                    FOV();
+                    EndTurn();
+                }
+                else
+                {
+                    Attack(Map.map[x + _x, y + _y].actor, this, 0);
+                }
+            }
+            else if (CMath.CheckBounds(x + _x, y + _y) && Map.map[x + _x, y + _y].moveType == 2 && canSwim)
             {
                 if (Map.map[x + _x, y + _y].actor == null)
                 {

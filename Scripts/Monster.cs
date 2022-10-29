@@ -10,7 +10,7 @@ namespace TheRuinsOfIpsus
         public string ai { get; set; }
         public int memory { get; set; }
         public int maxMemory { get; set; }
-        public Monster(int _id, int _x, int _y, int _hpCap, int _ac, int _sight, char _character, string _fColor, string _bColor, bool _opaque, string _name, string _description, float _actMax, string _ai, int _maxMemory, string _bodyPlotName)
+        public Monster(int _id, int _x, int _y, int _hpCap, int _ac, int _sight, char _character, string _fColor, string _bColor, bool _opaque, string _name, string _description, float _actMax, string _ai, int _maxMemory, string _bodyPlotName, List<int> _moveTypes, bool _canSwim)
         {
             id = _id;
             x = _x;
@@ -32,6 +32,8 @@ namespace TheRuinsOfIpsus
             bodyPlot = BodyPlots.bodyPlots[bodyPlotName];
             spacer = " + ";
             attacks = new List<AtkData>();
+            moveTypes = _moveTypes;
+            canSwim = _canSwim;
         }
         public Monster(Monster data, int _x, int _y, EquipmentSlot[] _bodyPlot, List<Item> _inventory, List<AtkData> _attacks)
         {
@@ -54,12 +56,20 @@ namespace TheRuinsOfIpsus
             bodyPlotName = data.bodyPlotName; bodyPlot = _bodyPlot;
             inventory = new List<Item>(); inventory = _inventory;
             attacks = new List<AtkData>(); attacks = _attacks;
+            moveTypes = data.moveTypes;
+            canSwim = data.canSwim;
         }
         public Monster() { }
         public override string Describe() { return name + ": " + spacer + description; }
         public void Move(int _x, int _y)
         {
-            if (Map.map[_x, _y].walkable && Map.map[_x, _y].actor == null)
+            if (CMath.CheckBounds(_x, _y) && moveTypes.Contains(Map.map[_x, _y].moveType) && Map.map[_x, _y].actor == null)
+            {
+                Map.map[x, y].actor = null;
+                x = _x; y = _y;
+                Map.map[x, y].actor = this;
+            }
+            else if (CMath.CheckBounds(_x, _y) && Map.map[_x, _y].moveType == 2 && canSwim && Map.map[_x, _y].actor == null)
             {
                 Map.map[x, y].actor = null;
                 x = _x; y = _y;

@@ -24,16 +24,18 @@ namespace TheRuinsOfIpsus
         public float actLeft { get; set; }
         public float actMax { get; set; }
         public string spacer { get; set; }
+        public bool canSwim { get; set; }
+        public List<int> moveTypes { get; set; }
         public List<Item> inventory { get; set; }
         public List<AtkData> attacks { get; set; }
         public EquipmentSlot[] bodyPlot { get; set; }
         public string bodyPlotName { get; set; }
         public abstract string Describe();
-        public void Draw(RLConsole console) { console.Set(x, y, ColorFinder.ColorPicker(fColor), ColorFinder.ColorPicker(bColor), character); }
+        public void Draw(RLConsole console) { if (bColor != "Black") { console.Set(x, y, ColorFinder.ColorPicker(fColor), ColorFinder.ColorPicker(bColor), character); } else { console.Set(x, y, ColorFinder.ColorPicker(fColor), ColorFinder.ColorPicker(Map.map[x, y].bColor), character); } }
         public void Attack(ActorBase target, ActorBase attacker, int type)
         {
             List<AtkData> atkDataTotal = new List<AtkData>();
-            foreach(AtkData atkData in attacker.attacks) { atkDataTotal.Add(atkData); }
+            foreach(AtkData atkData in attacker.attacks) { if (atkData.type == type) { atkDataTotal.Add(atkData); } }
             if (atkDataTotal.Count == 0) { atkDataTotal.Add(new AtkData("Basic", 0, "1-1-0-0")); }
             int totalDmg = 0;
             int numberOfHits = 0;

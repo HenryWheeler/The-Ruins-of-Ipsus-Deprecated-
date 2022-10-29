@@ -34,14 +34,15 @@ namespace TheRuinsOfIpsus
                         {
                             for (int x = node.x - 1; x <= node.x + 1; x++)
                             {
-                                if (CheckBounds(x, y) && Map.map[x, y].walkable)
+                                if (CheckBounds(x, y) && Map.map[x, y].moveType != 0)
                                 {
-                                    if (Map.map[x, y].actor == null)
+                                    if (map[x, y].v > current)
                                     {
-                                        if (map[x, y].v > current) { map[x, y].v = current + 1; finalNode = node; }
-                                        else continue;
+                                        if (Map.map[x, y].actor == null && Map.map[x, y].moveType != 2) { map[x, y].v = current + 1; finalNode = node; }
+                                        else if (Map.map[x, y].actor != null && Map.map[x, y].moveType == 2) { map[x, y].v = current + 70; finalNode = node; }
+                                        else { map[x, y].v = current + 35; finalNode = node; }
                                     }
-                                    else if (map[x, y].v > current) { map[x, y].v = current + 25; finalNode = node; }
+                                    else { continue; }
                                 }
                                 else continue;
                             }

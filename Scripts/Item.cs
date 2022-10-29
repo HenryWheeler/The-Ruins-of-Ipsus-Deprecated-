@@ -63,6 +63,6 @@ namespace TheRuinsOfIpsus
         }
         public Item() { }
         public string Describe() { return name + ": " + spacer + "Ac: " + ac + spacer + "Slot: " + slot + spacer + "Equipped: " + equipped + spacer + description; }
-        public void Draw(RLConsole console) { console.Set(x, y, ColorFinder.ColorPicker(fColor), ColorFinder.ColorPicker(bColor), character); }
+        public void Draw(RLConsole console) { if (bColor != "Black") { console.Set(x, y, ColorFinder.ColorPicker(fColor), ColorFinder.ColorPicker(bColor), character); } else { console.Set(x, y, ColorFinder.ColorPicker(fColor), ColorFinder.ColorPicker(Map.map[x, y].bColor), character); } }
     }
 }

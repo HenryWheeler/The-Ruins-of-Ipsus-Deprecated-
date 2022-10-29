@@ -13,7 +13,7 @@ namespace TheRuinsOfIpsus
         public static Random random { get; set; }
         public static int seedInt { get; set; }
         public CMath(int _seed) { seed = new Random(_seed); random = new Random(); seedInt = _seed; }
-        public static int Distance(int oX, int oY, int eX, int eY) { return ((oX - eX) * (oX - eX)) + ((oY - eY) * (oY - eY)); }
+        public static double Distance(int oX, int oY, int eX, int eY) { return Math.Sqrt(Math.Pow(eX - oX, 2) + Math.Pow(eY - oY, 2)); }
         public static bool Sight(int oX, int oY, int eX, int eY, int sight)
         {
             if (Map.outside) { sight = sight * 2; }
@@ -70,7 +70,7 @@ namespace TheRuinsOfIpsus
         }
         public static bool CheckBounds(int x, int y)
         {
-            if (x <= 0 || x >= 80 || y <= 0 || y >= 70) return false;
+            if (x <= 0 || x >= 79 || y <= 0 || y >= 69) return false;
             else return true;
         }
         public static void ClearConsole(RLConsole console)

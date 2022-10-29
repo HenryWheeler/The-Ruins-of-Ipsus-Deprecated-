@@ -24,7 +24,7 @@ namespace TheRuinsOfIpsus
         public static void PlayerAction(Player player, RLKey key)
         {
             DisplayActions("Move: [NumPad/Arrow Keys]" + "     Debug Save Game: [N]" + spacer + "End Turn: [.]"  + "     Debug Load Game: [M]" + "     Save & Quit: [J]" + spacer 
-                + "Look: [L]" + "     Debug Reveal All: [V]" + spacer + "Open Inventory: [I]" + spacer + "Get Item: [G]");
+                + "Look: [L]" + "     Debug Reveal All: [V]" + spacer + "Open Inventory: [I]" + spacer + "Get Item: [G]" + "     Target: [T]");
 
             switch (key)
             {
@@ -48,6 +48,15 @@ namespace TheRuinsOfIpsus
                 case RLKey.M: Log.ClearLogDisplay(); SaveDataManager.LoadDebugSave(player); Log.AddToStoredLog("Debug Loaded!", true); break;
                 case RLKey.J: Log.ClearLogDisplay(); SaveDataManager.CreateSave(player); Program.rootConsole.Close(); break;
                 case RLKey.V: Log.ClearLogDisplay(); foreach(Tile tile in Map.map) { if (tile != null) { tile.visible = true; tile.explored = true; } } break;
+                case RLKey.T:
+                    {
+                        Log.ClearLogDisplay();
+                        bool hasMissile = false;
+                        foreach (EquipmentSlot slot in player.bodyPlot) { if (slot != null && slot.name == "Missile") { if (slot.item != null) { hasMissile = true; } } }
+                        if (hasMissile) { TargetReticle.StartTargeting(); }
+                        else { Log.AddToStoredLog("You have no missile to target with.", true); }
+                        break;
+                    }
             }
         }
         public static void InventoryAction(Player player, RLKey key)
@@ -78,6 +87,29 @@ namespace TheRuinsOfIpsus
                         }
                         break;
                     }
+            }
+        }
+        public static void TargetAction(RLKey key)
+        {
+            DisplayActions("Stop Targeting: [T/Escape]" + spacer + "Move: [NumPad/Arrow Keys]" + spacer + "Fire: [F]");
+
+            switch (key)
+            {
+                case RLKey.Up: Log.ClearLogDisplay(); TargetReticle.Move(0, -1); break;
+                case RLKey.Down: Log.ClearLogDisplay(); TargetReticle.Move(0, 1); break;
+                case RLKey.Left: Log.ClearLogDisplay(); TargetReticle.Move(-1, 0); break;
+                case RLKey.Right: Log.ClearLogDisplay(); TargetReticle.Move(1, 0); break;
+                case RLKey.Keypad8: Log.ClearLogDisplay(); TargetReticle.Move(0, -1); break;
+                case RLKey.Keypad9: Log.ClearLogDisplay(); TargetReticle.Move(1, -1); break;
+                case RLKey.Keypad6: Log.ClearLogDisplay(); TargetReticle.Move(1, 0); break;
+                case RLKey.Keypad3: Log.ClearLogDisplay(); TargetReticle.Move(1, 1); break;
+                case RLKey.Keypad2: Log.ClearLogDisplay(); TargetReticle.Move(0, 1); break;
+                case RLKey.Keypad1: Log.ClearLogDisplay(); TargetReticle.Move(-1, 1); break;
+                case RLKey.Keypad4: Log.ClearLogDisplay(); TargetReticle.Move(-1, 0); break;
+                case RLKey.Keypad7: Log.ClearLogDisplay(); TargetReticle.Move(-1, -1); break;
+                case RLKey.Escape: Log.ClearLogDisplay(); TargetReticle.StopTargeting(); break;
+                case RLKey.T: Log.ClearLogDisplay(); TargetReticle.StopTargeting(); break;
+                case RLKey.F: Log.ClearLogDisplay(); TargetReticle.Fire(); break;
             }
         }
         public static void LookAction(RLKey key)

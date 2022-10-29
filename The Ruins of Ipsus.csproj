@@ -110,7 +110,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Scripts\Abstracts\ActorBase.cs" />
-    <Compile Include="Scripts\Abstracts\AMap.cs" />
     <Compile Include="Scripts\AIManager.cs" />
     <Compile Include="Scripts\BodyPlots.cs" />
     <Compile Include="Scripts\Action.cs" />
@@ -126,6 +125,10 @@
     <Compile Include="Scripts\Log.cs" />
     <Compile Include="Scripts\Look.cs" />
     <Compile Include="Scripts\Map.cs" />
+    <Compile Include="Scripts\MapGeneration\CaveGenerator.cs" />
+    <Compile Include="Scripts\MapGeneration\DungeonGenerator.cs" />
+    <Compile Include="Scripts\MapGeneration\FieldGenerator.cs" />
+    <Compile Include="Scripts\Abstracts\AGenerator.cs" />
     <Compile Include="Scripts\MapGeneration\MapGenerator.cs" />
     <Compile Include="Scripts\Monster.cs" />
     <Compile Include="Scripts\Player.cs" />
@@ -134,6 +137,7 @@
     <Compile Include="Scripts\SaveDataManager.cs" />
     <Compile Include="Scripts\ShadowcastFOV.cs" />
     <Compile Include="Scripts\Stats.cs" />
+    <Compile Include="Scripts\TargetReticle.cs" />
     <Compile Include="Scripts\TurnManager.cs" />
     <Compile Include="Scripts\Menu.cs" />
   </ItemGroup>
