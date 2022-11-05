@@ -37,13 +37,14 @@ namespace TheRuinsOfIpsus
 
             while (!doneConnecting)
             {
-                Tile firstTile = null;
-                Tile lastTile = null;
+                Coordinate firstCoordinate = null;
+                Coordinate lastCoordinate = null;
                 List<Tile> cavernTiles = new List<Tile>();
 
-                foreach (Tile tile in Map.map) { if (tile != null && tile.moveType != 0) { firstTile = tile; break; } }
+                foreach (Tile tile in Map.map) { if (tile != null && tile.moveType != 0) { firstCoordinate = tile.GetComponent<Coordinate>(); break; } }
 
-                DijkstraMaps.CreateMap(new Node(firstTile.x, firstTile.y), "CurrentRoom");
+
+                DijkstraMaps.CreateMap(new Coordinate(firstCoordinate.x, firstCoordinate.y), "CurrentRoom");
                 foreach (Node node in DijkstraMaps.maps["CurrentRoom"]) { if (node != null && node.v != 1000) { cavernTiles.Add(Map.map[node.x, node.y]); } }
                 for (int v = 0; v < loopCount; v++)
                 {
@@ -51,26 +52,28 @@ namespace TheRuinsOfIpsus
                     {
                         if (tile != null && tile.moveType != 0 && !cavernTiles.Contains(tile))
                         {
-                            if (lastTile == null) { lastTile = tile; }
-                            else { if (CMath.Distance(tile.x, tile.y, firstTile.x, firstTile.y) < CMath.Distance(lastTile.x, lastTile.y, firstTile.x, firstTile.y)) { lastTile = tile; } }
+                            Coordinate coordinate = tile.GetComponent<Coordinate>();
+                            if (lastCoordinate == null) { lastCoordinate = tile.GetComponent<Coordinate>(); }
+                            else { if (CMath.Distance(coordinate.x, coordinate.y, firstCoordinate.x, firstCoordinate.y) < CMath.Distance(lastCoordinate.x, lastCoordinate.y, firstCoordinate.x, firstCoordinate.y)) { lastCoordinate = tile.GetComponent<Coordinate>(); } }
                         }
                     }
                     foreach (Tile tile in cavernTiles)
                     {
                         if (tile != null && tile.moveType != 0)
                         {
-                            if (lastTile != null && CMath.Distance(tile.x, tile.y, firstTile.x, firstTile.y) < CMath.Distance(lastTile.x, lastTile.y, firstTile.x, firstTile.y)) { firstTile = tile; }
+                            Coordinate coordinate = tile.GetComponent<Coordinate>();
+                            if (lastCoordinate != null && CMath.Distance(coordinate.x, coordinate.y, firstCoordinate.x, firstCoordinate.y) < CMath.Distance(lastCoordinate.x, lastCoordinate.y, firstCoordinate.x, firstCoordinate.y)) { firstCoordinate = tile.GetComponent<Coordinate>(); }
                         }
                     }
                 }
-                if (lastTile == null) { doneConnecting = true; }
+                if (lastCoordinate == null) { doneConnecting = true; }
                 else
                 {
                     switch (type)
                     {
-                        case 0: CreateStraightPassage(firstTile.x, firstTile.y, lastTile.x, lastTile.y); break;
-                        case 1: CreateDiagonalPassage(firstTile.x, firstTile.y, lastTile.x, lastTile.y); break;
-                        case 2: CreateBezierCurve(firstTile.x, firstTile.y, lastTile.x, lastTile.y); break;
+                        case 0: CreateStraightPassage(firstCoordinate.x, firstCoordinate.y, lastCoordinate.x, lastCoordinate.y); break;
+                        case 1: CreateDiagonalPassage(firstCoordinate.x, firstCoordinate.y, lastCoordinate.x, lastCoordinate.y); break;
+                        case 2: CreateBezierCurve(firstCoordinate.x, firstCoordinate.y, lastCoordinate.x, lastCoordinate.y); break;
                     }
                 }
             }
@@ -81,7 +84,7 @@ namespace TheRuinsOfIpsus
             {
                 for (int x = sX - 1; x <= eX + 1; x++)
                 {
-                    if (x < 1 || y < 1 || x >= 79 || y >= 69) return false;
+                    if (x < 1 || y < 1 || x >= mapWidth - 1 || y >= mapHeight - 1) return false;
                     if (Map.map[x, y].moveType != 0) return false;
                 }
             }

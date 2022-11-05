@@ -13,8 +13,9 @@ namespace TheRuinsOfIpsus
         private int wallsNeeded = 4;
         private int randomFill;
         private int smooth = 5;
-        public void CreateMap()
+        public void CreateMap(int _mapWidth, int _mapHeight)
         {
+            mapWidth = _mapWidth; mapHeight = _mapHeight;
             randomFill = CMath.seed.Next(46, 52);
             Map.outside = false;
             SetAllWalls();

@@ -12,8 +12,9 @@ namespace TheRuinsOfIpsus
         private int roomsToGenerate = 15;
         private int minRoomSize = 5;
         private int maxRoomSize = 12;
-        public void CreateMap()
+        public void CreateMap(int _mapWidth, int _mapHeight)
         {
+            mapWidth = _mapWidth; mapHeight = _mapHeight;
             Map.outside = false;
 
             SetAllWalls();

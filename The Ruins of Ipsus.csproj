@@ -63,6 +63,9 @@
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.6.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK">
       <HintPath>..\..\RLNET1.0.6\OpenTK.dll</HintPath>
     </Reference>
@@ -109,37 +112,59 @@
     <Content Include="Scripts\JsonData\Id%27s.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Scripts\Abstracts\ActorBase.cs" />
-    <Compile Include="Scripts\AIManager.cs" />
-    <Compile Include="Scripts\BodyPlots.cs" />
-    <Compile Include="Scripts\Action.cs" />
-    <Compile Include="Scripts\ColorFinder.cs" />
-    <Compile Include="Scripts\Interfaces\IUseable.cs" />
-    <Compile Include="Scripts\CMath.cs" />
-    <Compile Include="Scripts\DijkstraMaps.cs" />
-    <Compile Include="Scripts\Interfaces\IDescription.cs" />
-    <Compile Include="Scripts\Interfaces\IDraw.cs" />
-    <Compile Include="Scripts\Item.cs" />
-    <Compile Include="Scripts\Inventory.cs" />
+    <Compile Include="Scripts\Components\AIComponents\AI.cs" />
+    <Compile Include="Scripts\Components\AIComponents\ChaseAI.cs" />
+    <Compile Include="Scripts\Components\AIComponents\WanderAI.cs" />
+    <Compile Include="Scripts\Components\AttackFunction.cs" />
+    <Compile Include="Scripts\Components\BodyPlot.cs" />
+    <Compile Include="Scripts\Components\Component.cs" />
+    <Compile Include="Scripts\Components\Coordinate.cs" />
+    <Compile Include="Scripts\Components\Description.cs" />
+    <Compile Include="Scripts\Components\Memory.cs" />
+    <Compile Include="Scripts\Components\Movement.cs" />
+    <Compile Include="Scripts\Components\OnHit.cs" />
+    <Compile Include="Scripts\Components\Draw.cs" />
+    <Compile Include="Scripts\Components\Equippable.cs" />
+    <Compile Include="Scripts\Components\Inventory.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnHittingProperty.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnBeingHitProperty.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnMoveProperty.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnTurnEndProperty.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\PropertyFunction.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnTurnStartProperty.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\DijkstraProperty.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\GrassyStep.cs" />
+    <Compile Include="Scripts\Components\Usable.cs" />
+    <Compile Include="Scripts\Entities\Entity.cs" />
+    <Compile Include="Scripts\Components\Stats.cs" />
+    <Compile Include="Scripts\Components\TurnFunction.cs" />
+    <Compile Include="Scripts\Components\Visibility.cs" />
+    <Compile Include="Scripts\GameManaging\AttackManager.cs" />
+    <Compile Include="Scripts\GameManaging\EntitySpawner.cs" />
+    <Compile Include="Scripts\References\BodyPlots.cs" />
+    <Compile Include="Scripts\GameManaging\Action.cs" />
+    <Compile Include="Scripts\References\ColorFinder.cs" />
+    <Compile Include="Scripts\GameManaging\CMath.cs" />
+    <Compile Include="Scripts\GameManaging\DijkstraMaps.cs" />
+    <Compile Include="Scripts\GameManaging\InventoryManager.cs" />
     <Compile Include="Scripts\JsonData\JsonDataManager.cs" />
-    <Compile Include="Scripts\Log.cs" />
-    <Compile Include="Scripts\Look.cs" />
-    <Compile Include="Scripts\Map.cs" />
+    <Compile Include="Scripts\GameManaging\Log.cs" />
+    <Compile Include="Scripts\GameManaging\Look.cs" />
+    <Compile Include="Scripts\References\Map.cs" />
     <Compile Include="Scripts\MapGeneration\CaveGenerator.cs" />
     <Compile Include="Scripts\MapGeneration\DungeonGenerator.cs" />
     <Compile Include="Scripts\MapGeneration\FieldGenerator.cs" />
     <Compile Include="Scripts\Abstracts\AGenerator.cs" />
     <Compile Include="Scripts\MapGeneration\MapGenerator.cs" />
-    <Compile Include="Scripts\Monster.cs" />
-    <Compile Include="Scripts\Player.cs" />
-    <Compile Include="Scripts\Program.cs" />
-    <Compile Include="Scripts\Renderer.cs" />
-    <Compile Include="Scripts\SaveDataManager.cs" />
-    <Compile Include="Scripts\ShadowcastFOV.cs" />
-    <Compile Include="Scripts\Stats.cs" />
-    <Compile Include="Scripts\TargetReticle.cs" />
-    <Compile Include="Scripts\TurnManager.cs" />
-    <Compile Include="Scripts\Menu.cs" />
+    <Compile Include="Scripts\Entities\Player.cs" />
+    <Compile Include="Scripts\GameManaging\Program.cs" />
+    <Compile Include="Scripts\UpdateLoop\Renderer.cs" />
+    <Compile Include="Scripts\GameManaging\SaveDataManager.cs" />
+    <Compile Include="Scripts\GameManaging\ShadowcastFOV.cs" />
+    <Compile Include="Scripts\GameManaging\StatManager.cs" />
+    <Compile Include="Scripts\GameManaging\TargetReticle.cs" />
+    <Compile Include="Scripts\GameManaging\TurnManager.cs" />
+    <Compile Include="Scripts\GameManaging\Menu.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">

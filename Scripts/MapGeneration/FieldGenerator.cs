@@ -8,8 +8,9 @@ namespace TheRuinsOfIpsus
 {
     public class FieldGenerator: AGenerator
     {
-        public void CreateMap()
+        public void CreateMap(int _mapWidth, int _mapHeight)
         {
+            mapWidth = _mapWidth; mapHeight = _mapHeight;
             Map.outside = true;
 
             SetAllWalls();
@@ -31,7 +32,7 @@ namespace TheRuinsOfIpsus
                         else if (probability == 2000) { CreateBezierCurve(x, 1, 1, y); }
                         else if (probability < 500 && probability > 495) { SetTile(x, y, '*', "Rock", "A solid hunk of granite.", "Light_Gray", "Dark_Gray", false, 0); }
 
-                        if (Map.map[x, y].name == "Stone Wall") { SetTile(x, y, '.', "Bare Ground", "The bare dirt ground.", "Brown", "Black", false, 1); }
+                        if (Map.map[x, y].GetComponent<Description>().name == "Stone Wall") { SetTile(x, y, '.', "Bare Ground", "The bare dirt ground.", "Brown", "Black", false, 1); }
                     }
                 }
             }
