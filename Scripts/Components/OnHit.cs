@@ -9,10 +9,18 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class OnHit: Component
     {
-        public void Hit(int dmg, string type, string weaponName, Entity entityRef) 
+        public void Hit(int dmg, string type, string weaponName, Entity attacker) 
         {
-            if (entity.GetComponent<PropertyFunction>() != null) { entity.GetComponent<PropertyFunction>().TriggerOnBeingHit(entityRef, dmg, type); }
-            Log.AddToStoredLog(entityRef.GetComponent<Description>().name + " hit " + entity.GetComponent<Description>().name + " for " + dmg + " damage with the " + weaponName + ".");
+            SpecialComponentManager.TriggerOnHit(entity, attacker, entity, dmg, type, false);
+            if (CMath.ReturnAI(entity) != null) { CMath.ReturnAI(entity).OnHit(attacker); }
+            Log.AddToStoredLog(attacker.GetComponent<Description>().name + " hit " + entity.GetComponent<Description>().name + " for " + dmg + " damage with the " + weaponName + ".");
+            Stats stats = entity.GetComponent<Stats>();
+            stats.hp -= dmg;
+            if (stats.display) { StatManager.UpdateStats(entity); }
+            if (stats.hp <= 0) { Death(); }
+        }
+        public void LowerHealth(int dmg)
+        {
             Stats stats = entity.GetComponent<Stats>();
             stats.hp -= dmg;
             if (stats.display) { StatManager.UpdateStats(entity); }

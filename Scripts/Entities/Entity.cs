@@ -10,30 +10,20 @@ namespace TheRuinsOfIpsus
     {
         public int uID { get; set; }
         public int tempID { get; set; }
+        public List<Component> collectionsToRemove = new List<Component>();
         public List<Component> components = new List<Component>();
         public void AddComponent(Component component)
         {
-            if (!components.Contains(component) && !component.GetType().Equals(typeof(PropertyFunction)))
+            if (!components.Contains(component))
             {
                 components.Add(component);
                 component.entity = this;
-
-                if (component.property && GetComponent<PropertyFunction>() == null) { AddComponent(new PropertyFunction()); GetComponent<PropertyFunction>().AddProperty(component); }
-                else if (component.property && GetComponent<PropertyFunction>() != null) { GetComponent<PropertyFunction>().AddProperty(component); }
             }
-            else if (GetComponent<PropertyFunction>() == null && component.GetType().Equals(typeof(PropertyFunction))) { components.Add(component); component.entity = this;  }
         }
         public void RemoveComponent(Component component)
         {
             components.Remove(component);
             component.entity = null;
-            if (component.property && GetComponent<PropertyFunction>() != null) 
-            {
-                GetComponent<PropertyFunction>().RemoveProperty(component); 
-                PropertyFunction function = GetComponent<PropertyFunction>(); 
-                if (function.onTurnStartProperties.Count == 0 && function.onTurnEndProperties.Count == 0 && function.onMoveProperties.Count == 0 && function.onBeingHitProperties.Count == 0 && function.onHittingProperties.Count == 0) 
-                { RemoveComponent(GetComponent<PropertyFunction>()); } 
-            }
         }
         public T GetComponent<T>() where T : Component
         {
@@ -46,6 +36,8 @@ namespace TheRuinsOfIpsus
             }
             return null;
         }
+        public void ClearCollections() { if (collectionsToRemove.Count != 0) 
+            { foreach (Component component in collectionsToRemove) { RemoveComponent(component); } collectionsToRemove.Clear(); } }
         public Entity(Entity entity)
         {
             foreach (Component component in entity.components)

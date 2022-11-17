@@ -1,8 +1,7 @@
-﻿Actor Id's:
-1. TestEnemy
-2. Frog
+﻿Id Listing
 
-Item Id's:
-1. UnspecificArmor
-2. Banana
-3. Wooden Bow
+Type followed by UID
+
+Entity Listing:
+
+0-

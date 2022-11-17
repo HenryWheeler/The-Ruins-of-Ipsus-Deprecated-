@@ -21,7 +21,7 @@ namespace TheRuinsOfIpsus
                 string logOut = null;
                 foreach (string log in storedLog) { logOut += log; }
                 CMath.DisplayToConsole(console, logOut, 1, 1, 0, 0);
-                ClearStoredLog();
+                storedLog.Clear();
             }
         }
         public static void AddToStoredLog(string logAdd, bool display = false)
@@ -30,7 +30,6 @@ namespace TheRuinsOfIpsus
             storedLog.Add(newString);
             if (display) DisplayLog();
         }
-        public static void ClearStoredLog() { storedLog.Clear(); }
         public static void ClearLogDisplay()
         {
             int h = console.Height - 2;

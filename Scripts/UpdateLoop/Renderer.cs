@@ -82,6 +82,7 @@ namespace TheRuinsOfIpsus
                     mapConsole.Set(coordinate.x, coordinate.y, ColorFinder.ColorPicker("Dark_Gray"), RLColor.Blend(RLColor.Black, ColorFinder.ColorPicker(draw.bColor), .55f), draw.character); }
                 else if (tile.actor != null) { tile.actor.GetComponent<Draw>().DrawToScreen(mapConsole); }
                 else if (tile.item != null) { tile.item.GetComponent<Draw>().DrawToScreen(mapConsole); }
+                else if (tile.terrain != null) { tile.terrain.GetComponent<Draw>().DrawToScreen(mapConsole); }
                 else { Draw draw = tile.GetComponent<Draw>(); 
                     mapConsole.Set(coordinate.x, coordinate.y, ColorFinder.ColorPicker(draw.fColor), ColorFinder.ColorPicker(draw.bColor), draw.character); }
             }

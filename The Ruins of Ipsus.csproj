@@ -112,28 +112,33 @@
     <Content Include="Scripts\JsonData\Id%27s.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Scripts\Components\AIComponents\AI.cs" />
+    <Compile Include="Scripts\Components\AIComponents\BaseAI\AI.cs" />
     <Compile Include="Scripts\Components\AIComponents\ChaseAI.cs" />
+    <Compile Include="Scripts\Components\AIComponents\SpiderAI.cs" />
     <Compile Include="Scripts\Components\AIComponents\WanderAI.cs" />
     <Compile Include="Scripts\Components\AttackFunction.cs" />
     <Compile Include="Scripts\Components\BodyPlot.cs" />
+    <Compile Include="Scripts\Components\Commerce.cs" />
     <Compile Include="Scripts\Components\Component.cs" />
     <Compile Include="Scripts\Components\Coordinate.cs" />
     <Compile Include="Scripts\Components\Description.cs" />
-    <Compile Include="Scripts\Components\Memory.cs" />
+    <Compile Include="Scripts\Components\Faction.cs" />
     <Compile Include="Scripts\Components\Movement.cs" />
     <Compile Include="Scripts\Components\OnHit.cs" />
     <Compile Include="Scripts\Components\Draw.cs" />
     <Compile Include="Scripts\Components\Equippable.cs" />
     <Compile Include="Scripts\Components\Inventory.cs" />
-    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnHittingProperty.cs" />
-    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnBeingHitProperty.cs" />
+    <Compile Include="Scripts\Components\PronounSet.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\InflictPoisonOnHit.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnHitProperty.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnMoveProperty.cs" />
-    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnTurnEndProperty.cs" />
-    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\PropertyFunction.cs" />
-    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnTurnStartProperty.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnTurnProperty.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\DijkstraProperty.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\GrassyStep.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\Poison.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\Restrained.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\RestrainOnMove.cs" />
+    <Compile Include="Scripts\Components\SpecialDefences.cs" />
     <Compile Include="Scripts\Components\Usable.cs" />
     <Compile Include="Scripts\Entities\Entity.cs" />
     <Compile Include="Scripts\Components\Stats.cs" />
@@ -141,6 +146,7 @@
     <Compile Include="Scripts\Components\Visibility.cs" />
     <Compile Include="Scripts\GameManaging\AttackManager.cs" />
     <Compile Include="Scripts\GameManaging\EntitySpawner.cs" />
+    <Compile Include="Scripts\GameManaging\SpecialComponentManager.cs" />
     <Compile Include="Scripts\References\BodyPlots.cs" />
     <Compile Include="Scripts\GameManaging\Action.cs" />
     <Compile Include="Scripts\References\ColorFinder.cs" />
@@ -158,6 +164,7 @@
     <Compile Include="Scripts\MapGeneration\MapGenerator.cs" />
     <Compile Include="Scripts\Entities\Player.cs" />
     <Compile Include="Scripts\GameManaging\Program.cs" />
+    <Compile Include="Scripts\References\PronounReferences.cs" />
     <Compile Include="Scripts\UpdateLoop\Renderer.cs" />
     <Compile Include="Scripts\GameManaging\SaveDataManager.cs" />
     <Compile Include="Scripts\GameManaging\ShadowcastFOV.cs" />

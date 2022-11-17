@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public abstract class OnBeingHitProperty : Component
+    public abstract class OnTurnProperty : Component
     {
-        public abstract void OnBeingHit(Entity attacker, int dmg, string type);
-        public OnBeingHitProperty() { }
+        public bool start { get; set; }
+        public abstract void OnTurn();
+        public OnTurnProperty() { }
     }
 }

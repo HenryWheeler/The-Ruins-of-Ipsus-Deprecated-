@@ -37,12 +37,26 @@ namespace TheRuinsOfIpsus
             bodyPlots.Add("Basic_Humanoid", basicHumanoidPlot);
 
             EquipmentSlot[] basicCreaturePlot = new EquipmentSlot[5];
-            basicHumanoidPlot[0] = usableSlots["Head"];
-            basicHumanoidPlot[1] = usableSlots["Face"];
-            basicHumanoidPlot[2] = usableSlots["Torso"];
-            basicHumanoidPlot[3] = usableSlots["Legs"];
-            basicHumanoidPlot[4] = usableSlots["Feet"];
+            basicCreaturePlot[0] = usableSlots["Head"];
+            basicCreaturePlot[1] = usableSlots["Face"];
+            basicCreaturePlot[2] = usableSlots["Torso"];
+            basicCreaturePlot[3] = usableSlots["Legs"];
+            basicCreaturePlot[4] = usableSlots["Feet"];
             bodyPlots.Add("Basic_Creature", basicCreaturePlot);
+
+            EquipmentSlot[] basicSpiderPlot = new EquipmentSlot[11];
+            basicSpiderPlot[0] = usableSlots["Head"];
+            basicSpiderPlot[1] = usableSlots["Face"];
+            basicSpiderPlot[2] = usableSlots["Torso"];
+            basicSpiderPlot[3] = usableSlots["Legs"];
+            basicSpiderPlot[4] = usableSlots["Legs"];
+            basicSpiderPlot[5] = usableSlots["Legs"];
+            basicSpiderPlot[6] = usableSlots["Legs"];
+            basicSpiderPlot[7] = usableSlots["Feet"];
+            basicSpiderPlot[8] = usableSlots["Feet"];
+            basicSpiderPlot[9] = usableSlots["Feet"];
+            basicSpiderPlot[10] = usableSlots["Feet"];
+            bodyPlots.Add("Basic_Spider", basicSpiderPlot);
         }
     }
     [Serializable]

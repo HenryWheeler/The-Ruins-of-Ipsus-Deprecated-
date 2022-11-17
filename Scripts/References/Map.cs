@@ -22,6 +22,7 @@ namespace TheRuinsOfIpsus
         public int moveType { get; set; }
         public Entity actor = null;
         public Entity item = null;
+        public Entity terrain = null;
         public Tile(int _x, int _y, char _character, string _name, string _description, string _fColor, string _bColor, bool _opaque, int _moveType)
         {
             AddComponent(new Coordinate(_x, _y));

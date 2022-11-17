@@ -10,7 +10,7 @@ namespace TheRuinsOfIpsus
     public class Inventory: Component
     {
         public bool display { get; set; }
-        public List<Entity> inventory { get; set; }
+        public List<Entity> inventory = new List<Entity>();
         public Inventory(bool _display = false) { display = _display; inventory = new List<Entity>(); }
         public Inventory() { }
     }

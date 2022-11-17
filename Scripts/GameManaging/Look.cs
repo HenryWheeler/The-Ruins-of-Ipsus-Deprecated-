@@ -34,10 +34,30 @@ namespace TheRuinsOfIpsus
             {
                 Map.sfx[x, y] = null;
                 x += _x; y += _y;
+                Description description = null;
                 if (!Map.map[x, y].GetComponent<Visibility>().visible) { Log.AddToStoredLog("You cannot look at what you cannot see.", true); Map.sfx[x, y] = new SFX(x, y, 'X', "Yellow", "Black", false, true); }
-                else if (Map.map[x, y].actor != null) { Log.AddToStoredLog(Map.map[x, y].actor.GetComponent<Description>().Describe(), true); Map.sfx[x, y] = new SFX(x, y, 'X', "Yellow", "Black", false, true); }
-                else if (Map.map[x, y].item != null) { Log.AddToStoredLog(Map.map[x, y].item.GetComponent<Description>().Describe(), true); Map.sfx[x, y] = new SFX(x, y, 'X', "Yellow", "Black", false, true); }
-                else { Log.AddToStoredLog(Map.map[x, y].GetComponent<Description>().Describe(), true); Map.sfx[x, y] = new SFX(x, y, 'X', "Yellow", "Black", false, true); }
+                else if (Map.map[x, y].actor != null) { description = Map.map[x, y].actor.GetComponent<Description>(); Map.sfx[x, y] = new SFX(x, y, 'X', "Yellow", "Black", false, true); }
+                else if (Map.map[x, y].item != null) { description = Map.map[x, y].item.GetComponent<Description>(); Map.sfx[x, y] = new SFX(x, y, 'X', "Yellow", "Black", false, true); }
+                else if (Map.map[x, y].terrain != null) { description = Map.map[x, y].terrain.GetComponent<Description>(); Map.sfx[x, y] = new SFX(x, y, 'X', "Yellow", "Black", false, true); }
+                else { description = Map.map[x, y].GetComponent<Description>(); Map.sfx[x, y] = new SFX(x, y, 'X', "Yellow", "Black", false, true); }
+                if (description != null)
+                {
+                    string display = "";
+
+                    if (description.entity != null && description.entity.GetComponent<PronounSet>() != null)
+                    {
+                        if (description.entity.GetComponent<PronounSet>().present) { display += description.Describe() + " + + + " + description.name + " is: + "; }
+                        else { display += description.Describe() + " + + + " + description.name + " are: + "; }
+                        string compare = display;
+                        foreach (Component component in description.entity.components)
+                        {
+                            if (component.special && component.componentName != "") { display += component.componentName + ", "; }
+                        }
+                        if (display == compare) { display = description.Describe();}
+                    }
+                    else { display += description.Describe(); }
+                    Log.AddToStoredLog(display, true);
+                }
             }
         }
     }

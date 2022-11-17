@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using RLNET;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace TheRuinsOfIpsus
 {
@@ -14,11 +16,13 @@ namespace TheRuinsOfIpsus
             turn++;
             if (entityTurn >= entities.Count - 1) entityTurn = 0;
             else entityTurn++;
+            //if (entities[entityTurn].actionLeft <= 0) Task.WaitAll(ProgressActorTurn(entities[entityTurn]));
             if (entities[entityTurn].actionLeft <= 0) ProgressActorTurn(entities[entityTurn]);
             else entities[entityTurn].StartTurn();
         }
         public static void ProgressActorTurn(TurnFunction entity)
         {
+            //await Task.Delay(1);
             if (entity.actionLeft <= 0) { entity.actionLeft += entity.entity.GetComponent<Stats>().maxAction; ProgressTurnOrder(); }
             else
             {

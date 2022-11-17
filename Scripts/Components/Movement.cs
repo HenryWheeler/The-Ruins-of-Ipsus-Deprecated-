@@ -21,7 +21,8 @@ namespace TheRuinsOfIpsus
                     Map.map[coordinate.x, coordinate.y].actor = null;
                     coordinate.x += _x; coordinate.y += _y;
                     Map.map[coordinate.x, coordinate.y].actor = entity;
-                    if (entity.GetComponent<PropertyFunction>() != null) { entity.GetComponent<PropertyFunction>().TriggerOnMove(coordinate.x, coordinate.y); }
+                    SpecialComponentManager.TriggerOnMove(entity, coordinate.x - _x, coordinate.y - _y, coordinate.x, coordinate.y);
+                    if (Map.map[coordinate.x, coordinate.y].terrain != null) { SpecialComponentManager.TriggerOnMove(Map.map[coordinate.x, coordinate.y].terrain, coordinate.x - _x, coordinate.y - _y, coordinate.x, coordinate.y); }
                     entity.GetComponent<TurnFunction>().EndTurn();
                 }
                 else if (display) { AttackManager.MeleeAllStrike(entity, Map.map[coordinate.x + _x, coordinate.y + _y].actor); }

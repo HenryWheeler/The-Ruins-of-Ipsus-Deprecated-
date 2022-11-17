@@ -18,11 +18,15 @@ namespace TheRuinsOfIpsus
 
             Stats stats = entity.GetComponent<Stats>();
 
+            stats.display = true;
+
             string display = "";
 
-            display += "Health: " + stats.hp + "/" + stats.hpCap + spacer;
-            display += "Armor: " + stats.ac + spacer;
-            display += "Speed: " + stats.maxAction + spacer;
+            display += "Red*Health: " + stats.hp + "/" + stats.hpCap + spacer;
+            display += "Light_Gray*Armor: " + stats.ac + spacer;
+            display += "Yellow*Celerity: " + stats.maxAction + spacer;
+            display += "Brown*Might: " + stats.strength + " (" + (stats.strength - 10)/2 + ")" + spacer;
+            display += "Blue*Acuity: " + stats.acuity + " (" + (stats.acuity - 10)/2 + ")" + spacer;
             display += "Sight: " + stats.sight + spacer + spacer;
 
             display += "Equipment: " + spacer + spacer;
@@ -34,6 +38,13 @@ namespace TheRuinsOfIpsus
                     if (slot.item != null) { display += slot.name + ": " + slot.item.GetComponent<Description>().name + spacer; }
                     else { display += slot.name + ": Empty" + spacer; }
                 }
+            }
+
+            display += spacer + "Status:" + spacer;
+
+            foreach (Component component in entity.components)
+            {
+                if (component.special && component.componentName != "") { display += component.componentName + ", "; }
             }
 
             CMath.DisplayToConsole(console, display, 0, 2, 1);

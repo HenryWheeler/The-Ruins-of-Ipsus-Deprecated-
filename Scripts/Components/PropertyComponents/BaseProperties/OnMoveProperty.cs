@@ -9,7 +9,7 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public abstract class OnMoveProperty: Component
     {
-        public abstract void OnMove(int x, int y);
+        public abstract void OnMove(int x1, int y1, int x2, int y2);
         public OnMoveProperty() { }
     }
 }

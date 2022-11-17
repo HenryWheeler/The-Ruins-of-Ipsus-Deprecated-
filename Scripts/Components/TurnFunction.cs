@@ -15,23 +15,25 @@ namespace TheRuinsOfIpsus
         public void StartTurn()
         { 
             turnActive = true;
-            if (entity.GetComponent<PropertyFunction>() != null) { entity.GetComponent<PropertyFunction>().TriggerTurnStart(); }
-            if (CMath.ReturnAI(entity) != null) { CMath.ReturnAI(entity).Action(); } 
+            SpecialComponentManager.TriggerTurn(entity, true);
+            if (CMath.ReturnAI(entity) != null) { Task.WaitAll(Wait()); CMath.ReturnAI(entity).EvaluateEnvironment(); } 
             else if (!display) { EndTurn(); }
-            if (display) { Log.DisplayLog(); } 
+            if (display) { Log.DisplayLog(); StatManager.UpdateStats(entity); } 
         }
         public void EndTurn() 
         { 
             turnActive = false;
-            if (entity.GetComponent<PropertyFunction>() != null) { entity.GetComponent<PropertyFunction>().TriggerTurnEnd(); }
+            SpecialComponentManager.TriggerTurn(entity, false);
             if (display)
             {
                 Coordinate coordinate = entity.GetComponent<Coordinate>();
                 ShadowcastFOV.ClearSight();
                 ShadowcastFOV.Compute(coordinate.x, coordinate.y, entity.GetComponent<Stats>().sight);
             }
-            TurnManager.ProgressActorTurn(this); 
+            //Task.WaitAll(Wait()); 
+            TurnManager.ProgressActorTurn(this);
         }
+        public async Task Wait() { await Task.Delay(new TimeSpan(1000)); }
         public TurnFunction(float _actionLeft, bool _display = false) { turnActive = false; actionLeft = actionLeft; display = _display; }
         public TurnFunction() { }
     }

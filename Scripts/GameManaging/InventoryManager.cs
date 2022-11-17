@@ -51,7 +51,7 @@ namespace TheRuinsOfIpsus
         }
         public static void AddToInventory(Entity actor, Entity item)
         {
-            if (actor != null && item != null) actor.GetComponent<Inventory>().inventory.Add(item);
+            if (actor != null && item != null && actor.GetComponent<Inventory>().inventory != null) actor.GetComponent<Inventory>().inventory.Add(item);
         }
         public static void RemoveFromInventory(Entity actor, Entity item)
         {
@@ -95,31 +95,49 @@ namespace TheRuinsOfIpsus
             {
                 if (entity.GetComponent<BodyPlot>().ReturnSlot(item.GetComponent<Equippable>().slot).item != null)
                 {
-                    UnequipItem(entity, entity.GetComponent<BodyPlot>().ReturnSlot(item.GetComponent<Equippable>().slot).item, display);
+                    if (entity.GetComponent<BodyPlot>().ReturnSlot(item.GetComponent<Equippable>().slot).item.GetComponent<Equippable>().unequipable)
+                    {
+                        UnequipItem(entity, entity.GetComponent<BodyPlot>().ReturnSlot(item.GetComponent<Equippable>().slot).item, display);
+                        item.GetComponent<Equippable>().Equip(entity);
+                        if (display) { Log.AddToStoredLog("You equip the " + item.GetComponent<Description>().name + "."); CloseInventory(); }
+                        entity.GetComponent<TurnFunction>().EndTurn();
+                    }
+                    else if (display) {
+                        Log.AddToStoredLog("You cannot equip the " + item.GetComponent<Description>().name + "because the " + 
+                            entity.GetComponent<BodyPlot>().ReturnSlot(item.GetComponent<Equippable>().slot).item.GetComponent<Description>().name + " cannot be unequipped.", true); }
                 }
-                item.GetComponent<Equippable>().Equip(entity);
-                if (display) { Log.AddToStoredLog("You equip the " + item.GetComponent<Description>().name + "."); CloseInventory(); }
-                entity.GetComponent<TurnFunction>().EndTurn();
+                else
+                {
+                    item.GetComponent<Equippable>().Equip(entity);
+                    if (display) { Log.AddToStoredLog("You equip the " + item.GetComponent<Description>().name + "."); CloseInventory(); }
+                    entity.GetComponent<TurnFunction>().EndTurn();
+                }
             }
             else if (display) { Log.AddToStoredLog("You cannot equip the " + item.GetComponent<Description>().name + ".", true); }
         }
         public static void UnequipItem(Entity entity, Entity item, bool display = false)
         {
-            item.GetComponent<Equippable>().Unequip(entity);
-            if (display) { Refresh(); Log.AddToStoredLog("You unequip the " + item.GetComponent<Description>().name + ".", true); }
+            if (item.GetComponent<Equippable>().unequipable)
+            {
+                item.GetComponent<Equippable>().Unequip(entity);
+                if (display) { Refresh(); Log.AddToStoredLog("You unequip the " + item.GetComponent<Description>().name + ".", true); }
+            }
+            else { Log.AddToStoredLog("You cannot unequip the " + item.GetComponent<Description>().name + ".", true); }
         }
         public static void DisplayInventory()
         {
             CMath.ClearConsole(console);
             int x = 0;
+            string output = "";
             foreach (Entity item in inventoryDisplay[currentPage])
             {
                 string addOn = "";
-                if (item.GetComponent<Equippable>() != null && item.GetComponent<Equippable>().equipped) { addOn = " - Equipped"; } 
-                if (selection == x) console.Print(2, (x * 3) + 2, "X " + item.GetComponent<Description>().name + " [" + item.GetComponent<Draw>().character + "]" + addOn, RLColor.White);
-                else console.Print(2, (x * 3) + 2, item.GetComponent<Description>().name + " [" + item.GetComponent<Draw>().character + "]" + addOn, RLColor.White);
+                if (item.GetComponent<Equippable>() != null && item.GetComponent<Equippable>().equipped) { addOn = " - Equipped"; }
+                if (selection == x) { output += "X " + item.GetComponent<Description>().name + " " + item.GetComponent<Draw>().fColor + "*" + item.GetComponent<Draw>().character + addOn + " + "; } 
+                else { output += item.GetComponent<Description>().name + " " + item.GetComponent<Draw>().fColor + "*" + item.GetComponent<Draw>().character + addOn + " + "; } 
                 x++;
             }
+            CMath.DisplayToConsole(console, output, 2, 0, 1, 2);
             console.Print(2, 80, "Page: " + (currentPage + 1) + "/" + inventoryDisplay.Count, RLColor.White);
         }
         public static void MoveSelection(int move)
@@ -151,12 +169,16 @@ namespace TheRuinsOfIpsus
         {
             string addition = "";
             if (inventoryDisplay[currentPage][selection].GetComponent<Equippable>() != null) 
-            { addition += spacer + "Can be equipped in " + inventoryDisplay[currentPage][selection].GetComponent<Equippable>().slot + "."; AttackFunction function = inventoryDisplay[currentPage][selection].GetComponent<AttackFunction>();
+            {
+                string[] slot = inventoryDisplay[currentPage][selection].GetComponent<Equippable>().slot.Split();
+                if (slot.Count() == 1) { addition += spacer + "Yellow*Can be equipped in " + "Yellow*" + slot[0] + "."; }
+                else { addition += spacer + "Yellow*Can be equipped in " + "Yellow*" + slot[0] + " " + "Yellow*" + slot[1] + "."; }
+                AttackFunction function = inventoryDisplay[currentPage][selection].GetComponent<AttackFunction>();
                 if (function != null) 
-                { addition += spacer + "Does " + function.die1 + "d" + function.die2 + " damage with a damage modifier of " + function.dmgModifier + " and a bonus to hit of " + function.toHitModifier + "."; } }
-            else { addition += spacer + "Cannot be equipped."; }
-            if (inventoryDisplay[currentPage][selection].GetComponent<Usable>() != null) { addition += spacer + "Can be used."; }
-            else { addition += spacer + "Cannot be used."; }
+                { addition += spacer + "Does Yellow*" + function.die1 + "d" + function.die2 + " damage with a damage modifier of Yellow*" + function.dmgModifier + " and a bonus to hit of Yellow*" + function.toHitModifier + "."; } }
+            else { addition += spacer + "Yellow*Cannot be equipped."; }
+            if (inventoryDisplay[currentPage][selection].GetComponent<Usable>() != null) { addition += spacer + "Yellow*Can be used."; }
+            else { addition += spacer + "Yellow*Cannot be used."; }
             Log.AddToStoredLog(inventoryDisplay[currentPage][selection].GetComponent<Description>().Describe() + addition, true);
         }
     }

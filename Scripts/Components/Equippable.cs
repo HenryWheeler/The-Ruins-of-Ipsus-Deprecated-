@@ -9,24 +9,25 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class Equippable: Component
     {
-        public int type { get; set; }
         public bool equipped { get; set; }
         public string slot { get; set; }
+        public bool unequipable { get; set; }
+        public bool addProperties { get; set; }
         public void Equip(Entity entityRef)
         {
             entityRef.GetComponent<BodyPlot>().ReturnSlot(slot).item = entity;
             equipped = true;
             entity.GetComponent<Stats>().ModifyAllStats(entityRef, true);
-            if (entity.GetComponent<PropertyFunction>() != null) { entity.GetComponent<PropertyFunction>().AddAllToEntity(entityRef); }
+            if (addProperties) { SpecialComponentManager.AddAllToEntity(entityRef, entity); }
         }
         public void Unequip(Entity entityRef)
         {
             entityRef.GetComponent<BodyPlot>().ReturnSlot(slot).item = null;
             equipped = false;
             entity.GetComponent<Stats>().ModifyAllStats(entityRef, false);
-            if (entity.GetComponent<PropertyFunction>() != null) { entity.GetComponent<PropertyFunction>().RemoveAllFromEntity(entityRef); }
+            if (addProperties) { SpecialComponentManager.RemoveAllFromEntity(entityRef, entity); }
         }
-        public Equippable(int _type, string _slot) { type = _type; equipped = false; slot = _slot; }
+        public Equippable(string _slot, bool _unequipable, bool _addProperties) { equipped = false; slot = _slot; unequipable = _unequipable; addProperties = _addProperties; }
         public Equippable() { }
     }
 }

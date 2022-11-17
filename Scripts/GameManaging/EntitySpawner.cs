@@ -20,5 +20,31 @@ namespace TheRuinsOfIpsus
             }
             return entity;
         }
+        public static Entity ReloadEntity(Entity entityRef)
+        {
+            if (entityRef != null)
+            {
+                Entity entityToUse = new Entity(entityRef);
+                if (entityToUse.GetComponent<Inventory>() != null)
+                {
+                    List<Entity> entities = new List<Entity>();
+                    if (entityToUse.GetComponent<Inventory>().inventory != null)
+                    {
+                        foreach (Entity entity in entityToUse.GetComponent<Inventory>().inventory) { if (entity != null) { entities.Add(entity); } }
+                        entityToUse.GetComponent<Inventory>().inventory.Clear();
+                        foreach (Entity id in entities) { entityToUse.GetComponent<Inventory>().inventory.Add(new Entity(id)); }
+                    }
+                    if (entityToUse.GetComponent<BodyPlot>() != null)
+                    {
+                        entities.Clear();
+                        foreach (EquipmentSlot entity in entityToUse.GetComponent<BodyPlot>().bodyPlot) { if (entity != null && entity.item != null) { entities.Add(entity.item); } }
+                        foreach (Entity id in entities) { new Entity(id).GetComponent<Equippable>().Equip(entityToUse); }
+                    }
+                    if (CMath.ReturnAI(entityToUse) != null) { CMath.ReturnAI(entityRef).target = null; }
+                }
+                return entityToUse;
+            }
+            return null;
+        }
     }
 }

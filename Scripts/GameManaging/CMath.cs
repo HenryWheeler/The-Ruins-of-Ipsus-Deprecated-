@@ -14,9 +14,19 @@ namespace TheRuinsOfIpsus
         public static int seedInt { get; set; }
         public CMath(int _seed) { seed = new Random(_seed); random = new Random(); seedInt = _seed; }
         public static double Distance(int oX, int oY, int eX, int eY) { return Math.Sqrt(Math.Pow(eX - oX, 2) + Math.Pow(eY - oY, 2)); }
-        public static bool Sight(Entity entity, int oX, int oY, int eX, int eY)
+        public static double Distance(Coordinate one, Coordinate two)
+        {
+            int returnValue = (int)Math.Sqrt(Math.Pow(two.x - one.x, 2) + Math.Pow(two.y - one.y, 2));
+            if (returnValue == 0) { return 1; }
+            else return (int)Math.Sqrt(Math.Pow(two.x - one.x, 2) + Math.Pow(two.y - one.y, 2));
+        }
+        public static bool Sight(Entity entity, Entity target)
         {
             int sight = entity.GetComponent<Stats>().sight;
+            Coordinate coordinate = entity.GetComponent<Coordinate>();
+            Coordinate coordinate2 = target.GetComponent<Coordinate>();
+            int oX = coordinate.x; int oY = coordinate.y;
+            int eX = coordinate2.x; int eY = coordinate2.y;
             if (Map.outside) { sight = sight * 2; }
             int t;
             int x = oX; int y = oY;
@@ -65,15 +75,29 @@ namespace TheRuinsOfIpsus
         public static void DisplayToConsole(RLConsole console, string logOut, int a, int b, int m = 0, int y = 2)
         {
             string[] outPut = logOut.Split(' ');
-            int c = 0;
+            int c = a;
             foreach (string text in outPut)
             {
-                if (text.Contains("+")) { y += 2 + m; c = a; }
+                string[] split = text.Split('*');
+                if (split.Count() == 1)
+                {
+                    if (split[0].Contains("+")) { y += 2 + m; c = a; }
+                    else
+                    {
+                        if (c + split[0].Length > console.Width - 4) { y += 2 + m; c = a; }
+                        console.Print(c + b, y, split[0], RLColor.White);
+                        c += split[0].Length + 1;
+                    }
+                }
                 else
                 {
-                    if (c + text.Length > console.Width - 4) { y += 2 + m; c = a; }
-                    console.Print(c + b, y, text, RLColor.White);
-                    c += text.Length + 1;
+                    if (split[1].Contains("+")) { y += 2 + m; c = a; }
+                    else
+                    {
+                        if (c + split[0].Length > console.Width - 4) { y += 2 + m; c = a; }
+                        console.Print(c + b, y, split[1], ColorFinder.ColorPicker(split[0]));
+                        c += split[1].Length + 1;
+                    }
                 }
             }
         }

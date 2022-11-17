@@ -7,12 +7,15 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public class DijkstraProperty: OnTurnEndProperty
+    public class DijkstraProperty: OnTurnProperty
     {
-        public override void OnTurnEnd()
+        public int tick { get; set; }
+        public int tickMax { get; set; }
+        public override void OnTurn()
         {
-            DijkstraMaps.CreateMap(entity.GetComponent<Coordinate>(), entity.GetComponent<Description>().name + entity.tempID);
+            if (tick == 0) { DijkstraMaps.CreateMap(entity.GetComponent<Coordinate>(), entity.GetComponent<Description>().name + entity.tempID); tick = tickMax; }
+            else { tick--; }
         }
-        public DijkstraProperty() { property = true; }
+        public DijkstraProperty(int _tickMax) { tickMax = _tickMax; start = false; special = true; }
     }
 }

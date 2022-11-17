@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public abstract class OnTurnStartProperty: Component
+    public class Commerce: Component
     {
-        public abstract void OnTurnStart();
-        public OnTurnStartProperty() { }
+        public int value { get; set; }
+        public Commerce(int _value) { value = _value; }
+        public Commerce() { }
     }
 }

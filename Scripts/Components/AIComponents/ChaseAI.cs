@@ -9,23 +9,37 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class ChaseAI : AI
     {
-        public override void Action()
+        public override void ExecuteAction()
         {
-            entity.GetComponent<Memory>().memorizedEntity = Program.player;
-            Coordinate coordinate = entity.GetComponent<Coordinate>();
-            Coordinate playerCoordinate = entity.GetComponent<Memory>().memorizedEntity.GetComponent<Coordinate>();
-            if (CMath.Sight(entity, coordinate.x, coordinate.y, playerCoordinate.x, playerCoordinate.y)) { entity.GetComponent<Memory>().SetMemoryMax(); }
-            if (entity.GetComponent<Memory>().TickMemory())
+            switch (action)
             {
-                Coordinate coordinate2 = DijkstraMaps.PathFromMap(entity, coordinate.x, coordinate.y, "You0");
-                entity.GetComponent<Movement>().Move(coordinate2.x, coordinate2.y);
-            } 
-            else { entity.GetComponent<TurnFunction>().EndTurn(); }
+                case -1: entity.GetComponent<Movement>().Move(CMath.random.Next(-1, 2), CMath.random.Next(-1, 2)); break;
+                case 0: entity.GetComponent<Movement>().Move(CMath.random.Next(-1, 2), CMath.random.Next(-1, 2)); break;
+                case 1:
+                    {
+                        if (DijkstraMaps.maps.ContainsKey(target.GetComponent<Description>().name + target.tempID))
+                        {
+                            Coordinate coordinate = DijkstraMaps.PathFromMap(entity.GetComponent<Coordinate>(), target.GetComponent<Description>().name + target.tempID);
+                            entity.GetComponent<Movement>().Move(coordinate.x, coordinate.y);
+                        }
+                        else
+                        {
+                            target.AddComponent(new DijkstraProperty(5));
+                            DijkstraMaps.CreateMap(entity.GetComponent<Coordinate>(), target.GetComponent<Description>().name + target.tempID);
+                            Coordinate coordinate = DijkstraMaps.PathFromMap(entity.GetComponent<Coordinate>(), target.GetComponent<Description>().name + target.tempID);
+                            entity.GetComponent<Movement>().Move(coordinate.x, coordinate.y);
+                        }
+                        break;
+                    }
+                case 2: entity.GetComponent<TurnFunction>().EndTurn(); break;
+            }
         }
         public override void OnHit(Entity attacker)
         {
-            entity.GetComponent<Memory>().memorizedEntity = attacker;
+            target = attacker;
+            action = 1;
         }
+        public ChaseAI(int _maxMemory) { maxMemory = _maxMemory; }
         public ChaseAI() { }
     }
 }

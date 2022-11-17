@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public abstract class AI : Component
+    public class Faction: Component
     {
-        public abstract void Action();
-        public abstract void OnHit(Entity attacker);
-        public AI() { }
+        public string faction { get; set; }
+        public Faction(string _faction) { faction = _faction; }
+        public Faction() { }
     }
 }

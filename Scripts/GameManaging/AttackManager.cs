@@ -25,8 +25,8 @@ namespace TheRuinsOfIpsus
                     for (int d = 0; d < attackFunction.die1; d++) { dmg += CMath.random.Next(1, attackFunction.die2); }
                     dmg += attackFunction.dmgModifier;
 
-                    if (weapon.GetComponent<PropertyFunction>() != null) { weapon.GetComponent<PropertyFunction>().TriggerOnHitting(target, dmg, attackFunction.dmgType); }
-                    if (attacker.GetComponent<PropertyFunction>() != null) { attacker.GetComponent<PropertyFunction>().TriggerOnHitting(target, dmg, null); }
+                    SpecialComponentManager.TriggerOnHit(weapon, attacker, target, dmg, attackFunction.dmgType, true);
+                    SpecialComponentManager.TriggerOnHit(attacker, attacker, target, dmg, null, true);
                     target.GetComponent<OnHit>().Hit(dmg, attackFunction.dmgType, weapon.GetComponent<Description>().name, attacker);
                 }
                 else { Log.AddToStoredLog(attacker.GetComponent<Description>().name + " missed with the " + weapon.GetComponent<Description>().name + "."); }

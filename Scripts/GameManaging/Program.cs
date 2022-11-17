@@ -59,6 +59,7 @@ namespace TheRuinsOfIpsus
             StatManager stats = new StatManager(rogueConsole);
             SaveDataManager saveDataManager = new SaveDataManager();
             JsonDataManager jsonDataManager = new JsonDataManager();
+            PronounReferences pronounReferences = new PronounReferences();
 
             rootConsole.Run();
         }
@@ -76,7 +77,6 @@ namespace TheRuinsOfIpsus
             entities.Clear();
             foreach (EquipmentSlot entity in player.GetComponent<BodyPlot>().bodyPlot) { if (entity != null && entity.item != null) { entities.Add(entity.item); } }
             foreach (Entity id in entities) { new Entity(id).GetComponent<Equippable>().Equip(player); } 
-            entities.Clear();
             Coordinate coordinate = player.GetComponent<Coordinate>();
             Map.map[coordinate.x, coordinate.y].actor = player;
             ShadowcastFOV.Compute(coordinate.x, coordinate.y, player.GetComponent<Stats>().sight);
@@ -103,6 +103,8 @@ namespace TheRuinsOfIpsus
             TurnManager.AddActor(player.GetComponent<TurnFunction>());
             StatManager.UpdateStats(player);
             InventoryManager inventory = new InventoryManager(rogueConsole, player);
+            Look look = new Look(player);
+            TargetReticle reticle = new TargetReticle(player);
 
             foreach (Tile tile in Map.map)
             {
@@ -110,30 +112,49 @@ namespace TheRuinsOfIpsus
                 {
                     Coordinate coordinate = tile.GetComponent<Coordinate>();
                     Entity test = EntitySpawner.CreateEntity(coordinate.x, coordinate.y, 3, 1);
-                    Map.map[coordinate.x, coordinate.y].item = test;
                 }
                 else if (tile.moveType == 1 && CMath.seed.Next(450) == 6)
                 {
                     Coordinate coordinate = tile.GetComponent<Coordinate>();
-                    Entity test = EntitySpawner.CreateEntity(coordinate.x, coordinate.y, 1, 0);
-                    test.GetComponent<Memory>().memorizedEntity = player;
-                    Map.map[coordinate.x, coordinate.y].actor = test;
+                    Entity test = EntitySpawner.CreateEntity(coordinate.x, coordinate.y, 3, 0);
                 }
                 else if (tile.moveType == 1 && CMath.seed.Next(450) == 7)
                 {
                     Coordinate coordinate = tile.GetComponent<Coordinate>();
                     EntitySpawner.CreateEntity(coordinate.x, coordinate.y, 1, 1);
                 }
-                else if (tile.moveType == 1 && CMath.seed.Next(450) == 8)
+                else if (tile.moveType == 1 && CMath.seed.Next(450) == -10)
                 {
                     Coordinate coordinate = tile.GetComponent<Coordinate>();
-                    Entity test = EntitySpawner.CreateEntity(coordinate.x, coordinate.y, 2, 0);
+                    Entity frog = EntitySpawner.CreateEntity(coordinate.x, coordinate.y, 2, 0);
+                }
+                else if (tile.moveType == 1 && CMath.seed.Next(450) > 448)
+                {
+                    Coordinate coordinate = tile.GetComponent<Coordinate>();
+                    Entity chaosFrog = new Entity();
+                    chaosFrog.AddComponent(new Coordinate(coordinate.x, coordinate.y));
+                    chaosFrog.AddComponent(new Draw("Red", "Black", 'f'));
+                    chaosFrog.AddComponent(new Description("Red*Chaos Red*Frog", "It is very Red*angry."));
+                    chaosFrog.AddComponent(PronounReferences.pronounSets["Nueter"]);
+                    chaosFrog.AddComponent(new Stats(7, 10, .5f, 500, 10, 10, false));
+                    chaosFrog.AddComponent(new TurnFunction(chaosFrog.GetComponent<Stats>().maxAction, false));
+                    chaosFrog.AddComponent(new Movement(false));
+                    chaosFrog.AddComponent(new Inventory(false));
+                    chaosFrog.AddComponent(new BodyPlot("Basic_Creature"));
+                    chaosFrog.AddComponent(new Visibility(false, false, false));
+                    chaosFrog.AddComponent(new OnHit());
+                    chaosFrog.AddComponent(new ChaseAI(10));
+                    chaosFrog.GetComponent<ChaseAI>().hatedEntities.Add("You");
+                    chaosFrog.GetComponent<ChaseAI>().hatedEntities.Add("Water");
+                    chaosFrog.GetComponent<ChaseAI>().hatedEntities.Add("Web");
+                    chaosFrog.GetComponent<ChaseAI>().favoredEntities.Add("Stone Floor");
+                    chaosFrog.GetComponent<ChaseAI>().hatedEntities.Add("Dark_Purple*Blacklog Dark_Purple*Spider");
+
+                    TurnManager.AddActor(chaosFrog.GetComponent<TurnFunction>());
+                    Map.map[coordinate.x, coordinate.y].actor = chaosFrog;
                 }
             }
 
-            Look look = new Look(player);
-
-            TargetReticle reticle = new TargetReticle(player);
             ShadowcastFOV.Compute(playerCoordinate.x, playerCoordinate.y, player.GetComponent<Stats>().sight);
             Log.AddToStoredLog("Welcome to the Ruins of Ipsus", true);
 
@@ -148,42 +169,17 @@ namespace TheRuinsOfIpsus
                 if (tile != null)
                 {
                     Coordinate coordinate = tile.GetComponent<Coordinate>();
-
                     Map.map[coordinate.x, coordinate.y] = tile;
-
-                    if (tile.actor != null && tile.actor != player)
-                    { 
-                        tile.actor = new Entity(tile.actor);
-                        if (tile.actor.GetComponent<Inventory>() != null)
-                        {
-                           // foreach (Entity entity in tile.actor.GetComponent<Inventory>().inventory)
-                            //{
-                              //  if (entity != null)
-                                //{
-                                  //  if (entity != null) { entity.Initilize(entity); }
-                                //}
-                           // }
-                        }
-                    }
-                    if (tile.item != null) 
-                    {
-                        tile.item = new Entity(tile.item);
-                        if (tile.item.GetComponent<Inventory>() != null)
-                        {
-                            foreach (Entity entity in tile.item.GetComponent<Inventory>().inventory)
-                            {
-                                if (entity != null)
-                                {
-                                    //if (entity != null) { entity.Initilize(entity); }
-                                }
-                            }
-                        }
-                    }
+                    if (tile.actor != null && tile.actor != player) { tile.actor = EntitySpawner.ReloadEntity(tile.actor); }
+                    else { tile.actor = null; }
+                    if (tile.item != null) { tile.item = EntitySpawner.ReloadEntity(tile.actor); }
+                    else { tile.item = null; }
+                    if (tile.terrain != null) { tile.terrain = EntitySpawner.ReloadEntity(tile.terrain); }
+                    else { tile.terrain = null; }
                 }
             }
 
             ReloadPlayer(saveData.player.components);
-
             Log.AddToStoredLog("Welcome to the Ruins of Ipsus", true);
 
             gameActive = true;
