@@ -1,0 +1,4 @@
+﻿List of factions in game:
+
+1. Human,
+2. Sea_Beast,

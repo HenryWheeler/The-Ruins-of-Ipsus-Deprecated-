@@ -22,7 +22,7 @@ namespace TheRuinsOfIpsus
             bodyPlot = new EquipmentSlot[BodyPlots.bodyPlots[_plotString].Count()]; 
             for (int i = 0; i < BodyPlots.bodyPlots[_plotString].Count(); i++)
             {
-                bodyPlot[i] = BodyPlots.bodyPlots[_plotString][i];
+                bodyPlot[i] = new EquipmentSlot(BodyPlots.bodyPlots[_plotString][i].name);
             }
         }
         public BodyPlot() { }

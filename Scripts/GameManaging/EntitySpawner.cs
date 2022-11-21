@@ -11,6 +11,7 @@ namespace TheRuinsOfIpsus
         public static Entity CreateEntity(int x, int y, int uID, int type)
         {
             Entity entity = JsonDataManager.ReturnEntity(uID, type);
+            EntityManager.AddEntity(entity);
             entity.GetComponent<Coordinate>().x = x;
             entity.GetComponent<Coordinate>().y = y;
             switch (type)
@@ -42,9 +43,44 @@ namespace TheRuinsOfIpsus
                     }
                     if (CMath.ReturnAI(entityToUse) != null) { CMath.ReturnAI(entityRef).target = null; }
                 }
+                EntityManager.AddEntity(entityToUse);
                 return entityToUse;
             }
             return null;
+        }
+        public static void CurrrentTestThing(int x, int y)
+        {
+            Entity cucumber = new Entity();
+            cucumber.AddComponent(new Coordinate(x, y));
+            cucumber.AddComponent(new Draw("Dark_Blue", "Black", 'e'));
+            cucumber.AddComponent(new Description("Dark_Blue*Deepwater Dark_Blue*Eel", "A product of the deep, one with a nasty temper and empty stomach."));
+            cucumber.AddComponent(PronounReferences.pronounSets["Nueter"]);
+            cucumber.AddComponent(new Stats(15, 8, .5f, 5, 5, 5, false));
+            cucumber.AddComponent(new TurnFunction(cucumber.GetComponent<Stats>().maxAction, false));
+            cucumber.AddComponent(new Movement(false, true));
+            cucumber.AddComponent(new Inventory(false));
+            cucumber.AddComponent(new BodyPlot("Basic_Worm"));
+            cucumber.AddComponent(new Visibility(false, false, false));
+            cucumber.AddComponent(new OnHit());
+            cucumber.AddComponent(new ChaseAI(20));
+            cucumber.AddComponent(new Faction("Sea_Beast"));
+            cucumber.GetComponent<ChaseAI>().hatedEntities.Add("Human");
+
+            Entity teeth = new Entity();
+            teeth.AddComponent(new Coordinate(0, 0));
+            teeth.AddComponent(new Draw("White", "Black", '/'));
+            teeth.AddComponent(new Description("Sharp Teeth", "A pair of sharp teeth."));
+            teeth.AddComponent(new Visibility(false, false, false));
+            teeth.AddComponent(new Equippable("Face", false, false));
+            teeth.AddComponent(new AttackFunction(1, 3, 0, 2, "Piercing", "Melee"));
+
+            InventoryManager.AddToInventory(cucumber, teeth);
+            InventoryManager.EquipItem(cucumber, teeth);
+
+            TurnManager.AddActor(cucumber.GetComponent<TurnFunction>());
+            Map.map[x, y].actor = cucumber;
+
+            EntityManager.AddEntity(cucumber);
         }
     }
 }

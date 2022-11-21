@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using RLNET;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace TheRuinsOfIpsus
 {
@@ -28,17 +30,16 @@ namespace TheRuinsOfIpsus
                 AddComponent(PronounReferences.pronounSets["Player"]);
                 AddComponent(new Stats(7, 10, 1f, 500, 10, 10, true));
                 AddComponent(new TurnFunction(GetComponent<Stats>().maxAction, true));
-                AddComponent(new Movement(true));
+                AddComponent(new Movement(true, true, false, true));
                 AddComponent(new Inventory(true));
                 AddComponent(new BodyPlot("Basic_Humanoid"));
                 AddComponent(new Visibility(false, false, false));
                 AddComponent(new OnHit());
-                AddComponent(new DijkstraProperty(1));
+                AddComponent(new Faction("Human"));
+                AddComponent(new DijkstraProperty());
 
                 Entity startingWeapon = JsonDataManager.ReturnEntity(2, 1);
                 InventoryManager.AddToInventory(this, startingWeapon);
-
-                GetComponent<TurnFunction>().StartTurn();
                 Action.PlayerAction(this);
             }
         }

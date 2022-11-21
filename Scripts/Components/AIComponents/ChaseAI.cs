@@ -11,33 +11,21 @@ namespace TheRuinsOfIpsus
     {
         public override void ExecuteAction()
         {
-            switch (action)
+            switch (mood)
             {
-                case -1: entity.GetComponent<Movement>().Move(CMath.random.Next(-1, 2), CMath.random.Next(-1, 2)); break;
-                case 0: entity.GetComponent<Movement>().Move(CMath.random.Next(-1, 2), CMath.random.Next(-1, 2)); break;
-                case 1:
+                case "Uncertain": entity.GetComponent<Movement>().Move(CMath.random.Next(-1, 2), CMath.random.Next(-1, 2)); break;
+                case "Angry":
                     {
-                        if (DijkstraMaps.maps.ContainsKey(target.GetComponent<Description>().name + target.tempID))
-                        {
-                            Coordinate coordinate = DijkstraMaps.PathFromMap(entity.GetComponent<Coordinate>(), target.GetComponent<Description>().name + target.tempID);
-                            entity.GetComponent<Movement>().Move(coordinate.x, coordinate.y);
-                        }
-                        else
-                        {
-                            target.AddComponent(new DijkstraProperty(5));
-                            DijkstraMaps.CreateMap(entity.GetComponent<Coordinate>(), target.GetComponent<Description>().name + target.tempID);
-                            Coordinate coordinate = DijkstraMaps.PathFromMap(entity.GetComponent<Coordinate>(), target.GetComponent<Description>().name + target.tempID);
-                            entity.GetComponent<Movement>().Move(coordinate.x, coordinate.y);
-                        }
+                        Coordinate coordinate = entity.GetComponent<Coordinate>();
+                        Coordinate targetCoordinate = DijkstraMaps.PathFromMap(entity, target);
+                        if (Map.map[coordinate.x + targetCoordinate.x, coordinate.y + targetCoordinate.y].actor != null &&
+                            Map.map[coordinate.x + targetCoordinate.x, coordinate.y + targetCoordinate.y].actor != entity)
+                        { AttackManager.MeleeAllStrike(entity, Map.map[coordinate.x + targetCoordinate.x, coordinate.y + targetCoordinate.y].actor); }
+                        else { entity.GetComponent<Movement>().Move(targetCoordinate.x, targetCoordinate.y); }
                         break;
                     }
-                case 2: entity.GetComponent<TurnFunction>().EndTurn(); break;
+                case "Fearful": entity.GetComponent<TurnFunction>().EndTurn(); break;
             }
-        }
-        public override void OnHit(Entity attacker)
-        {
-            target = attacker;
-            action = 1;
         }
         public ChaseAI(int _maxMemory) { maxMemory = _maxMemory; }
         public ChaseAI() { }

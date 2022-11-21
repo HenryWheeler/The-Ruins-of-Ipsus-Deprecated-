@@ -11,9 +11,10 @@ namespace TheRuinsOfIpsus
         public static void MeleeAllStrike(Entity attacker, Entity target)
         {
             foreach (EquipmentSlot slot in attacker.GetComponent<BodyPlot>().bodyPlot) { if (slot.item != null) { 
-                    if (slot.item.GetComponent<AttackFunction>() != null && slot.item.GetComponent<AttackFunction>().weaponType == "Melee") { Attack(attacker, target, slot.item); } } }
+                    if (slot.item.GetComponent<AttackFunction>() != null && slot.item.GetComponent<AttackFunction>().weaponType == "Melee") { Attack(attacker, target, slot.item, false); } } }
+            attacker.GetComponent<TurnFunction>().EndTurn();
         }
-        public static void Attack(Entity attacker, Entity target, Entity weapon)
+        public static void Attack(Entity attacker, Entity target, Entity weapon, bool endTurn = true)
         {
             if (attacker != null && target != null && weapon != null)
             {
@@ -30,7 +31,7 @@ namespace TheRuinsOfIpsus
                     target.GetComponent<OnHit>().Hit(dmg, attackFunction.dmgType, weapon.GetComponent<Description>().name, attacker);
                 }
                 else { Log.AddToStoredLog(attacker.GetComponent<Description>().name + " missed with the " + weapon.GetComponent<Description>().name + "."); }
-                attacker.GetComponent<TurnFunction>().EndTurn();
+                if (endTurn) { attacker.GetComponent<TurnFunction>().EndTurn(); }
             }
         }
     }

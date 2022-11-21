@@ -17,6 +17,7 @@ namespace TheRuinsOfIpsus
         public int strength { get; set; }
         public int acuity { get; set; }
         public bool display { get; set; }
+        public List<string> status = new List<string>();
         public void ModifyAllStats(Entity entityRef, bool add)
         {
             Stats stats = entityRef.GetComponent<Stats>();

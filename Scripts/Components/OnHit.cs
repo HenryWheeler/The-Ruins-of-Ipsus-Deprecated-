@@ -31,7 +31,9 @@ namespace TheRuinsOfIpsus
             Coordinate coordinate = entity.GetComponent<Coordinate>();
             Map.map[coordinate.x, coordinate.y].actor = null; 
             Log.AddToStoredLog(entity.GetComponent<Description>().name + " has died."); 
-            TurnManager.RemoveActor(entity.GetComponent<TurnFunction>()); 
+            TurnManager.RemoveActor(entity.GetComponent<TurnFunction>());
+            EntityManager.RemoveEntity(entity);
+            EntityManager.UpdateMap(entity);
         }
         public OnHit() { }
     }

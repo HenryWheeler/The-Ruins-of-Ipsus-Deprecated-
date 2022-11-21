@@ -18,12 +18,14 @@ namespace TheRuinsOfIpsus
             {
                 components.Add(component);
                 component.entity = this;
+                if (component.componentName != null && GetComponent<Stats>() != null) { GetComponent<Stats>().status.Add(component.componentName); }
             }
         }
         public void RemoveComponent(Component component)
         {
             components.Remove(component);
             component.entity = null;
+            if (component.componentName != null && GetComponent<Stats>() != null) { GetComponent<Stats>().status.Remove(component.componentName); }
         }
         public T GetComponent<T>() where T : Component
         {
@@ -37,7 +39,8 @@ namespace TheRuinsOfIpsus
             return null;
         }
         public void ClearCollections() { if (collectionsToRemove.Count != 0) 
-            { foreach (Component component in collectionsToRemove) { RemoveComponent(component); } collectionsToRemove.Clear(); } }
+            { foreach (Component component in collectionsToRemove) { RemoveComponent(component); if (component.componentName != "") 
+                    { GetComponent<Stats>().status.Remove(component.componentName); } } collectionsToRemove.Clear(); } }
         public Entity(Entity entity)
         {
             foreach (Component component in entity.components)

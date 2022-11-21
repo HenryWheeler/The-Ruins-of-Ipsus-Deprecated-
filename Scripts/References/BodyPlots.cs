@@ -20,6 +20,7 @@ namespace TheRuinsOfIpsus
             usableSlots.Add("Off Hand", new EquipmentSlot("Off Hand"));
             usableSlots.Add("Main Hand", new EquipmentSlot("Main Hand"));
             usableSlots.Add("Missile", new EquipmentSlot("Missile"));
+            usableSlots.Add("Tail", new EquipmentSlot("Tail"));
 
             InitializeBodyPlots();
         }
@@ -57,6 +58,13 @@ namespace TheRuinsOfIpsus
             basicSpiderPlot[9] = usableSlots["Feet"];
             basicSpiderPlot[10] = usableSlots["Feet"];
             bodyPlots.Add("Basic_Spider", basicSpiderPlot);
+
+            EquipmentSlot[] basicWormPlot = new EquipmentSlot[4];
+            basicSpiderPlot[0] = usableSlots["Head"];
+            basicSpiderPlot[1] = usableSlots["Face"];
+            basicSpiderPlot[2] = usableSlots["Torso"];
+            basicSpiderPlot[3] = usableSlots["Tail"];
+            bodyPlots.Add("Basic_Worm", basicSpiderPlot);
         }
     }
     [Serializable]

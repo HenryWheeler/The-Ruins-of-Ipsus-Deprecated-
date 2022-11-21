@@ -4,4 +4,8 @@ Type followed by UID
 
 Entity Listing:
 
-0-
+0-2: Frog
+0-3: Blacklog Spider
+1-1: Test Grass Walk
+1-2: Broken Blade	
+1-3: Test Thing

@@ -9,9 +9,9 @@ namespace TheRuinsOfIpsus
         public static List<Coordinate> visibleTiles = new List<Coordinate>();
         public static void Compute(int x, int y, int rangeLimit, AI ai = null, bool aiUse = false)
         {
-            ClearList();
+            //ClearList();
             if (!aiUse) { SetVisible(x, y, true); }
-            if (Map.outside && !aiUse) { for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, 50, 1, new Slope(1, 1), new Slope(0, 1), aiUse, ai); }
+            if (Map.outside && !aiUse) { for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, 75, 1, new Slope(1, 1), new Slope(0, 1), aiUse, ai); }
             else for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, rangeLimit, 1, new Slope(1, 1), new Slope(0, 1), aiUse, ai);
         }
         struct Slope 
@@ -42,11 +42,22 @@ namespace TheRuinsOfIpsus
                     if(inRange && (y != topY || top.Y*x >= top.X*y) && (y != bottomY || bottom.Y*x <= bottom.X*y))
                     {
                         if (aiUse) 
-                        { 
-                            if (Map.map[tx, ty].actor != null && Map.map[tx, ty].actor != ai.entity)
+                        {
+                            if (CMath.CheckBounds(tx, ty) && Map.map[tx, ty].actor != null && Map.map[tx, ty].actor != ai.entity)
                             {
                                 if (ai.ReturnHatred(Map.map[tx, ty].actor) > Math.Abs(ai.ReturnConviction(Map.map[tx, ty].actor, 1)))
-                                { ai.target = Map.map[tx, ty].actor; return; }
+                                { ai.referenceTarget =  Map.map[tx, ty].actor; ai.mood = "Angry"; return; }
+                                else
+                                {
+                                    if (Map.map[tx, ty].actor.GetComponent<Stats>() != null)
+                                    {
+                                        foreach (string status in Map.map[tx, ty].actor.GetComponent<Stats>().status)
+                                        {
+                                            if (ai.hatedEntities.Contains(status)) 
+                                            { ai.referenceTarget = Map.map[tx, ty].actor; ai.mood = "Angry"; return; }
+                                        }
+                                    }
+                                }
                             }
                         }
                         else if (!aiUse) { SetVisible(tx, ty, true); }

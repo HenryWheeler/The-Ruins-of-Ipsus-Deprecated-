@@ -11,6 +11,7 @@ namespace TheRuinsOfIpsus
         private static List<TurnFunction> entities = new List<TurnFunction>();
         private static int turn = 0;
         private static int entityTurn = 0;
+
         public static void ProgressTurnOrder()
         {
             turn++;

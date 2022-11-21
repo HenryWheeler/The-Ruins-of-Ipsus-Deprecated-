@@ -35,6 +35,6 @@ namespace TheRuinsOfIpsus
                 }
             }
         }
-        public Restrained() { special = true; componentName = "White*Restrained"; }
+        public Restrained() { special = true; componentName = "Restrained"; }
     }
 }

@@ -18,6 +18,11 @@ namespace TheRuinsOfIpsus
                 case "Light_Blue": return RLColor.LightBlue;
                 case "Dark_Blue": return RLColor.Blend(RLColor.Black, RLColor.Blue, 50);
                 case "Yellow": return RLColor.Yellow;
+                case "Yellow_Gray": return RLColor.Blend(RLColor.Yellow, RLColor.Gray, 50);
+                case "Light_Yellow": return RLColor.Blend(RLColor.Yellow, RLColor.White, 50);
+                case "Light_Yellow_Gray": return RLColor.Blend(RLColor.Blend(RLColor.Yellow, RLColor.White, 50), RLColor.Gray, 50);
+                case "Dark_Yellow_Gray": return RLColor.Blend(RLColor.Blend(RLColor.Yellow, RLColor.Black, 50), RLColor.Gray, 50);
+                case "Dark_Yellow": return RLColor.Blend(RLColor.Yellow, RLColor.Black, 50);
                 case "Green": return RLColor.Green;
                 case "Light_Green": return RLColor.LightGreen;
                 case "Dark_Green": return RLColor.Blend(RLColor.Black, RLColor.Green, 50);
@@ -26,6 +31,7 @@ namespace TheRuinsOfIpsus
                 case "Dark_Gray": return RLColor.Blend(RLColor.Black, RLColor.Gray, 50);
                 case "Gray_Blue": return RLColor.Blend(RLColor.Blue, RLColor.Gray, 50);
                 case "Light_Gray_Blue": return RLColor.Blend(RLColor.LightBlue, RLColor.Gray, 50);
+                case "Purple": return RLColor.Magenta;
                 case "Purple_Gray": return RLColor.Blend(RLColor.Magenta, RLColor.Gray, 50);
                 case "Light_Purple_Gray": return RLColor.Blend(RLColor.LightMagenta, RLColor.Gray, 50);
                 case "Dark_Purple": return RLColor.Blend(RLColor.Magenta, RLColor.Gray, 50);

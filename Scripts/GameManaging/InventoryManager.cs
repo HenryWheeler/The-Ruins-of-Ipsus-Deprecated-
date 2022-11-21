@@ -28,6 +28,7 @@ namespace TheRuinsOfIpsus
                 if (display) Log.AddToStoredLog("You picked up the " + tile.item.GetComponent<Description>().name + ".");
                 AddToInventory(entity, tile.item); tile.item = null;
                 entity.GetComponent<TurnFunction>().EndTurn();
+                EntityManager.UpdateMap(tile.item);
             }
             else { if (display) Log.AddToStoredLog("There is nothing to pick up.", true); }
         }
@@ -46,6 +47,7 @@ namespace TheRuinsOfIpsus
                 if (item.GetComponent<Equippable>() != null && item.GetComponent<Equippable>().equipped) { UnequipItem(entity, item, display); }
                 if (display) { CloseInventory(); Log.AddToStoredLog("You dropped the " + item.GetComponent<Description>().name + "."); }
                 entity.GetComponent<TurnFunction>().EndTurn();
+                EntityManager.UpdateMap(item);
             }
             else { if (display) Log.AddToStoredLog("There is no room to drop this item.", true); }
         }

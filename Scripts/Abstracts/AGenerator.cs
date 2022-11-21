@@ -43,8 +43,7 @@ namespace TheRuinsOfIpsus
 
                 foreach (Tile tile in Map.map) { if (tile != null && tile.moveType != 0) { firstCoordinate = tile.GetComponent<Coordinate>(); break; } }
 
-
-                DijkstraMaps.CreateMap(new Coordinate(firstCoordinate.x, firstCoordinate.y), "CurrentRoom");
+                DijkstraMaps.CreateMap(Map.map[firstCoordinate.x, firstCoordinate.y], "CurrentRoom");
                 foreach (Node node in DijkstraMaps.maps["CurrentRoom"]) { if (node != null && node.v != 1000) { cavernTiles.Add(Map.map[node.x, node.y]); } }
                 for (int v = 0; v < loopCount; v++)
                 {

@@ -10,11 +10,12 @@ namespace TheRuinsOfIpsus
     public class Movement: Component
     {
         public bool display { get; set; }
+        public List<int> moveTypes = new List<int>();
         public void Move(int _x, int _y)
         {
             Coordinate coordinate = entity.GetComponent<Coordinate>();
 
-            if (CMath.CheckBounds(coordinate.x + _x, coordinate.y + _y) && Map.map[coordinate.x + _x, coordinate.y + _y].moveType != 0)
+            if (CMath.CheckBounds(coordinate.x + _x, coordinate.y + _y) && moveTypes.Contains(Map.map[coordinate.x + _x, coordinate.y + _y].moveType))
             {
                 if (Map.map[coordinate.x + _x, coordinate.y + _y].actor == null)
                 {
@@ -31,7 +32,13 @@ namespace TheRuinsOfIpsus
             else if (display) { Log.AddToStoredLog("You cannot move there.", true); }
             else { entity.GetComponent<TurnFunction>().EndTurn(); }
         }
-        public Movement(bool _display = false) { display = _display; }
+        public Movement(bool canWalk = false, bool canSwim = false, bool canPhase = false, bool _display = false) 
+        {
+            if (canWalk) { moveTypes.Add(1); }
+            if (canSwim) { moveTypes.Add(2); }
+            if (canPhase) { moveTypes.Add(0); }
+            display = _display; 
+        }
         public Movement() { }
     }
 }

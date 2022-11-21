@@ -9,37 +9,33 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public abstract class AI : Component
     {
-        public int action { get; set; }
+        public string mood { get; set; }
         public int memory { get; set; }
         public int maxMemory { get; set; }
-        public Entity target { get; set; }
+        public string target { get; set; }
+        public Entity referenceTarget { get; set; }
         public List<string> favoredEntities = new List<string>();
         public List<string> hatedEntities = new List<string>();
-        public abstract void OnHit(Entity attacker);
+        public void OnHit(Entity attacker)
+        {
+            if (attacker.GetComponent<Faction>() != null && !hatedEntities.Contains(attacker.GetComponent<Faction>().faction)) 
+            { hatedEntities.Add(attacker.GetComponent<Faction>().faction); target = attacker.GetComponent<Faction>().faction; }
+            referenceTarget = attacker;
+            mood = "Angry"; memory = maxMemory;
+        }
         public void EvaluateEnvironment()
         {
-            if (target == null)
+            Coordinate coordinate = entity.GetComponent<Coordinate>();
+            ShadowcastFOV.Compute(coordinate.x, coordinate.y, entity.GetComponent<Stats>().sight, this, true);
+            if (referenceTarget != null && mood == "Angry")
             {
-                Coordinate coordinate = entity.GetComponent<Coordinate>();
-                ShadowcastFOV.Compute(coordinate.x, coordinate.y, entity.GetComponent<Stats>().sight, this, true);
-                if (target != null)
-                {
-                    memory = maxMemory;
-                    if (ReturnHatred(entity) > Math.Abs(ReturnConviction(entity, -1))) { action = 1; }
-                    else { action = 1; }
-                }
-                else { action = CMath.random.Next(-1, 1); }
-                ExecuteAction();
+                if (target == null) { target = referenceTarget.GetComponent<Faction>().faction; memory = maxMemory; }
+                else if (target == referenceTarget.GetComponent<Faction>().faction) { memory = maxMemory; }
+                referenceTarget = null;
             }
-            else if (CMath.Sight(entity, target)) { memory = maxMemory; ExecuteAction(); }
-            else if (memory > 0) { memory--; ExecuteAction(); }
-            else { target = null; EvaluateEnvironment(); }
-            if (target != null)
-            {
-                Coordinate coordinate = entity.GetComponent<Coordinate>();
-                Coordinate targetCoordinate = target.GetComponent<Coordinate>();
-                if (targetCoordinate == coordinate) { target = null; }
-            }
+            else if (memory > 0) { memory--; }
+            else { target = null; mood = "Uncertain"; }
+            ExecuteAction();
         }
         public abstract void ExecuteAction();
         public int ReturnHatred(Entity entity)
