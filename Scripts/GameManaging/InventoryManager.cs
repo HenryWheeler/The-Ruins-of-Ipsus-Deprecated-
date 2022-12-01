@@ -25,31 +25,23 @@ namespace TheRuinsOfIpsus
             Tile tile = Map.map[coordinate.x, coordinate.y];
             if (tile.item != null)
             {
+                Entity itemRef = tile.item;
                 if (display) Log.AddToStoredLog("You picked up the " + tile.item.GetComponent<Description>().name + ".");
                 AddToInventory(entity, tile.item); tile.item = null;
                 entity.GetComponent<TurnFunction>().EndTurn();
-                EntityManager.UpdateMap(tile.item);
+                EntityManager.UpdateMap(itemRef);
             }
             else { if (display) Log.AddToStoredLog("There is nothing to pick up.", true); }
         }
         public static void DropItem(Entity entity, Entity item, bool display = false)
         {
             Coordinate actorCoordinate = entity.GetComponent<Coordinate>();
-            Coordinate itemCoordinate = item.GetComponent<Coordinate>();
-            Tile tile = Map.map[actorCoordinate.x, actorCoordinate.y];
-            if (tile.item == null)
-            {
-                RemoveFromInventory(entity, item);
-                tile.item = item;
-                Coordinate coordinate = tile.GetComponent<Coordinate>();
-                itemCoordinate.x = coordinate.x;
-                itemCoordinate.y = coordinate.y;
-                if (item.GetComponent<Equippable>() != null && item.GetComponent<Equippable>().equipped) { UnequipItem(entity, item, display); }
-                if (display) { CloseInventory(); Log.AddToStoredLog("You dropped the " + item.GetComponent<Description>().name + "."); }
-                entity.GetComponent<TurnFunction>().EndTurn();
-                EntityManager.UpdateMap(item);
-            }
-            else { if (display) Log.AddToStoredLog("There is no room to drop this item.", true); }
+            RemoveFromInventory(entity, item);
+            Coordinate coordinate = Map.map[actorCoordinate.x, actorCoordinate.y].GetComponent<Coordinate>();
+            PlaceItem(coordinate, item);
+            if (item.GetComponent<Equippable>() != null && item.GetComponent<Equippable>().equipped) { UnequipItem(entity, item, display); }
+            if (display) { CloseInventory(); Log.AddToStoredLog("You dropped the " + item.GetComponent<Description>().name + "."); }
+            entity.GetComponent<TurnFunction>().EndTurn();
         }
         public static void AddToInventory(Entity actor, Entity item)
         {
@@ -125,6 +117,44 @@ namespace TheRuinsOfIpsus
                 if (display) { Refresh(); Log.AddToStoredLog("You unequip the " + item.GetComponent<Description>().name + ".", true); }
             }
             else { Log.AddToStoredLog("You cannot unequip the " + item.GetComponent<Description>().name + ".", true); }
+        }
+        public static void UseItem(Entity entity, Entity item, bool inInventory, bool display = false)
+        {
+            if (inInventory) { entity.GetComponent<Inventory>().inventory.Remove(item); }
+            else { Coordinate coordinate = item.GetComponent<Coordinate>(); Map.map[coordinate.x, coordinate.y].item = null; }
+            if (display) { CloseInventory(); }
+            item.GetComponent<Usable>().Use(entity);
+            entity.GetComponent<TurnFunction>().EndTurn();
+        }
+        public static void PlaceItem(Coordinate targetCoordinate, Entity item)
+        {
+            Coordinate finalLanding = targetCoordinate;
+            int itemMoveCount = 0;
+            if (Map.map[targetCoordinate.x, targetCoordinate.y].item == null)
+            {
+                item.GetComponent<Coordinate>().x = targetCoordinate.x; item.GetComponent<Coordinate>().y = targetCoordinate.y;
+                Map.map[targetCoordinate.x, targetCoordinate.y].item = item;
+                EntityManager.UpdateMap(item); return;
+            }
+            do
+            {
+                Coordinate start = finalLanding;
+                for (int y = start.y - 1; y <= start.y + 1; y++)
+                {
+                    for (int x = start.x - 1; x <= start.x + 1; x++)
+                    {
+                        if (CMath.CheckBounds(x, y) && Map.map[x, y].moveType != 0 && Map.map[x, y].item == null)
+                        { 
+                            item.GetComponent<Coordinate>().x = x; item.GetComponent<Coordinate>().y = y; 
+                            Map.map[x, y].item = item;
+                            EntityManager.UpdateMap(item); return;
+                        }
+                        else { finalLanding = new Coordinate(x, y); continue; }
+                    }
+                }
+                itemMoveCount++;
+                if (itemMoveCount >= 25) { break; }
+            } while (Map.map[finalLanding.x, finalLanding.y].item != null);
         }
         public static void DisplayInventory()
         {

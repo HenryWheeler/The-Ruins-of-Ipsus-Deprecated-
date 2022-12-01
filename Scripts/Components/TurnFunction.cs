@@ -16,7 +16,7 @@ namespace TheRuinsOfIpsus
         { 
             turnActive = true;
             SpecialComponentManager.TriggerTurn(entity, true);
-            if (CMath.ReturnAI(entity) != null) { Task.WaitAll(Wait()); CMath.ReturnAI(entity).EvaluateEnvironment(); } 
+            if (CMath.ReturnAI(entity) != null) { CMath.ReturnAI(entity).EvaluateEnvironment(); } 
             else if (!display) { EndTurn(); }
             if (display) { Log.DisplayLog(); StatManager.UpdateStats(entity); } 
         }
@@ -30,10 +30,8 @@ namespace TheRuinsOfIpsus
                 ShadowcastFOV.ClearSight();
                 ShadowcastFOV.Compute(coordinate.x, coordinate.y, entity.GetComponent<Stats>().sight);
             }
-            //Task.WaitAll(Wait()); 
             TurnManager.ProgressActorTurn(this);
         }
-        public async Task Wait() { await Task.Delay(new TimeSpan(1000)); }
         public TurnFunction(float _actionLeft, bool _display = false) { turnActive = false; actionLeft = actionLeft; display = _display; }
         public TurnFunction() { }
     }

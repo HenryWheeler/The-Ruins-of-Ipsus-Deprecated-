@@ -41,6 +41,12 @@ namespace TheRuinsOfIpsus
         public void ClearCollections() { if (collectionsToRemove.Count != 0) 
             { foreach (Component component in collectionsToRemove) { RemoveComponent(component); if (component.componentName != "") 
                     { GetComponent<Stats>().status.Remove(component.componentName); } } collectionsToRemove.Clear(); } }
+        public void ClearEntity()
+        {
+            foreach (Component component in components)
+            { if (component != null) { component.entity = null; } }
+            components = null;
+        }
         public Entity(Entity entity)
         {
             foreach (Component component in entity.components)

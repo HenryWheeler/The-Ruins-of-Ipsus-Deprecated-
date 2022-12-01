@@ -14,7 +14,7 @@ namespace TheRuinsOfIpsus
             if (Map.outside && !aiUse) { for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, 75, 1, new Slope(1, 1), new Slope(0, 1), aiUse, ai); }
             else for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, rangeLimit, 1, new Slope(1, 1), new Slope(0, 1), aiUse, ai);
         }
-        struct Slope 
+        public struct Slope 
         {
             public Slope(int y, int x) { Y = y; X = x; }
             public readonly int Y, X;
@@ -45,8 +45,8 @@ namespace TheRuinsOfIpsus
                         {
                             if (CMath.CheckBounds(tx, ty) && Map.map[tx, ty].actor != null && Map.map[tx, ty].actor != ai.entity)
                             {
-                                if (ai.ReturnHatred(Map.map[tx, ty].actor) > Math.Abs(ai.ReturnConviction(Map.map[tx, ty].actor, 1)))
-                                { ai.referenceTarget =  Map.map[tx, ty].actor; ai.mood = "Angry"; return; }
+                                if (ai.ReturnHatred(Map.map[tx, ty].actor) > 0)
+                                { ai.referenceTarget =  Map.map[tx, ty].actor; ai.mood = "Red*Angry"; return; }
                                 else
                                 {
                                     if (Map.map[tx, ty].actor.GetComponent<Stats>() != null)
@@ -54,7 +54,7 @@ namespace TheRuinsOfIpsus
                                         foreach (string status in Map.map[tx, ty].actor.GetComponent<Stats>().status)
                                         {
                                             if (ai.hatedEntities.Contains(status)) 
-                                            { ai.referenceTarget = Map.map[tx, ty].actor; ai.mood = "Angry"; return; }
+                                            { ai.referenceTarget = Map.map[tx, ty].actor; ai.mood = "Red*Angry"; return; }
                                         }
                                     }
                                 }

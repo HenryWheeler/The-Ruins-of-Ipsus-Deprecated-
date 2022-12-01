@@ -46,16 +46,7 @@ namespace TheRuinsOfIpsus
                         }
                         break; 
                     }
-                case "Angry":
-                    {
-                        Coordinate coordinate = entity.GetComponent<Coordinate>();
-                        Coordinate targetCoordinate = DijkstraMaps.PathFromMap(entity, target);
-                        if (Map.map[coordinate.x + targetCoordinate.x, coordinate.y + targetCoordinate.y].actor != null && 
-                            Map.map[coordinate.x + targetCoordinate.x, coordinate.y + targetCoordinate.y].actor != entity)
-                        { AttackManager.MeleeAllStrike(entity, Map.map[coordinate.x, coordinate.y].actor); }
-                        else { entity.GetComponent<Movement>().Move(targetCoordinate.x, targetCoordinate.y); }
-                        break;
-                    }
+                case "Red*Angry": { HuntAndAttack(); break; }
                 case "Fearful": entity.GetComponent<TurnFunction>().EndTurn(); break;
             }
         }

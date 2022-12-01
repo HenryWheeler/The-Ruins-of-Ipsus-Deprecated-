@@ -51,9 +51,9 @@ namespace TheRuinsOfIpsus
             if (entity.GetComponent<Faction>() != null)
             {
                 string faction = entity.GetComponent<Faction>().faction;
-                if (entities.ContainsKey(faction)) { DijkstraMaps.CreateMap(entities[faction], faction); }
+                if (entities.ContainsKey(faction)) { DijkstraMaps.CreateMap(entities[faction], faction, 50); }
             }
-            else { if (entities.ContainsKey("Items")) { DijkstraMaps.CreateMap(entities["Items"], entity.GetComponent<Description>().name); } }
+            else { if (entities.ContainsKey("Items")) { DijkstraMaps.CreateMap(entities["Items"], entity.GetComponent<Description>().name, 50); } }
         }
     }
 }

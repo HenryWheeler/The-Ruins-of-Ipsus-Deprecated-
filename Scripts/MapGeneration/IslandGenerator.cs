@@ -37,7 +37,6 @@ namespace TheRuinsOfIpsus
             }
             for (int z = 0; z < smooth; z++) { SmoothMap(); }
             SetSandyShore();
-            CreateSurroundingWalls();
         }
         public void SetSandyShore()
         {

@@ -20,14 +20,10 @@ namespace TheRuinsOfIpsus
             if (returnValue == 0) { return 1; }
             else return (int)Math.Sqrt(Math.Pow(two.x - one.x, 2) + Math.Pow(two.y - one.y, 2));
         }
-        public static bool Sight(Entity entity, Entity target)
+        public static bool PathBlocked(Coordinate coordinate, Coordinate coordinate2, int range)
         {
-            int sight = entity.GetComponent<Stats>().sight;
-            Coordinate coordinate = entity.GetComponent<Coordinate>();
-            Coordinate coordinate2 = target.GetComponent<Coordinate>();
             int oX = coordinate.x; int oY = coordinate.y;
             int eX = coordinate2.x; int eY = coordinate2.y;
-            if (Map.outside) { sight = sight * 2; }
             int t;
             int x = oX; int y = oY;
             int delta_x = eX - oX; int delta_y = eY - oY;
@@ -35,7 +31,7 @@ namespace TheRuinsOfIpsus
             int sign_x = Math.Sign(delta_x); int sign_y = Math.Sign(delta_y);
 
             if (oX == eX && oY == eY) return true;
-            if (Math.Abs(delta_x) > sight || Math.Abs(delta_y) > sight) return false;
+            if (Math.Abs(delta_x) > range || Math.Abs(delta_y) > range) return false;
 
             if (abs_delta_x > abs_delta_y)
             {
@@ -47,7 +43,7 @@ namespace TheRuinsOfIpsus
                     t += abs_delta_y * 2;
                     if (x == eX && y == eY) { return true; }
                 }
-                while (!Map.map[x, y].GetComponent<Visibility>().opaque);
+                while (Map.map[x, y].actor == null && Map.map[x, y].moveType != 0);
                 return false;
             }
             else
@@ -63,6 +59,44 @@ namespace TheRuinsOfIpsus
                 while (!Map.map[x, y].GetComponent<Visibility>().opaque);
                 return false;
             }
+        }
+        public static List<Coordinate> ReturnLine(Coordinate origin, Coordinate target)
+        {
+            List<Coordinate> coordinates = new List<Coordinate>();
+            int t;
+            int x = origin.x; int y = origin.y;
+            int delta_x = target.x - origin.x; int delta_y = target.y - origin.y;
+            int abs_delta_x = Math.Abs(delta_x); int abs_delta_y = Math.Abs(delta_y);
+            int sign_x = Math.Sign(delta_x); int sign_y = Math.Sign(delta_y);
+            bool hasConnected = false;
+
+            if (abs_delta_x > abs_delta_y)
+            {
+                t = abs_delta_y * 2 - abs_delta_x;
+                do
+                {
+                    if (t >= 0) { y += sign_y; t -= abs_delta_x * 2; }
+                    x += sign_x;
+                    t += abs_delta_y * 2;
+                    coordinates.Add(new Coordinate(x, y));
+                    if (x == target.x && y == target.y) { hasConnected = true; }
+                }
+                while (!hasConnected);
+            }
+            else
+            {
+                t = abs_delta_x * 2 - abs_delta_y;
+                do
+                {
+                    if (t >= 0) { x += sign_x; t -= abs_delta_y * 2; }
+                    y += sign_y;
+                    t += abs_delta_x * 2;
+                    coordinates.Add(new Coordinate(x, y));
+                    if (x == target.x && y == target.y) { hasConnected = true; }
+                }
+                while (!hasConnected);
+            }
+            return coordinates;
         }
         public static AI ReturnAI(Entity entityRef)
         {
@@ -103,7 +137,7 @@ namespace TheRuinsOfIpsus
         }
         public static bool CheckBounds(int x, int y)
         {
-            if (x <= 0 || x >= 79 || y <= 0 || y >= 69) return false;
+            if (x <= 0 || x >= Program.gameMapWidth || y <= 0 || y >= Program.gameMapHeight) return false;
             else return true;
         }
         public static void ClearConsole(RLConsole console)

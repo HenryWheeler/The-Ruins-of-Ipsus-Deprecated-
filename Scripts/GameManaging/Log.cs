@@ -16,7 +16,7 @@ namespace TheRuinsOfIpsus
 
             if (storedLog.Count != 0)
             {
-                storedLog.Reverse();
+                //storedLog.Reverse();
 
                 string logOut = null;
                 foreach (string log in storedLog) { logOut += log; }

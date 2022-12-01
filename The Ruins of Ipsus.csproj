@@ -104,11 +104,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ascii_6x6.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ascii_8x8.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Icon.ico" />
-    <Content Include="RLNetLicense\RLNet1.0.6-LICENSE.txt" />
+    <Content Include="LICENSE.txt" />
     <Content Include="Scripts\Components\PropertyComponents\Factions.txt" />
     <Content Include="Scripts\JsonData\Id%27s.txt" />
   </ItemGroup>
@@ -116,6 +119,7 @@
     <Compile Include="Scripts\Components\AIComponents\BaseAI\AI.cs" />
     <Compile Include="Scripts\Components\AIComponents\ChaseAI.cs" />
     <Compile Include="Scripts\Components\AIComponents\SpiderAI.cs" />
+    <Compile Include="Scripts\Components\AnimationFunction.cs" />
     <Compile Include="Scripts\Components\AttackFunction.cs" />
     <Compile Include="Scripts\Components\BodyPlot.cs" />
     <Compile Include="Scripts\Components\Commerce.cs" />
@@ -129,7 +133,10 @@
     <Compile Include="Scripts\Components\Equippable.cs" />
     <Compile Include="Scripts\Components\Inventory.cs" />
     <Compile Include="Scripts\Components\PronounSet.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnThrowProperty.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnUseProperty.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\DijkstraProperty.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\ExplodeOnUse.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\InflictPoisonOnHit.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnHitProperty.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnMoveProperty.cs" />
@@ -138,6 +145,8 @@
     <Compile Include="Scripts\Components\PropertyComponents\Poison.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\Restrained.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\RestrainOnMove.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\UpdateCameraOnMove.cs" />
+    <Compile Include="Scripts\Components\Throwable.cs" />
     <Compile Include="Scripts\Components\SpecialDefences.cs" />
     <Compile Include="Scripts\Components\Usable.cs" />
     <Compile Include="Scripts\Entities\Entity.cs" />
@@ -147,8 +156,11 @@
     <Compile Include="Scripts\GameManaging\AttackManager.cs" />
     <Compile Include="Scripts\GameManaging\EntityManager.cs" />
     <Compile Include="Scripts\GameManaging\EntitySpawner.cs" />
+    <Compile Include="Scripts\GameManaging\RangeModels.cs" />
     <Compile Include="Scripts\GameManaging\SpecialComponentManager.cs" />
+    <Compile Include="Scripts\GameManaging\SpecialEffectManager.cs" />
     <Compile Include="Scripts\MapGeneration\IslandGenerator.cs" />
+    <Compile Include="Scripts\MapGeneration\OverworldGeneration.cs" />
     <Compile Include="Scripts\References\BodyPlots.cs" />
     <Compile Include="Scripts\GameManaging\Action.cs" />
     <Compile Include="Scripts\References\ColorFinder.cs" />

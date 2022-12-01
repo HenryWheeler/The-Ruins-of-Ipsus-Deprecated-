@@ -4,6 +4,48 @@ using RLNET;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
+    public class World
+    {
+        public World(int width, int height, int depth)
+        {
+            chunks = new Chunk[width, height, depth];
+            chunkWidth = Renderer.mapWidth;
+            chunkHeight = Renderer.mapHeight;
+            chunkSeeds = new double[width, height, depth];
+            for (int x = 0; x < width - 1; x++)
+            {
+                for (int y = 0; y < height - 1; y++)
+                {
+                    for (int z = 0; z < depth - 1; y++)
+                    {
+                        chunkSeeds[x, y, z] = CMath.seed.NextDouble();
+                    }
+                }
+            }
+        }
+        public static void CreateChunk(int x, int y, int z, string environment)
+        {
+            chunks[x, y, z] = new Chunk(chunkWidth, chunkHeight, environment, chunkSeeds[x, y, z]);
+        }
+        public static Chunk[,,] chunks;
+        public static double[,,] chunkSeeds; 
+        public static int chunkWidth { get; set; }
+        public static int chunkHeight { get; set; }
+    }
+    [Serializable]
+    public class Chunk
+    {
+        public Chunk(int width, int height, string _environment, double seedStart)
+        {
+            tiles = new Tile[width, height];
+            environment = _environment;
+            chunkSeed = new Random((int)Math.Floor(seedStart) + (int)Math.Ceiling(seedStart));
+        }
+        public static Tile[,] tiles { get; set; }
+        public static string environment { get; set; }
+        public static Random chunkSeed { get; set; }
+    }
+    [Serializable]
     public class Map
     {
         public Map(int width, int height)

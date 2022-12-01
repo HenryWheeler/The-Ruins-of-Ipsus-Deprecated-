@@ -12,23 +12,27 @@ namespace TheRuinsOfIpsus
         public static int x;
         public static int y;
         public static bool targeting = false;
+        public static bool inInventory { get; set; }
         private static Player player;
         private static List<SFX> sfxPos;
         public TargetReticle(Player _player) { player = _player; sfxPos = new List<SFX>(); }
-        public static void StartTargeting()
+        public static void StartTargeting(bool _inInventory)
         {
+            inInventory = _inInventory;
+            if (inInventory) { InventoryManager.CloseInventory(); }
             Coordinate coordinate = player.GetComponent<Coordinate>();
             x = coordinate.x; y = coordinate.y;
             targeting = true; player.GetComponent<TurnFunction>().turnActive = false;
             Move(0, 0);
-            RLKey key = RLKey.Unknown; Action.TargetAction(key);
+            RLKey key = RLKey.Unknown; Action.TargetAction(player, key);
         }
         public static void StopTargeting()
         {
             targeting = false; player.GetComponent<TurnFunction>().turnActive = true;
             foreach (SFX sfx in sfxPos) { Coordinate coordinate = sfx.GetComponent<Coordinate>(); Map.sfx[coordinate.x, coordinate.y] = null; }
             sfxPos.Clear();
-            RLKey key = RLKey.Unknown; Action.PlayerAction(player, key);
+            if (!inInventory) { Action.PlayerAction(player); }
+            else { InventoryManager.OpenInventory(); }
             Log.ClearLogDisplay();
         }
         public static void Move(int _x, int _y)
@@ -38,10 +42,10 @@ namespace TheRuinsOfIpsus
                 foreach (SFX sfx in sfxPos) { Coordinate coordinate = sfx.GetComponent<Coordinate>(); Map.sfx[coordinate.x, coordinate.y] = null; }
                 sfxPos.Clear();
                 x += _x; y += _y;
-                CreateLine();
+                CreateLine(player.GetComponent<Stats>().strength);
             }
         }
-        public static void CreateLine()
+        public static void CreateLine(int range)
         {
             Coordinate coordinate = player.GetComponent<Coordinate>();
             int t;
@@ -59,8 +63,17 @@ namespace TheRuinsOfIpsus
                     if (t >= 0) { y += sign_y; t -= abs_delta_x * 2; }
                     x += sign_x;
                     t += abs_delta_y * 2;
-                    if (x == TargetReticle.x && y == TargetReticle.y) { hasConnected = true; sfxPos.Add(Reticle(x, y, 'X', "Yellow")); }
-                    else { sfxPos.Add(Reticle(x, y, '.', "White")); }
+                    if (x == TargetReticle.x && y == TargetReticle.y) 
+                    {
+                        hasConnected = true;
+                        if (CMath.Distance(coordinate.x, coordinate.y, x, y) < range) { sfxPos.Add(Reticle(x, y, 'X', "Yellow")); }
+                        else { sfxPos.Add(Reticle(x, y, 'X', "Gray")); Log.AddToStoredLog("Your target is out of range.", true); } 
+                    }
+                    else 
+                    { 
+                        if (CMath.Distance(coordinate.x, coordinate.y, x, y) < range) { sfxPos.Add(Reticle(x, y, '.', "White")); }
+                        else { sfxPos.Add(Reticle(x, y, '.', "Gray")); }
+                    }
                 }
                 while (!hasConnected);
             }
@@ -72,25 +85,46 @@ namespace TheRuinsOfIpsus
                     if (t >= 0) { x += sign_x; t -= abs_delta_y * 2; }
                     y += sign_y;
                     t += abs_delta_x * 2;
-                    if (x == TargetReticle.x && y == TargetReticle.y) { hasConnected = true; sfxPos.Add(Reticle(x, y, 'X', "Yellow")); }
-                    else { sfxPos.Add(Reticle(x, y, '.', "White")); }
+                    if (x == TargetReticle.x && y == TargetReticle.y)
+                    {
+                        hasConnected = true;
+                        if (CMath.Distance(coordinate.x, coordinate.y, x, y) < range) { sfxPos.Add(Reticle(x, y, 'X', "Yellow")); }
+                        else { sfxPos.Add(Reticle(x, y, 'X', "Gray")); Log.AddToStoredLog("Your target is out of range.", true); }
+                    }
+                    else
+                    {
+                        if (CMath.Distance(coordinate.x, coordinate.y, x, y) < range) { sfxPos.Add(Reticle(x, y, '.', "White")); }
+                        else { sfxPos.Add(Reticle(x, y, '.', "Gray")); }
+                    }
                 }
                 while (!hasConnected);
             }
         }
-        public static void Fire()
+        public static Coordinate ReturnFire(Entity entity, Entity target, int range)
         {
-            if (Map.map[x, y].GetComponent<Visibility>().visible)
+            if (target == null)
             {
-                if (Map.map[x, y].actor != null)
+                if (Map.map[x, y].GetComponent<Visibility>().visible)
                 {
-                    foreach (SFX sfx in sfxPos) { Coordinate coordinate = sfx.GetComponent<Coordinate>(); Map.sfx[coordinate.x, coordinate.y] = null; }
-                    sfxPos.Clear();
-                    //player.Attack(Map.map[x, y].actor, player, 1);
+                    Coordinate refCoordinate = entity.GetComponent<Coordinate>();
+                    if (CMath.Distance(refCoordinate.x, refCoordinate.y, x, y) < range)
+                    {
+                        if (CMath.PathBlocked(player.GetComponent<Coordinate>(), new Coordinate(x, y), range))
+                        {
+                            foreach (SFX sfx in sfxPos) { Coordinate coordinate = sfx.GetComponent<Coordinate>(); Map.sfx[coordinate.x, coordinate.y] = null; }
+                            sfxPos.Clear();
+                            return new Coordinate(x, y);
+                        }
+                        else { Log.AddToStoredLog("Your target is blocked.", true); return null; }
+                    }
+                    else { Log.AddToStoredLog("Your target is out of range.", true); return null; }
                 }
-                else { Log.AddToStoredLog("There is nothing there for you to fire at.", true); }
+                else { Log.AddToStoredLog("You cannot fire at what you cannot see.", true); return null; }
             }
-            else { Log.AddToStoredLog("You cannot fire at what you cannot see.", true); }
+            else
+            {
+                return null;
+            }
         }
         public static SFX Reticle(int x, int y, char character, string color)
         {

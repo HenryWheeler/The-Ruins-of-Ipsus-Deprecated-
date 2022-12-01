@@ -29,16 +29,19 @@ namespace TheRuinsOfIpsus
 
         public static Player player;
         public static bool gameActive = false;
+
+        public static int gameMapWidth = 100;
+        public static int gameMapHeight = 100;
         public static void Main()
         {
 
             RLSettings settings = new RLSettings();
-            settings.BitmapFile = "ascii_8x8.png";
-            settings.CharWidth = 8;
-            settings.CharHeight = 8;
+            settings.BitmapFile = "ascii_6x6.png";
+            settings.CharWidth = 6;
+            settings.CharHeight = 6;
             settings.Width = screenWidth;
             settings.Height = screenHeight;
-            settings.Scale = 1.5f;
+            settings.Scale = 2f;
             settings.Title = "The Ruins of Ipsus";
             settings.WindowBorder = RLWindowBorder.Hidden;
             settings.ResizeType = RLResizeType.None;
@@ -84,6 +87,7 @@ namespace TheRuinsOfIpsus
             TurnManager.AddActor(player.GetComponent<TurnFunction>());
             Action.PlayerAction(player);
             ShadowcastFOV.Compute(coordinate.x, coordinate.y, player.GetComponent<Stats>().sight);
+            player.GetComponent<UpdateCameraOnMove>().OnMove(coordinate.x, coordinate.y, coordinate.x, coordinate.y);
             player.GetComponent<TurnFunction>().StartTurn();
 
             EntityManager.AddEntity(player);
@@ -91,10 +95,10 @@ namespace TheRuinsOfIpsus
         public static void NewGame()
         {
             CMath cMath = new CMath(new Random().Next());
-            MapGenerator.CreateMap(mapWidth, mapHeight);
+            MapGenerator.CreateMap(gameMapWidth, gameMapHeight);
 
             List<Tile> tiles = new List<Tile>();
-            foreach (Tile tile in Map.map) { if (tile.moveType == 1) { tiles.Add(tile); } }
+            foreach (Tile tile in Map.map) { if (tile.moveType != 0) { tiles.Add(tile); } }
             Coordinate useTile = tiles[CMath.seed.Next(0, tiles.Count - 1)].GetComponent<Coordinate>();
             player = new Player(null);
             Map.map[useTile.x, useTile.y].actor = player;
@@ -110,29 +114,16 @@ namespace TheRuinsOfIpsus
 
             foreach (Tile tile in Map.map)
             {
-                if (tile.moveType == 1 && CMath.seed.Next(450) == 5)
-                {
-                    Coordinate coordinate = tile.GetComponent<Coordinate>();
-                    Entity test = EntitySpawner.CreateEntity(coordinate.x, coordinate.y, 3, 1);
-                }
-                else if (tile.moveType == 1 && CMath.seed.Next(450) == 6)
+                if (tile.moveType == 1 && CMath.seed.Next(450) == 6)
                 {
                     Coordinate coordinate = tile.GetComponent<Coordinate>();
                     Entity test = EntitySpawner.CreateEntity(coordinate.x, coordinate.y, 3, 0);
                     test.RemoveComponent(test.GetComponent<Movement>()); test.AddComponent(new Movement(true));
+                    test.RemoveComponent(test.GetComponent<SpiderAI>()); test.AddComponent(new SpiderAI(15));
                     test.GetComponent<SpiderAI>().hatedEntities.Add("Restrained");
+                    test.AddComponent(PronounReferences.pronounSets["Nueter"]);
                 }
-                else if (tile.moveType == 1 && CMath.seed.Next(450) == 7)
-                {
-                    Coordinate coordinate = tile.GetComponent<Coordinate>();
-                    EntitySpawner.CreateEntity(coordinate.x, coordinate.y, 1, 1);
-                }
-                else if (tile.moveType == 1 && CMath.seed.Next(450) == -10)
-                {
-                    Coordinate coordinate = tile.GetComponent<Coordinate>();
-                    Entity frog = EntitySpawner.CreateEntity(coordinate.x, coordinate.y, 2, 0);
-                }
-                else if (tile.moveType == 1 && CMath.seed.Next(450) == 800)
+                else if (tile.moveType == 1 && CMath.seed.Next(450) == -800)
                 {
                     Coordinate coordinate = tile.GetComponent<Coordinate>();
                     Entity chaosFrog = new Entity();
@@ -154,7 +145,23 @@ namespace TheRuinsOfIpsus
                     TurnManager.AddActor(chaosFrog.GetComponent<TurnFunction>());
                     Map.map[coordinate.x, coordinate.y].actor = chaosFrog;
                 }
-                else if (tile.moveType == 2 && CMath.seed.Next(450) == 9)
+                else if (tile.moveType == 1 && CMath.seed.Next(450) == 300)
+                {
+                    Coordinate coordinate = tile.GetComponent<Coordinate>();
+                    Entity testPotion = new Entity();
+                    testPotion.AddComponent(new Coordinate(coordinate.x, coordinate.y));
+                    testPotion.AddComponent(new Draw("Orange", "Black", '!'));
+                    testPotion.AddComponent(new Description("Potion of Orange*Explosion", "The label reads, 'Warning: Do not drink, throwing is advised.'"));
+                    testPotion.AddComponent(new Stats(7, 10, .5f, 500, 10, 10, false));
+                    testPotion.AddComponent(new Visibility(false, false, false));
+                    testPotion.AddComponent(new Usable());
+                    testPotion.AddComponent(new Throwable());
+                    testPotion.AddComponent(new ExplodeOnUse(15));
+                    testPotion.AddComponent(new ExplodeOnThrow(15));
+
+                    Map.map[coordinate.x, coordinate.y].item = testPotion;
+                }
+                else if (tile.moveType == 2 && CMath.seed.Next(450) > 446)
                 {
                     Coordinate coordinate = tile.GetComponent<Coordinate>();
                     EntitySpawner.CurrrentTestThing(coordinate.x, coordinate.y);
@@ -164,13 +171,13 @@ namespace TheRuinsOfIpsus
             ShadowcastFOV.Compute(playerCoordinate.x, playerCoordinate.y, player.GetComponent<Stats>().sight);
             Log.AddToStoredLog("Welcome to the Ruins of Ipsus", true);
             player.GetComponent<TurnFunction>().StartTurn();
-
+            EntityManager.UpdateAll();
             gameActive = true;
         }
         public static void LoadSave(SaveData saveData)
         {
             CMath cMath = new CMath(saveData.seed);
-            MapGenerator.CreateMap(mapWidth, mapHeight);
+            MapGenerator.CreateMap(gameMapWidth, gameMapHeight);
             foreach (Tile tile in saveData.tiles)
             {
                 if (tile != null)
@@ -186,6 +193,7 @@ namespace TheRuinsOfIpsus
                 }
             }
             ReloadPlayer(saveData.player.components);
+            EntityManager.UpdateAll();
             Log.AddToStoredLog("Welcome to the Ruins of Ipsus", true);
             gameActive = true;
         }

@@ -13,8 +13,6 @@ namespace TheRuinsOfIpsus
             mapWidth = _mapWidth; mapHeight = _mapHeight;
             Map.outside = true;
 
-            SetAllWalls();
-
             for (int x = 0; x < mapWidth; x++)
             {
                 for (int y = 0; y < mapHeight; y++)
@@ -36,8 +34,6 @@ namespace TheRuinsOfIpsus
                     }
                 }
             }
-
-            CreateSurroundingWalls();
         }
         public override void SetAllWalls()
         {

@@ -8,8 +8,8 @@ namespace TheRuinsOfIpsus
 {
     public abstract class AGenerator
     {
-        public int mapWidth = 80;
-        public int mapHeight = 70;
+        public int mapWidth;
+        public int mapHeight;
         public abstract void CreateDiagonalPassage(int r1x, int r1y, int r2x, int r2y);
         public abstract void CreateBezierCurve(int r0x, int r0y, int r2x, int r2y);
         public abstract void CreateStraightPassage(int r1x, int r1y, int r2x, int r2y);
@@ -83,7 +83,7 @@ namespace TheRuinsOfIpsus
             {
                 for (int x = sX - 1; x <= eX + 1; x++)
                 {
-                    if (x < 1 || y < 1 || x >= mapWidth - 1 || y >= mapHeight - 1) return false;
+                    if (x < 1 || y <= 1 || x >= mapWidth || y >= mapHeight) return false;
                     if (Map.map[x, y].moveType != 0) return false;
                 }
             }

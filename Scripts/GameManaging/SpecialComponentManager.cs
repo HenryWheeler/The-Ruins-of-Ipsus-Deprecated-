@@ -40,6 +40,22 @@ namespace TheRuinsOfIpsus
             }
             entity.ClearCollections();
         }
+        public static void TriggerOnUse(Entity entity, Entity itemUsed)
+        {
+            List<OnUseProperty> properties = new List<OnUseProperty>();
+            foreach (Component property in itemUsed.components)
+            { if (property.GetType().BaseType.Equals(typeof(OnUseProperty))) { properties.Add((OnUseProperty)property); } }
+            foreach (OnUseProperty property in properties) { property.OnUse(entity); }
+            itemUsed.ClearCollections();
+        }
+        public static void TriggerOnThrow(Entity entity, Entity itemThrown, Coordinate landingSite)
+        {
+            List<OnThrowProperty> properties = new List<OnThrowProperty>();
+            foreach (Component property in itemThrown.components)
+            { if (property.GetType().BaseType.Equals(typeof(OnThrowProperty))) { properties.Add((OnThrowProperty)property); } }
+            foreach (OnThrowProperty property in properties) { property.OnThrow(entity, landingSite); }
+            itemThrown.ClearCollections();
+        }
         public static void AddAllToEntity(Entity entityToAddTo, Entity entityToAddWith)
         {
             foreach (Component component in entityToAddWith.components) { if (component.special) { entityToAddTo.AddComponent(component); } }

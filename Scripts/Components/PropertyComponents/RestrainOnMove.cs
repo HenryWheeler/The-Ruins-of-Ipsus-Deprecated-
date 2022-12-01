@@ -20,8 +20,8 @@ namespace TheRuinsOfIpsus
                     if (Map.map[coordinate.x, coordinate.y].actor.GetComponent<SpecialDefences>() == null || !Map.map[coordinate.x, coordinate.y].actor.GetComponent<SpecialDefences>().statusImmunities.Contains("Restraint")) 
                     {
                         Map.map[coordinate.x, coordinate.y].actor.AddComponent(new Restrained());
-                        if (Map.map[coordinate.x, coordinate.y].actor.GetComponent<PronounSet>().present) { Log.AddToStoredLog(Map.map[coordinate.x, coordinate.y].actor.GetComponent<Description>().name + " has been restrained!"); }
-                        else { Log.AddToStoredLog(Map.map[coordinate.x, coordinate.y].actor.GetComponent<Description>().name + " have been restrained!"); }
+                        if (Map.map[coordinate.x, coordinate.y].actor.GetComponent<PronounSet>().present) { Log.AddToStoredLog(Map.map[coordinate.x, coordinate.y].actor.GetComponent<Description>().name + " has been restrained in the " + entity.GetComponent<Description>().name + "."); }
+                        else { Log.AddToStoredLog(Map.map[coordinate.x, coordinate.y].actor.GetComponent<Description>().name + " have been restrained in the " + entity.GetComponent<Description>().name + "."); }
                         Map.map[coordinate.x, coordinate.y].terrain = null;
                     }                       
                 }

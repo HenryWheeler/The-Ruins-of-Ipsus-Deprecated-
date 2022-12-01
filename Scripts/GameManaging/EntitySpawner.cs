@@ -53,7 +53,7 @@ namespace TheRuinsOfIpsus
             Entity cucumber = new Entity();
             cucumber.AddComponent(new Coordinate(x, y));
             cucumber.AddComponent(new Draw("Dark_Blue", "Black", 'e'));
-            cucumber.AddComponent(new Description("Dark_Blue*Deepwater Dark_Blue*Eel", "A product of the deep, one with a nasty temper and empty stomach."));
+            cucumber.AddComponent(new Description("Dark_Blue*Deepwater Dark_Blue*Eel", "A product of the deep, one with a nasty temper and an empty stomach."));
             cucumber.AddComponent(PronounReferences.pronounSets["Nueter"]);
             cucumber.AddComponent(new Stats(15, 8, .5f, 5, 5, 5, false));
             cucumber.AddComponent(new TurnFunction(cucumber.GetComponent<Stats>().maxAction, false));

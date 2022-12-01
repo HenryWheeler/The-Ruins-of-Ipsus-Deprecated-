@@ -14,7 +14,9 @@ namespace TheRuinsOfIpsus
             switch (color)
             {
                 case "Red": return RLColor.Red;
+                case "Red_Orange": return RLColor.Blend(RLColor.Red, ColorFinder.ColorPicker("Orange"), 50);
                 case "Blue": return RLColor.Blue;
+                case "Orange": return RLColor.Blend(RLColor.Red, RLColor.Yellow, 50);
                 case "Light_Blue": return RLColor.LightBlue;
                 case "Dark_Blue": return RLColor.Blend(RLColor.Black, RLColor.Blue, 50);
                 case "Yellow": return RLColor.Yellow;

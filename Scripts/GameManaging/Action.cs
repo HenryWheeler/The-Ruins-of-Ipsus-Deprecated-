@@ -12,6 +12,7 @@ namespace TheRuinsOfIpsus
         private static RLConsole console { get; set; }
         public Action(RLConsole _console) { console = _console; }
         private static string spacer = " + ";
+        private static Entity targetWeapon { get; set; }
         public static void MenuAction(RLKey key, RLRootConsole console)
         {
             switch (key)
@@ -56,9 +57,9 @@ namespace TheRuinsOfIpsus
                         {
                             Log.ClearLogDisplay();
                             bool hasMissile = false;
-                            foreach (EquipmentSlot slot in player.GetComponent<BodyPlot>().bodyPlot) { if (slot != null && slot.name == "Missile") { if (slot.item != null) { hasMissile = true; } } }
-                            if (hasMissile) { TargetReticle.StartTargeting(); }
-                            else { Log.AddToStoredLog("You have no missile to target with.", true); }
+                            foreach (EquipmentSlot slot in player.GetComponent<BodyPlot>().bodyPlot) 
+                            { if (slot != null && slot.name == "Missile") { if (slot.item != null) { hasMissile = true; TargetReticle.StartTargeting(false); } } }
+                            if (!hasMissile) { Log.AddToStoredLog("You have no missile to target with.", true); }
                             break;
                         }
                 }
@@ -66,7 +67,7 @@ namespace TheRuinsOfIpsus
         }
         public static void InventoryAction(Player player, RLKey key = RLKey.Unknown)
         {
-            DisplayActions("Close Inventory: [I/Escape]" + spacer + "Change Selection: [NumPad/Arrow Keys]" + spacer + "Drop Item: [D]" + spacer + "Equip/Unequip: [E]");
+            DisplayActions("Close Inventory: [I/Escape]" + "     Use Item: [U]" + spacer + "Change Selection: [NumPad/Arrow Keys]" + "     Throw Item: [T]" + spacer + "Drop Item: [D]" + spacer + "Equip/Unequip: [E]");
 
             if (key != RLKey.Unknown)
             {
@@ -90,17 +91,42 @@ namespace TheRuinsOfIpsus
                             {
                                 int first = InventoryManager.currentPage;
                                 int second = InventoryManager.selection;
-                                if (InventoryManager.inventoryDisplay[first][second].GetComponent<Equippable>().equipped) { InventoryManager.UnequipItem(player, InventoryManager.inventoryDisplay[first][second], true); }
-                                else { InventoryManager.EquipItem(player, InventoryManager.inventoryDisplay[first][second], true); }
+                                if (InventoryManager.inventoryDisplay[first][second].GetComponent<Equippable>() != null)
+                                {
+                                    if (InventoryManager.inventoryDisplay[first][second].GetComponent<Equippable>().equipped) { InventoryManager.UnequipItem(player, InventoryManager.inventoryDisplay[first][second], true); }
+                                    else { InventoryManager.EquipItem(player, InventoryManager.inventoryDisplay[first][second], true); }
+                                } else { Log.AddToStoredLog("You cannot equip the " + InventoryManager.inventoryDisplay[first][second].GetComponent<Description>().name + ".", true); }
+                            }
+                            break;
+                        }
+                    case RLKey.U:
+                        {
+                            if (player.GetComponent<Inventory>().inventory.Count != 0)
+                            {
+                                int first = InventoryManager.currentPage;
+                                int second = InventoryManager.selection;
+                                if (InventoryManager.inventoryDisplay[first][second].GetComponent<Usable>() != null) { InventoryManager.UseItem(player, InventoryManager.inventoryDisplay[first][second], true); }
+                                else { Log.AddToStoredLog("You cannot use the " + InventoryManager.inventoryDisplay[first][second].GetComponent<Description>().name + ".", true); }
+                            }
+                            break;
+                        }
+                    case RLKey.T:
+                        {
+                            if (player.GetComponent<Inventory>().inventory.Count != 0)
+                            {
+                                int first = InventoryManager.currentPage;
+                                int second = InventoryManager.selection;
+                                targetWeapon = InventoryManager.inventoryDisplay[first][second];
+                                TargetReticle.StartTargeting(true);
                             }
                             break;
                         }
                 }
             }
         }
-        public static void TargetAction(RLKey key = RLKey.Unknown)
+        public static void TargetAction(Player player, RLKey key = RLKey.Unknown)
         {
-            DisplayActions("Stop Targeting: [T/Escape]" + spacer + "Move: [NumPad/Arrow Keys]" + spacer + "Fire: [F]");
+            DisplayActions("Stop Targeting: [S/Escape]" + spacer + "Move: [NumPad/Arrow Keys]" + spacer + "Fire & Throw: [F/T/Enter]");
 
             if (key != RLKey.Unknown)
             {
@@ -119,8 +145,10 @@ namespace TheRuinsOfIpsus
                     case RLKey.Keypad4: Log.ClearLogDisplay(); TargetReticle.Move(-1, 0); break;
                     case RLKey.Keypad7: Log.ClearLogDisplay(); TargetReticle.Move(-1, -1); break;
                     case RLKey.Escape: Log.ClearLogDisplay(); TargetReticle.StopTargeting(); break;
-                    case RLKey.T: Log.ClearLogDisplay(); TargetReticle.StopTargeting(); break;
-                    case RLKey.F: Log.ClearLogDisplay(); TargetReticle.Fire(); break;
+                    case RLKey.S: Log.ClearLogDisplay(); TargetReticle.StopTargeting(); break;
+                    case RLKey.T: Log.ClearLogDisplay(); AttackManager.ThrowWeapon(player, null, targetWeapon); break;
+                    case RLKey.F: Log.ClearLogDisplay(); AttackManager.ThrowWeapon(player, null, targetWeapon); break;
+                    case RLKey.Enter: Log.ClearLogDisplay(); AttackManager.ThrowWeapon(player, null, targetWeapon); break;
                 }
             }
         }

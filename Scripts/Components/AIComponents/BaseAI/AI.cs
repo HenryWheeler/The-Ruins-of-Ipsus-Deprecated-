@@ -12,7 +12,8 @@ namespace TheRuinsOfIpsus
         public string mood { get; set; }
         public int memory { get; set; }
         public int maxMemory { get; set; }
-        public string target { get; set; }
+        public int evaluationTimer = 0
+;        public string target { get; set; }
         public Entity referenceTarget { get; set; }
         public List<string> favoredEntities = new List<string>();
         public List<string> hatedEntities = new List<string>();
@@ -21,23 +22,39 @@ namespace TheRuinsOfIpsus
             if (attacker.GetComponent<Faction>() != null && !hatedEntities.Contains(attacker.GetComponent<Faction>().faction)) 
             { hatedEntities.Add(attacker.GetComponent<Faction>().faction); target = attacker.GetComponent<Faction>().faction; }
             referenceTarget = attacker;
-            mood = "Angry"; memory = maxMemory;
+            mood = "Red*Angry"; memory = maxMemory;
         }
         public void EvaluateEnvironment()
         {
-            Coordinate coordinate = entity.GetComponent<Coordinate>();
-            ShadowcastFOV.Compute(coordinate.x, coordinate.y, entity.GetComponent<Stats>().sight, this, true);
-            if (referenceTarget != null && mood == "Angry")
+            if (evaluationTimer > 0) { evaluationTimer--; }
+            else
             {
-                if (target == null) { target = referenceTarget.GetComponent<Faction>().faction; memory = maxMemory; }
-                else if (target == referenceTarget.GetComponent<Faction>().faction) { memory = maxMemory; }
-                referenceTarget = null;
+                Coordinate coordinate = entity.GetComponent<Coordinate>();
+                ShadowcastFOV.Compute(coordinate.x, coordinate.y, entity.GetComponent<Stats>().sight, this, true);
+                if (referenceTarget != null && mood == "Red*Angry")
+                {
+                    if (target == null) { target = referenceTarget.GetComponent<Faction>().faction; memory = maxMemory; }
+                    else if (target == referenceTarget.GetComponent<Faction>().faction) { memory = maxMemory; }
+                    referenceTarget = null;
+                }
+                else if (memory > 0) { memory--; }
+                else { target = null; mood = "Uncertain"; evaluationTimer = 5; }
             }
-            else if (memory > 0) { memory--; }
-            else { target = null; mood = "Uncertain"; }
             ExecuteAction();
         }
         public abstract void ExecuteAction();
+        public void HuntAndAttack()
+        {
+            if (target != null)
+            {
+                Coordinate coordinate = entity.GetComponent<Coordinate>();
+                Node targetCoordinate = DijkstraMaps.PathFromMap(entity, target);
+                if (targetCoordinate.v == 0 && Map.map[coordinate.x + targetCoordinate.x, coordinate.y + targetCoordinate.y].actor != null &&
+                    Map.map[coordinate.x + targetCoordinate.x, coordinate.y + targetCoordinate.y].actor != entity)
+                { AttackManager.MeleeAllStrike(entity, Map.map[coordinate.x + targetCoordinate.x, coordinate.y + targetCoordinate.y].actor); }
+                else { entity.GetComponent<Movement>().Move(targetCoordinate.x, targetCoordinate.y); }
+            } else { entity.GetComponent<TurnFunction>().EndTurn(); }
+        }
         public int ReturnHatred(Entity entity)
         {
             if (this.entity.GetComponent<Faction>() != null && entity.GetComponent<Faction>() != null)
