@@ -14,10 +14,6 @@ namespace TheRuinsOfIpsus
                     if (slot.item.GetComponent<AttackFunction>() != null && slot.item.GetComponent<AttackFunction>().weaponType == "Melee") { Attack(attacker, target, slot.item, false); } } }
             attacker.GetComponent<TurnFunction>().EndTurn();
         }
-        public static void RangedStrike(Entity attacker, Coordinate targetCoordinate)
-        {
-            Entity target = Map.map[targetCoordinate.x, targetCoordinate.y].actor;
-        }
         public static void ThrowWeapon(Entity attacker, Entity target, Entity weapon)
         {
             if (TargetReticle.ReturnFire(attacker, target, attacker.GetComponent<Stats>().strength) != null)
@@ -25,7 +21,7 @@ namespace TheRuinsOfIpsus
                 Coordinate targetCoordinate = TargetReticle.ReturnFire(attacker, target, attacker.GetComponent<Stats>().strength);
                 InventoryManager.PlaceItem(targetCoordinate, weapon);
 
-                List<Coordinate> coordinates = CMath.ReturnLine(attacker.GetComponent<Coordinate>(), weapon.GetComponent<Coordinate>());
+                List<Coordinate> coordinates = RangeModels.ReturnLine(attacker.GetComponent<Coordinate>(), weapon.GetComponent<Coordinate>());
                 int current = 0;
                 Draw itemFrame = weapon.GetComponent<Draw>();
                 Draw baseFrame = new Draw("Gray", "Black", '.');

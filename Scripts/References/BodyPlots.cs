@@ -60,11 +60,39 @@ namespace TheRuinsOfIpsus
             bodyPlots.Add("Basic_Spider", basicSpiderPlot);
 
             EquipmentSlot[] basicWormPlot = new EquipmentSlot[4];
-            basicSpiderPlot[0] = usableSlots["Head"];
-            basicSpiderPlot[1] = usableSlots["Face"];
-            basicSpiderPlot[2] = usableSlots["Torso"];
-            basicSpiderPlot[3] = usableSlots["Tail"];
-            bodyPlots.Add("Basic_Worm", basicSpiderPlot);
+            basicWormPlot[0] = usableSlots["Head"];
+            basicWormPlot[1] = usableSlots["Face"];
+            basicWormPlot[2] = usableSlots["Torso"];
+            basicWormPlot[3] = usableSlots["Tail"];
+            bodyPlots.Add("Basic_Worm", basicWormPlot);
+
+            EquipmentSlot[] basicInsectPlot = new EquipmentSlot[9];
+            basicInsectPlot[0] = usableSlots["Head"];
+            basicInsectPlot[1] = usableSlots["Face"];
+            basicInsectPlot[2] = usableSlots["Torso"];
+            basicInsectPlot[3] = usableSlots["Legs"];
+            basicInsectPlot[4] = usableSlots["Legs"];
+            basicInsectPlot[5] = usableSlots["Legs"];
+            basicInsectPlot[6] = usableSlots["Feet"];
+            basicInsectPlot[7] = usableSlots["Feet"];
+            basicInsectPlot[8] = usableSlots["Feet"];
+            bodyPlots.Add("Basic_Insect", basicInsectPlot);
+
+            EquipmentSlot[] basicCrustaceanPlot = new EquipmentSlot[13];
+            basicCrustaceanPlot[0] = usableSlots["Head"];
+            basicCrustaceanPlot[1] = usableSlots["Face"];
+            basicCrustaceanPlot[2] = usableSlots["Torso"];
+            basicCrustaceanPlot[3] = usableSlots["Legs"];
+            basicCrustaceanPlot[4] = usableSlots["Legs"];
+            basicCrustaceanPlot[5] = usableSlots["Legs"];
+            basicCrustaceanPlot[6] = usableSlots["Legs"];
+            basicCrustaceanPlot[7] = usableSlots["Feet"];
+            basicCrustaceanPlot[8] = usableSlots["Feet"];
+            basicCrustaceanPlot[9] = usableSlots["Feet"];
+            basicCrustaceanPlot[10] = usableSlots["Feet"];
+            basicCrustaceanPlot[11] = usableSlots["Main Hand"];
+            basicCrustaceanPlot[12] = usableSlots["Off Hand"];
+            bodyPlots.Add("Basic_Crustacean", basicCrustaceanPlot);
         }
     }
     [Serializable]

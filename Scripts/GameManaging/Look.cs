@@ -46,8 +46,8 @@ namespace TheRuinsOfIpsus
 
                     if (description.entity != null && description.entity.GetComponent<PronounSet>() != null)
                     {
-                        if (description.entity.GetComponent<PronounSet>().present) { display += description.Describe() + " + + + " + description.name + " is: + "; }
-                        else { display += description.Describe() + " + + + " + description.name + " are: + + "; }
+                        if (description.entity.GetComponent<PronounSet>().present) { display += description.Describe() + " + + " + description.name + " is: + "; }
+                        else { display += description.Describe() + " + + " + description.name + " are: + "; }
                         string compare = display;
                         if (CMath.ReturnAI(description.entity) != null) { display += CMath.ReturnAI(description.entity).mood + ", "; }
                         foreach (Component component in description.entity.components)

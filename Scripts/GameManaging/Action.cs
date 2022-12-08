@@ -11,7 +11,6 @@ namespace TheRuinsOfIpsus
     {
         private static RLConsole console { get; set; }
         public Action(RLConsole _console) { console = _console; }
-        private static string spacer = " + ";
         private static Entity targetWeapon { get; set; }
         public static void MenuAction(RLKey key, RLRootConsole console)
         {
@@ -24,8 +23,8 @@ namespace TheRuinsOfIpsus
         }
         public static void PlayerAction(Player player, RLKey key = RLKey.Unknown)
         {
-            DisplayActions("Move: [NumPad/Arrow Keys]" + "     Debug Save Game: [N]" + spacer + "End Turn: [.]"  + "     Debug Load Game: [M]" + "     Save & Quit: [J]" + spacer 
-                + "Look: [L]" + "     Debug Reveal All: [V]" + spacer + "Open Inventory: [I]" + spacer + "Get Item: [G]" + "     Target: [T]");
+            DisplayActions("Move:[NumPad]" + " End Turn:[.]" + " Save & Quit:[J]" 
+                + " Look:[L]" + " Open Inventory:[I]" + " Get Item:[G]" + " Target:[T]");
 
             if (key != RLKey.Unknown)
             {
@@ -47,9 +46,7 @@ namespace TheRuinsOfIpsus
                     case RLKey.Period: player.GetComponent<TurnFunction>().EndTurn(); break;
                     case RLKey.L: Look.StartLooking(player.GetComponent<Coordinate>()); break;
                     case RLKey.I: InventoryManager.OpenInventory(); break;
-                    case RLKey.G: InventoryManager.GetItem(player, true); break;
-                    case RLKey.N: SaveDataManager.CreateDebugSave(player); Log.AddToStoredLog("Debug Saved!", true); break;
-                    case RLKey.M: SaveDataManager.LoadDebugSave(player); Log.AddToStoredLog("Debug Loaded!", true); break;
+                    case RLKey.G: InventoryManager.GetItem(player); break;
                     case RLKey.J: SaveDataManager.CreateSave(player); Program.rootConsole.Close(); break;
                     case RLKey.V: foreach (Tile tile in Map.map) { if (tile != null) { Coordinate coordinate = tile.GetComponent<Coordinate>();
                                 ShadowcastFOV.SetVisible(coordinate.x, coordinate.y, true, true); } } break;
@@ -67,7 +64,7 @@ namespace TheRuinsOfIpsus
         }
         public static void InventoryAction(Player player, RLKey key = RLKey.Unknown)
         {
-            DisplayActions("Close Inventory: [I/Escape]" + "     Use Item: [U]" + spacer + "Change Selection: [NumPad/Arrow Keys]" + "     Throw Item: [T]" + spacer + "Drop Item: [D]" + spacer + "Equip/Unequip: [E]");
+            DisplayActions("Close Inventory:[I/Escape]" + " Use Item:[U]" + " Change Selection:[NumPad]" + " Throw Item:[T]" + " Drop Item:[D]" + " Equip/Unequip:[E]");
 
             if (key != RLKey.Unknown)
             {
@@ -84,7 +81,7 @@ namespace TheRuinsOfIpsus
                     case RLKey.Keypad4: InventoryManager.MovePage(-1); break;
                     case RLKey.Right: InventoryManager.MovePage(1); break;
                     case RLKey.Keypad6: InventoryManager.MovePage(1); break;
-                    case RLKey.D: if (player.GetComponent<Inventory>().inventory.Count != 0) { InventoryManager.DropItem(player, InventoryManager.inventoryDisplay[InventoryManager.currentPage][InventoryManager.selection], true); } break;
+                    case RLKey.D: if (player.GetComponent<Inventory>().inventory.Count != 0) { InventoryManager.DropItem(player, InventoryManager.inventoryDisplay[InventoryManager.currentPage][InventoryManager.selection]); } break;
                     case RLKey.E:
                         {
                             if (player.GetComponent<Inventory>().inventory.Count != 0)
@@ -93,8 +90,8 @@ namespace TheRuinsOfIpsus
                                 int second = InventoryManager.selection;
                                 if (InventoryManager.inventoryDisplay[first][second].GetComponent<Equippable>() != null)
                                 {
-                                    if (InventoryManager.inventoryDisplay[first][second].GetComponent<Equippable>().equipped) { InventoryManager.UnequipItem(player, InventoryManager.inventoryDisplay[first][second], true); }
-                                    else { InventoryManager.EquipItem(player, InventoryManager.inventoryDisplay[first][second], true); }
+                                    if (InventoryManager.inventoryDisplay[first][second].GetComponent<Equippable>().equipped) { InventoryManager.UnequipItem(player, InventoryManager.inventoryDisplay[first][second]); }
+                                    else { InventoryManager.EquipItem(player, InventoryManager.inventoryDisplay[first][second]); }
                                 } else { Log.AddToStoredLog("You cannot equip the " + InventoryManager.inventoryDisplay[first][second].GetComponent<Description>().name + ".", true); }
                             }
                             break;
@@ -126,7 +123,7 @@ namespace TheRuinsOfIpsus
         }
         public static void TargetAction(Player player, RLKey key = RLKey.Unknown)
         {
-            DisplayActions("Stop Targeting: [S/Escape]" + spacer + "Move: [NumPad/Arrow Keys]" + spacer + "Fire & Throw: [F/T/Enter]");
+            DisplayActions("Stop Targeting:[S/Escape]" + " Move:[NumPad]" + " Fire & Throw:[F/T/Enter]");
 
             if (key != RLKey.Unknown)
             {
@@ -154,7 +151,7 @@ namespace TheRuinsOfIpsus
         }
         public static void LookAction(RLKey key = RLKey.Unknown)
         {
-            DisplayActions("Stop Looking: [L/Escape]" + spacer + "Move: [NumPad/Arrow Keys]");
+            DisplayActions("Stop Looking:[L/Escape]" + " Move Reticle:[NumPad]");
 
             if (key != RLKey.Unknown)
             {
@@ -177,6 +174,7 @@ namespace TheRuinsOfIpsus
                 }
             }
         }
-        public static void DisplayActions(string actions) { CMath.ClearConsole(console); CMath.DisplayToConsole(console, actions, 0, 2); }
+        public static void DisplayActions(string actions) 
+        { CMath.ClearConsole(console); CMath.DisplayToConsole(console, actions, 0, 2); console.Print(8, 0, " Actions ", RLColor.White); }
     }
 }

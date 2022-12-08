@@ -12,7 +12,7 @@ namespace TheRuinsOfIpsus
         public int strength { get; set; }
         public override void OnHit(Entity attacker, Entity target, int dmg, string type)
         {
-            if (target.GetComponent<Poison>() == null) 
+            if (target.GetComponent<Poison>() == null && target.GetComponent<Stats>().immunities.Contains("Poison")) 
             { 
                 target.AddComponent(new Poison(strength * 3, strength));
                 if (attacker.GetComponent<PronounSet>().present) { Log.AddToStoredLog(attacker.GetComponent<Description>().name + " has inflicted " + target.GetComponent<Description>().name + " with a malignant Green*poison"); }

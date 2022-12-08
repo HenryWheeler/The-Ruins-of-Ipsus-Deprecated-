@@ -16,7 +16,7 @@ namespace TheRuinsOfIpsus
 
             Stats stats = entity.GetComponent<Stats>();
             stats.hp -= dmg;
-            if (stats.display) { StatManager.UpdateStats(entity); }
+            if (entity.display) { StatManager.UpdateStats(entity); }
             if (stats.hp <= 0) { Death(); }
             else
             {
@@ -31,7 +31,7 @@ namespace TheRuinsOfIpsus
         {
             Stats stats = entity.GetComponent<Stats>();
             stats.hp -= dmg;
-            if (stats.display) { StatManager.UpdateStats(entity); }
+            if (entity.display) { StatManager.UpdateStats(entity); }
             if (stats.hp <= 0) { Death(); }
         }
         public void Death() 

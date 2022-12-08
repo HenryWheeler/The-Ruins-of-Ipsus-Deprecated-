@@ -107,16 +107,15 @@
     <Content Include="ascii_6x6.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ascii_8x8.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Icon.ico" />
     <Content Include="LICENSE.txt" />
     <Content Include="Scripts\Components\PropertyComponents\Factions.txt" />
+    <Content Include="Scripts\GameManaging\SpawnTables.txt" />
     <Content Include="Scripts\JsonData\Id%27s.txt" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Scripts\Components\AIComponents\BaseAI\AI.cs" />
+    <Compile Include="Scripts\Components\AIComponents\ScavengerAI.cs" />
     <Compile Include="Scripts\Components\AIComponents\ChaseAI.cs" />
     <Compile Include="Scripts\Components\AIComponents\SpiderAI.cs" />
     <Compile Include="Scripts\Components\AnimationFunction.cs" />
@@ -132,6 +131,7 @@
     <Compile Include="Scripts\Components\Draw.cs" />
     <Compile Include="Scripts\Components\Equippable.cs" />
     <Compile Include="Scripts\Components\Inventory.cs" />
+    <Compile Include="Scripts\Components\PlayerComponent.cs" />
     <Compile Include="Scripts\Components\PronounSet.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnThrowProperty.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnUseProperty.cs" />
@@ -141,13 +141,13 @@
     <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnHitProperty.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnMoveProperty.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnTurnProperty.cs" />
-    <Compile Include="Scripts\Components\PropertyComponents\GrassyStep.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\Poison.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\Restrained.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\RestrainOnMove.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\UpdateCameraOnMove.cs" />
+    <Compile Include="Scripts\Components\SpellCasting.cs" />
     <Compile Include="Scripts\Components\Throwable.cs" />
-    <Compile Include="Scripts\Components\SpecialDefences.cs" />
+    <Compile Include="Scripts\Components\Traversable.cs" />
     <Compile Include="Scripts\Components\Usable.cs" />
     <Compile Include="Scripts\Entities\Entity.cs" />
     <Compile Include="Scripts\Components\Stats.cs" />
@@ -155,12 +155,13 @@
     <Compile Include="Scripts\Components\Visibility.cs" />
     <Compile Include="Scripts\GameManaging\AttackManager.cs" />
     <Compile Include="Scripts\GameManaging\EntityManager.cs" />
-    <Compile Include="Scripts\GameManaging\EntitySpawner.cs" />
     <Compile Include="Scripts\GameManaging\RangeModels.cs" />
+    <Compile Include="Scripts\GameManaging\SpawnTables.cs" />
     <Compile Include="Scripts\GameManaging\SpecialComponentManager.cs" />
     <Compile Include="Scripts\GameManaging\SpecialEffectManager.cs" />
-    <Compile Include="Scripts\MapGeneration\IslandGenerator.cs" />
-    <Compile Include="Scripts\MapGeneration\OverworldGeneration.cs" />
+    <Compile Include="Scripts\GameManaging\SpellManager.cs" />
+    <Compile Include="Scripts\WorldGeneration\IslandGenerator.cs" />
+    <Compile Include="Scripts\WorldGeneration\OverworldGeneration.cs" />
     <Compile Include="Scripts\References\BodyPlots.cs" />
     <Compile Include="Scripts\GameManaging\Action.cs" />
     <Compile Include="Scripts\References\ColorFinder.cs" />
@@ -170,12 +171,12 @@
     <Compile Include="Scripts\JsonData\JsonDataManager.cs" />
     <Compile Include="Scripts\GameManaging\Log.cs" />
     <Compile Include="Scripts\GameManaging\Look.cs" />
-    <Compile Include="Scripts\References\Map.cs" />
-    <Compile Include="Scripts\MapGeneration\CaveGenerator.cs" />
-    <Compile Include="Scripts\MapGeneration\DungeonGenerator.cs" />
-    <Compile Include="Scripts\MapGeneration\FieldGenerator.cs" />
+    <Compile Include="Scripts\References\World.cs" />
+    <Compile Include="Scripts\WorldGeneration\CaveGenerator.cs" />
+    <Compile Include="Scripts\WorldGeneration\DungeonGenerator.cs" />
+    <Compile Include="Scripts\WorldGeneration\FieldGenerator.cs" />
     <Compile Include="Scripts\Abstracts\AGenerator.cs" />
-    <Compile Include="Scripts\MapGeneration\MapGenerator.cs" />
+    <Compile Include="Scripts\WorldGeneration\ChunkGenerator.cs" />
     <Compile Include="Scripts\Entities\Player.cs" />
     <Compile Include="Scripts\GameManaging\Program.cs" />
     <Compile Include="Scripts\References\PronounReferences.cs" />

@@ -9,15 +9,15 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class RestrainOnMove: OnMoveProperty
     {
-        public override void OnMove(int x1, int y1, int x2, int y2)
+        public override void OnMove(Vector3 initialPosition, Vector3 finalPosition)
         {
             int chance = CMath.random.Next(1, 100);
             if (chance > 75)
             {
-                Coordinate coordinate = entity.GetComponent<Coordinate>();
+                Vector3 vector3 = entity.GetComponent<Coordinate>().vector3;
                 if (Map.map[coordinate.x, coordinate.y].actor != null)
                 {
-                    if (Map.map[coordinate.x, coordinate.y].actor.GetComponent<SpecialDefences>() == null || !Map.map[coordinate.x, coordinate.y].actor.GetComponent<SpecialDefences>().statusImmunities.Contains("Restraint")) 
+                    if (!Map.map[coordinate.x, coordinate.y].actor.GetComponent<Stats>().immunities.Contains("Restraint")) 
                     {
                         Map.map[coordinate.x, coordinate.y].actor.AddComponent(new Restrained());
                         if (Map.map[coordinate.x, coordinate.y].actor.GetComponent<PronounSet>().present) { Log.AddToStoredLog(Map.map[coordinate.x, coordinate.y].actor.GetComponent<Description>().name + " has been restrained in the " + entity.GetComponent<Description>().name + "."); }

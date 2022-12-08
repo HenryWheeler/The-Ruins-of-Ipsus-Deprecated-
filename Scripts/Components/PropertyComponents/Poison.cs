@@ -15,14 +15,14 @@ namespace TheRuinsOfIpsus
         public override void OnTurn()
         {
             timeLeft--; if (timeLeft == 0) { entity.collectionsToRemove.Add(this); 
-                if (entity.GetComponent<Stats>() != null && entity.GetComponent<Stats>().display)
+                if (entity.GetComponent<Stats>() != null && entity.display)
                 { Log.AddToStoredLog("The poison ailing " + entity.GetComponent<PronounSet>().subjective + " has subsided."); }
             } 
             else
             {
                 int dmg = CMath.random.Next(strength - 2, strength + 2);
                 entity.GetComponent<OnHit>().LowerHealth(dmg);
-                if (entity.GetComponent<Stats>() != null && entity.GetComponent<Stats>().display) 
+                if (entity.GetComponent<Stats>() != null && entity.display) 
                 { Log.AddToStoredLog("The poison drains " + dmg + " points of " + entity.GetComponent<PronounSet>().possesive + " health away."); }
             }
         }

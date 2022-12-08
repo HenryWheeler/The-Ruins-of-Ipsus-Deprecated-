@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public class Inventory: Component
+    public class SpellCasting: Component
     {
-        public List<Entity> inventory = new List<Entity>();
-        public Inventory() { }
+
     }
 }

@@ -12,7 +12,7 @@ namespace TheRuinsOfIpsus
     {
         private static RLRootConsole rootConsole { get; set; }
         public Menu(RLRootConsole _rootConsole) { rootConsole = _rootConsole; rootConsole.Update += Update; }
-        public void Update(object sender, UpdateEventArgs e)
+        public static void Update(object sender, UpdateEventArgs e)
         {
             if (!Program.gameActive)
             {
@@ -22,8 +22,8 @@ namespace TheRuinsOfIpsus
         }
         public static void MakeSelection(int selection)
         {
-            if (selection == 0) { Program.NewGame(); }
-            else if (selection == 1 && SaveDataManager.savePresent) { SaveDataManager.LoadSave(); }
+            if (selection == 0) { Program.NewGame(); rootConsole.Update -= Update; }
+            else if (selection == 1 && SaveDataManager.savePresent) { SaveDataManager.LoadSave(); rootConsole.Update -= Update; }
             else if (selection == 2) { rootConsole.Close(); }
         }
     }

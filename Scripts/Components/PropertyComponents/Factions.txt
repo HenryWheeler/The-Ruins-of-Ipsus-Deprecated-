@@ -2,3 +2,4 @@
 
 1. Human,
 2. Sea_Beast,
+3. Insect,

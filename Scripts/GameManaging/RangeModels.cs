@@ -15,13 +15,59 @@ namespace TheRuinsOfIpsus
             ClearCoordinates();
             for (uint octant = 0; octant < 8; octant++)
             {
-                Compute(octant, startingPoint.x, startingPoint.y, size, 1, new Slope(1, 1), new Slope(0, 1));
+                ComputeSphere(octant, startingPoint.x, startingPoint.y, size, 1, new Slope(1, 1), new Slope(0, 1));
             }
             if (includeStart) { returnCoordinates.Add(startingPoint); }
             return returnCoordinates;
         }
+        public static List<Coordinate> BeamRangeModel(Coordinate startingPoint, Coordinate target, int range, bool includeStart)
+        {
+            ClearCoordinates();
+            if (CMath.Distance(startingPoint, target) > range) { return null; }
+            returnCoordinates = ReturnLine(startingPoint, target);
+            if (!includeStart) { returnCoordinates.Remove(startingPoint); }
+            return returnCoordinates;
+        }
         public static void ClearCoordinates() { returnCoordinates.Clear(); }
-        static void Compute(uint octant, int oX, int oY, int rangeLimit, int x, Slope top, Slope bottom)
+        public static List<Coordinate> ReturnLine(Coordinate origin, Coordinate target)
+        {
+            List<Coordinate> coordinates = new List<Coordinate>();
+            int t;
+            int x = origin.x; int y = origin.y;
+            int delta_x = target.x - origin.x; int delta_y = target.y - origin.y;
+            int abs_delta_x = Math.Abs(delta_x); int abs_delta_y = Math.Abs(delta_y);
+            int sign_x = Math.Sign(delta_x); int sign_y = Math.Sign(delta_y);
+            bool hasConnected = false;
+
+            if (abs_delta_x > abs_delta_y)
+            {
+                t = abs_delta_y * 2 - abs_delta_x;
+                do
+                {
+                    if (t >= 0) { y += sign_y; t -= abs_delta_x * 2; }
+                    x += sign_x;
+                    t += abs_delta_y * 2;
+                    coordinates.Add(new Coordinate(x, y));
+                    if (x == target.x && y == target.y) { hasConnected = true; }
+                }
+                while (!hasConnected);
+            }
+            else
+            {
+                t = abs_delta_x * 2 - abs_delta_y;
+                do
+                {
+                    if (t >= 0) { x += sign_x; t -= abs_delta_y * 2; }
+                    y += sign_y;
+                    t += abs_delta_x * 2;
+                    coordinates.Add(new Coordinate(x, y));
+                    if (x == target.x && y == target.y) { hasConnected = true; }
+                }
+                while (!hasConnected);
+            }
+            return coordinates;
+        }
+        static void ComputeSphere(uint octant, int oX, int oY, int rangeLimit, int x, Slope top, Slope bottom)
         {
             for (; (uint)x <= (uint)rangeLimit; x++)
             {
@@ -45,7 +91,7 @@ namespace TheRuinsOfIpsus
                     }
 
                     bool inRange = rangeLimit < 0 || CMath.Distance(oX, oY, tx, ty) <= rangeLimit;
-                    if (inRange && (y != topY || top.Y * x >= top.X * y) && (y != bottomY || bottom.Y * x <= bottom.X * y))
+                    if (CMath.CheckBounds(tx, ty) && inRange && (y != topY || top.Y * x >= top.X * y) && (y != bottomY || bottom.Y * x <= bottom.X * y))
                     {
                         returnCoordinates.Add(new Coordinate(tx, ty));
                     }
@@ -59,7 +105,7 @@ namespace TheRuinsOfIpsus
                             {
                                 Slope newBottom = new Slope(y * 2 + 1, x * 2 - 1);
                                 if (!inRange || y == bottomY) { bottom = newBottom; break; }
-                                else { Compute(octant, oX, oY, rangeLimit, x + 1, top, newBottom); }
+                                else { ComputeSphere(octant, oX, oY, rangeLimit, x + 1, top, newBottom); }
                             }
                             wasOpaque = 1;
                         }

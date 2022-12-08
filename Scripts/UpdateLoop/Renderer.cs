@@ -13,13 +13,13 @@ namespace TheRuinsOfIpsus
         public static int mapWidth;
         public static int mapHeight;
         private static RLConsole messageConsole;
-        private static int messageWidth;
+        public static int messageWidth;
         private static int messageHeight;
         private static RLConsole rogueConsole;
-        private static int rogueWidth;
+        public static int rogueWidth;
         private static int rogueHeight;
         private static RLConsole actionConsole;
-        private static int actionWidth;
+        public static int actionWidth;
         private static int actionHeight;
         public static bool inventoryOpen = false;
         public static bool threadRunning = false;
@@ -46,14 +46,8 @@ namespace TheRuinsOfIpsus
             actionWidth = _actionWidth;
             actionHeight = _actionHeight;
             rootConsole.Render += Render;
-
-            CreateConsoleBorder(messageConsole);
-            messageConsole.Print(11, 0, " Message Log ", RLColor.White);
-            CreateConsoleBorder(rogueConsole);
-            rogueConsole.Print(14, 0, " The Rogue @ ", RLColor.White);
-            CreateConsoleBorder(actionConsole);
-            actionConsole.Print(33, 0, " Actions ", RLColor.White);
         }
+        public static bool CheckIfInRenderDistance(Coordinate coordinate) { if (coordinate.x > maxX || coordinate.x < minX || coordinate.y > maxY || coordinate.y < minY) { return false; } else { return true; } }
         public void Render(object sender, UpdateEventArgs e)
         {
             rootConsole.Clear();
@@ -70,7 +64,11 @@ namespace TheRuinsOfIpsus
         public void RenderMenu()
         {
             CreateConsoleBorder(rootConsole);
-            rootConsole.Print((rootConsole.Width / 2) - 9, (rootConsole.Height / 3) - 15, "The Ruins Of Ipsus", RLColor.White);
+            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 14, " ______  _             ____         __                   ___   __                          ", RLColor.White);
+            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 13, "|__  __|| |__   ____  |__  | __ __ |__| ___  ____   ___ | __| |  | ____  ____  __ __  ____ ", RLColor.White);
+            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 12, "  |  |  | |  | | __ | |   _||  |  ||  ||   ||  __| | _ ||  _| |  || __ ||  __||  |  ||  __|", RLColor.White);
+            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 11, "  |  |  |  _  || ___| | | | |  |  ||  || | ||___ | ||_||| |   |  ||  __||___ ||  |  ||___ |", RLColor.White);
+            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 10, "  |__|  |_| |_||____| |_|_| |_____||__||_|_||____| |___||_|   |__||_|   |____||_____||____|", RLColor.White);
             rootConsole.Print((rootConsole.Width / 2) - 7, (rootConsole.Height / 2) - 6, "New Game: [N]", RLColor.White);
             if (SaveDataManager.savePresent) { rootConsole.Print((rootConsole.Width / 2) - 10, (rootConsole.Height / 2) - 3, "Load Save Game: [L]", RLColor.White); }
             else { rootConsole.Print((rootConsole.Width / 2) - 10, (rootConsole.Height / 2) - 3, "Load Save Game: [L]", RLColor.Gray); }
@@ -151,7 +149,7 @@ namespace TheRuinsOfIpsus
         public static void RenderMap()
         {
             //mapConsole.Clear();
-            RLConsole.Blit(mapConsole, 0, 0, mapWidth, mapHeight, rootConsole, 0, 0);
+            RLConsole.Blit(mapConsole, 0, 0, mapWidth, mapHeight, rootConsole, messageWidth, 0);
 
             int y = 0;
             for (int ty = minY; ty < maxY; ty++)
@@ -164,7 +162,7 @@ namespace TheRuinsOfIpsus
                         Tile tile = Map.map[tx, ty];
                         Visibility visibility = tile.GetComponent<Visibility>();
                         if (Map.sfx[tx, ty] != null) { Map.sfx[tx, ty].GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
-                        if (!visibility.visible && !visibility.explored) { mapConsole.Set(x, y, RLColor.Black, RLColor.Black, tile.GetComponent<Draw>().character); }
+                        else if (!visibility.visible && !visibility.explored) { mapConsole.Set(x, y, RLColor.Black, RLColor.Black, tile.GetComponent<Draw>().character); }
                         else if (!visibility.visible && visibility.explored) { Draw draw = tile.GetComponent<Draw>(); mapConsole.Set(x, y, ColorFinder.ColorPicker("Dark_Gray"), RLColor.Blend(RLColor.Black, ColorFinder.ColorPicker(draw.bColor), .55f), draw.character); }
                         else if (tile.actor != null) { tile.actor.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
                         else if (tile.item != null) { tile.item.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
@@ -177,11 +175,11 @@ namespace TheRuinsOfIpsus
                 y++;
             }
             CreateConsoleBorder(mapConsole);
-            mapConsole.Print(37, 0, " Map ", RLColor.White);
+            mapConsole.Print((mapWidth / 2) - 3, 0, " Map ", RLColor.White);
         }
         public static void RenderLog()
         {
-            RLConsole.Blit(messageConsole, 0, 0, messageWidth, messageHeight, rootConsole, mapWidth, 0);
+            RLConsole.Blit(messageConsole, 0, 0, messageWidth, messageHeight, rootConsole, 0, 0);
         }
         public static void RenderRogue()
         {
@@ -189,7 +187,7 @@ namespace TheRuinsOfIpsus
         }
         public static void RenderAction()
         {
-            RLConsole.Blit(actionConsole, 0, 0, actionWidth, actionHeight, rootConsole, 0, mapHeight);
+            RLConsole.Blit(actionConsole, 0, 0, actionWidth, actionHeight, rootConsole, 0, messageHeight);
         }
         public static void CreateConsoleBorder(RLConsole console)
         {

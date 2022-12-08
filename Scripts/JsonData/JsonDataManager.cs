@@ -12,9 +12,8 @@ namespace TheRuinsOfIpsus
     public class JsonDataManager
     {
         private static JsonSerializerSettings options;
-        private static string path { get; set; }
-        private static string itemPath { get; set; }
-        public static int totalEntity = 0;
+        private static string entityPath { get; set; }
+        private static string tablePath { get; set; }
         public JsonDataManager()
         {
             options = new JsonSerializerSettings()
@@ -23,19 +22,39 @@ namespace TheRuinsOfIpsus
                 Formatting = Formatting.Indented,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             };
-
-            path = Path.Combine(Environment.CurrentDirectory, "EntityData");
+            entityPath = Path.Combine(Environment.CurrentDirectory, "EntityData");
+            tablePath = Path.Combine(Environment.CurrentDirectory, "TableData");
         }
-        public static Entity ReturnEntity(int uID, int type)
+        public static List<Entity> PullAllEntities()
         {
-            totalEntity++;
-            string pullData = File.ReadAllText(Path.Combine(path, "Entity-" + type + "-" + uID + ".json"));
+            List<Entity> pullData = new List<Entity>();
+            foreach (string filePath in Directory.GetFiles(entityPath)) { JsonConvert.DeserializeObject<Entity>(File.ReadAllText(filePath), options); }
+            return pullData;
+        }
+        public static List<SpawnTable> PullAllTables()
+        {
+            List<SpawnTable> pullData = new List<SpawnTable>();
+            foreach (string filePath in Directory.GetFiles(tablePath)) 
+            { 
+                SpawnTable table = JsonConvert.DeserializeObject<SpawnTable>(File.ReadAllText(filePath), options);
+                pullData.Add(table);
+            }
+            return pullData;
+        }
+        public static Entity ReturnEntity(int uID)
+        {
+            string pullData = File.ReadAllText(Path.Combine(entityPath, "Entity-" + uID + ".json"));
             return new Entity(JsonConvert.DeserializeObject<Entity>(pullData, options));
         }
-        public static void SaveEntity(Entity entity, int type)
+        public static void SaveEntity(Entity entity)
         {
-            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-            File.WriteAllText(Path.Combine(path, "Entity-" + type + "-" + entity.uID + ".json"), JsonConvert.SerializeObject(entity, options));
+            if (!Directory.Exists(entityPath)) Directory.CreateDirectory(entityPath);
+            File.WriteAllText(Path.Combine(entityPath, "Entity-"+ entity.uID + ".json"), JsonConvert.SerializeObject(entity, options));
+        }
+        public static void SaveTable(SpawnTable table)
+        {
+            if (!Directory.Exists(tablePath)) Directory.CreateDirectory(tablePath);
+            File.WriteAllText(Path.Combine(tablePath, table.name + ".json"), JsonConvert.SerializeObject(table, options));
         }
     }
 }

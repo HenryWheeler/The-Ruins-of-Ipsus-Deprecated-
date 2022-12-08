@@ -18,10 +18,13 @@ namespace TheRuinsOfIpsus
         {
             int current = 0;
             Node[,] map = new Node[Program.gameMapWidth, Program.gameMapHeight];
-            foreach (Tile tile in Map.map)
+            foreach (Entity tile in World.tiles)
             {
-                Coordinate tileCoordinate = tile.GetComponent<Coordinate>();
-                if (CMath.CheckBounds(tileCoordinate.x, tileCoordinate.y)) { map[tileCoordinate.x, tileCoordinate.y] = new Node(tileCoordinate.x, tileCoordinate.y, 1000); }
+                if (tile != null)
+                {
+                    Coordinate tileCoordinate = tile.GetComponent<Coordinate>();
+                    if (CMath.CheckBounds(tileCoordinate.x, tileCoordinate.y)) { map[tileCoordinate.x, tileCoordinate.y] = new Node(tileCoordinate.x, tileCoordinate.y, 1000); }
+                }  
             }
             foreach (Entity entity in coordinates) 
             { Coordinate coordinate = entity.GetComponent<Coordinate>(); if (CMath.CheckBounds(coordinate.x, coordinate.y)) { map[coordinate.x, coordinate.y].v = 0; } }
@@ -38,12 +41,13 @@ namespace TheRuinsOfIpsus
                         {
                             for (int x = node.x - 1; x <= node.x + 1; x++)
                             {
-                                if (CMath.CheckBounds(x, y) && Map.map[x, y].moveType != 0)
+                                if (node != null && CMath.CheckBounds(x, y) && World.tiles[x, y, 0].GetComponent<Traversable>().terrainType != 0)
                                 {
                                     if (map[x, y].v > current)
                                     {
-                                        if (Map.map[x, y].actor == null) { map[x, y].v = current + 1; finalNode = node; }
-                                        else { map[x, y].v = current + 70; finalNode = node; }
+                                        map[x, y].v = current + 1; finalNode = node;
+                                        //if (Map.map[x, y].actor == null) { map[x, y].v = current + 1; finalNode = node; }
+                                        //else { map[x, y].v = current + 70; finalNode = node; }
                                         //Map.map[x, y].GetComponent<Draw>().character = (char)current;
                                     }
                                     else { continue; }
@@ -61,11 +65,14 @@ namespace TheRuinsOfIpsus
         public static void CombineThenCreate(Node[,] map1, Node[,] map2, string name)
         {
             Node[,] map = new Node[Program.gameMapWidth, Program.gameMapHeight];
-            foreach (Tile tile in Map.map)
+            foreach (Entity tile in World.tiles)
             {
-                Coordinate tileCoordinate = tile.GetComponent<Coordinate>();
-                if (CMath.CheckBounds(tileCoordinate.x, tileCoordinate.y) && map1[tileCoordinate.x, tileCoordinate.y] != null && map2[tileCoordinate.x, tileCoordinate.y] != null) 
-                { map[tileCoordinate.x, tileCoordinate.y] = new Node(tileCoordinate.x, tileCoordinate.y, map1[tileCoordinate.x, tileCoordinate.y].v + map2[tileCoordinate.x, tileCoordinate.y].v); }
+                if (tile != null)
+                {
+                    Coordinate tileCoordinate = tile.GetComponent<Coordinate>();
+                    if (CMath.CheckBounds(tileCoordinate.x, tileCoordinate.y) && map1[tileCoordinate.x, tileCoordinate.y] != null && map2[tileCoordinate.x, tileCoordinate.y] != null)
+                    { map[tileCoordinate.x, tileCoordinate.y] = new Node(tileCoordinate.x, tileCoordinate.y, map1[tileCoordinate.x, tileCoordinate.y].v + map2[tileCoordinate.x, tileCoordinate.y].v); }
+                }
             }
             AddMap(map, name);
         }

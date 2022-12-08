@@ -28,31 +28,6 @@ namespace TheRuinsOfIpsus
             string savePath = Path.Combine(path, directoryName);
             if (File.Exists(Path.Combine(savePath, "DebugSaveFile.json"))) { savePresent = true; }
         }
-        public static void CreateDebugSave(Player _player)
-        {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            path = Path.Combine(path, directoryName);
-            if (!Directory.Exists(path)) { Directory.CreateDirectory(path); }
-
-            string saveData = JsonConvert.SerializeObject(_player, options);
-            File.WriteAllText(Path.Combine(path, "DebugSaveFile.json"), saveData);
-        }
-        public static void LoadDebugSave(Player _player)
-        {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string savePath = Path.Combine(path, directoryName);
-
-            Coordinate coordinate = _player.GetComponent<Coordinate>();
-            Map.map[coordinate.x, coordinate.y].actor = null;
-            TurnManager.RemoveActor(_player.GetComponent<TurnFunction>());
-            _player.GetComponent<TurnFunction>().turnActive = false;
-            Program.rootConsole.Update -= _player.Update;
-
-            string pullData = File.ReadAllText(Path.Combine(savePath, "DebugSaveFile.json"));
-
-            Player saveData = JsonConvert.DeserializeObject<Player>(pullData, options);
-            Program.ReloadPlayer(saveData.components);
-        }
         public static void CreateSave(Player _player)
         {
             string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);

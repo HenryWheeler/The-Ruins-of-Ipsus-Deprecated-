@@ -8,46 +8,55 @@ namespace TheRuinsOfIpsus
 {
     public class FieldGenerator: AGenerator
     {
-        public void CreateMap(int _mapWidth, int _mapHeight)
+        public void CreateMap(int _startX, int _startY, int _startZ, int _mapWidth, int _mapHeight, int strength)
         {
+            startX = _startX;
+            startY = _startY;
+            startZ = _startZ;
             mapWidth = _mapWidth; mapHeight = _mapHeight;
-            Map.outside = true;
+            SetAllWalls();
 
-            for (int x = 0; x < mapWidth; x++)
+            for (int x = startX * mapWidth; x < (startX * mapWidth) + mapWidth; x++)
             {
-                for (int y = 0; y < mapHeight; y++)
+                for (int y = startY * mapHeight; y < (startY * mapHeight) + mapHeight; y++)
                 {
-                    if (x >= 1 && x < mapWidth - 1 && y >= 1 && y < mapHeight - 1)
+                    if (CMath.CheckBounds(x, y))
                     {
-                        int probability = CMath.seed.Next(0, 100);
+                        int probability = World.seed.Next(0, 100);
                         if (probability > 80) { SetTile(x, y, '"', "Grass", "Soft Green Grass.", "Dark_Green", "Black", false, 1); }
                         else if (probability > 60) { SetTile(x, y, '`', "Grass", "Soft Green Grass.", "Light_Green", "Black", false, 1); }
                         else if (probability == 1) { CreateTreePatch(x, y); }
                         else { SetTile(x, y, '.', "Bare Ground", "The bare dirt ground.", "Brown", "Black", false, 1); }
 
-                        probability = CMath.seed.Next(0, 3000);
+                        probability = World.seed.Next(0, 3000);
                         if (probability == 1500) { CreatePond(x, y); }
                         else if (probability == 2000) { CreateBezierCurve(x, 1, 1, y); }
                         else if (probability < 500 && probability > 495) { SetTile(x, y, '*', "Rock", "A solid hunk of granite.", "Light_Gray", "Dark_Gray", false, 0); }
 
-                        if (Map.map[x, y].GetComponent<Description>().name == "Stone Wall") { SetTile(x, y, '.', "Bare Ground", "The bare dirt ground.", "Brown", "Black", false, 1); }
+                        if (Map.map[x, y] == null) { SetTile(x, y, '.', "Bare Ground", "The bare dirt ground.", "Brown", "Black", false, 1); }
                     }
                 }
             }
+
+            string table = "Field-" + strength.ToString();
+            //FillChunk(table, World.seed.Next(6, 10));
         }
         public override void SetAllWalls()
         {
-            for (int x = 0; x < mapWidth; x++)
+            for (int x = startX * mapWidth; x < (startX * mapWidth) + mapWidth; x++)
             {
-                for (int y = 0; y < mapHeight; y++)
+                for (int y = startY * mapHeight; y < (startY * mapHeight) + mapHeight; y++)
                 {
-                    SetTile(x, y, '#', "Stone Wall", "A cold stone wall.", "White", "Gray", true, 0);
+                    int probability = World.seed.Next(0, 100);
+                    if (probability > 80) { SetTile(x, y, '"', "Grass", "Soft Green Grass.", "Dark_Green", "Black", false, 1); }
+                    else if (probability > 60) { SetTile(x, y, '`', "Grass", "Soft Green Grass.", "Light_Green", "Black", false, 1); }
+                    else { SetTile(x, y, '.', "Bare Ground", "The bare dirt ground.", "Brown", "Black", false, 1); }
                 }
             }
         }
         public void CreateTreePatch(int _x, int _y)
         {
-            int size = CMath.seed.Next(1, 4);
+            int size = World.seed.Next(1, 4);
 
             for (int x = _x - size; x < _x + size; x++)
             {
@@ -55,21 +64,21 @@ namespace TheRuinsOfIpsus
                 {
                     if (CMath.CheckBounds(x, y))
                     {
-                        if (CMath.seed.Next(1, 100) > 50) { SetTile(x, y, (char)20, "Oak Tree", "A solid sturdy oak.", "Dark_Green", "Black", true, 0); }
+                        if (World.seed.Next(1, 100) > 50) { SetTile(x, y, (char)20, "Oak Tree", "A solid sturdy oak.", "Dark_Green", "Black", true, 0); }
                     }
                 }
             }
         }
         public void CreatePond(int _x, int _y)
         {
-            int size = CMath.seed.Next(3, 12);
+            int size = World.seed.Next(3, 12);
             for (int x = _x - size; x < _x + size; x++)
             {
                 for (int y = _y - size; y < _y + size; y++)
                 {
-                    if (CMath.CheckBounds(x, y) && CMath.seed.Next(0, 100) > 50)
+                    if (CMath.CheckBounds(x, y) && World.seed.Next(0, 100) > 50)
                     {
-                        if (CMath.seed.Next(0, 100) < 50) { SetTile(x, y, (char)247, "Water", "A murky pool.", "Light_Blue", "Dark_Blue", false, 2); }
+                        if (World.seed.Next(0, 100) < 50) { SetTile(x, y, (char)247, "Water", "A murky pool.", "Light_Blue", "Dark_Blue", false, 2); }
                         else { SetTile(x, y, (char)247, "Water", "A murky pool.", "Light_Blue", "Blue", false, 2); }
                     }
                 }
@@ -88,12 +97,12 @@ namespace TheRuinsOfIpsus
 
                                 if (water > 4)
                                 {
-                                    if (CMath.seed.Next(0, 100) < 50) { SetTile(x, y, (char)247, "Water", "A murky pool.", "Light_Blue", "Dark_Blue", false, 2); }
+                                    if (World.seed.Next(0, 100) < 50) { SetTile(x, y, (char)247, "Water", "A murky pool.", "Light_Blue", "Dark_Blue", false, 2); }
                                     else { SetTile(x, y, (char)247, "Water", "A murky pool.", "Light_Blue", "Blue", false, 2); }
                                 }
                                 else if (water < 4)
                                 {
-                                    int probability = CMath.seed.Next(0, 100);
+                                    int probability = World.seed.Next(0, 100);
                                     if (probability > 80) { SetTile(x, y, '"', "Grass", "Soft Green Grass.", "Dark_Green", "Black", false, 1); }
                                     else if (probability > 60) { SetTile(x, y, '`', "Grass", "Soft Green Grass.", "Light_Green", "Black", false, 1); }
                                     else { SetTile(x, y, '.', "Bare Ground", "The bare dirt ground.", "Brown", "Black", false, 1); }
@@ -112,7 +121,7 @@ namespace TheRuinsOfIpsus
             {
                 for (int y = sY - 1; y <= sY + 1; y++)
                 {
-                    if (x != sX || y != sY) { if (CMath.CheckBounds(x, y) && Map.map[x, y].moveType == 2) { walls++; } }
+                    if (x != sX || y != sY) { if (CMath.CheckBounds(x, y) && Map.map[x, y] != null && Map.map[x, y].moveType == 2) { walls++; } }
                 }
             }
 
@@ -166,8 +175,8 @@ namespace TheRuinsOfIpsus
         {
             int r1x; int r1y;
 
-            r1x = CMath.seed.Next(1, 80);
-            r1y = CMath.seed.Next(1, 70);
+            r1x = World.seed.Next(1, 80);
+            r1y = World.seed.Next(1, 70);
 
             for (float t = 0; t < 1; t += .001f)
             {
@@ -182,7 +191,7 @@ namespace TheRuinsOfIpsus
         }
         public override void CreateStraightPassage(int r1x, int r1y, int r2x, int r2y)
         {
-            if (CMath.seed.Next(0, 1) == 0)
+            if (World.seed.Next(0, 1) == 0)
             {
                 for (int x = Math.Min(r1x, r2x); x <= Math.Max(r1x, r2x); x++)
                 {

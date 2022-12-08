@@ -12,30 +12,35 @@ namespace TheRuinsOfIpsus
         private int roomsToGenerate = 15;
         private int minRoomSize = 5;
         private int maxRoomSize = 12;
-        public void CreateMap(int _mapWidth, int _mapHeight)
+        public void CreateMap(int _startX, int _startY, int _startZ, int _mapWidth, int _mapHeight, int strength)
         {
+            startX = _startX;
+            startY = _startY;
+            startZ = _startZ;
             mapWidth = _mapWidth; mapHeight = _mapHeight;
-            Map.outside = false;
 
             SetAllWalls();
 
             for (int i = 0; i < roomsToGenerate; i++)
             {
-                int xSP = CMath.seed.Next(0, mapWidth);
-                int ySP = CMath.seed.Next(0, mapHeight);
-                int rW = CMath.seed.Next(minRoomSize, maxRoomSize);
-                int rH = CMath.seed.Next(minRoomSize, maxRoomSize);
+                int xSP = World.seed.Next(0, mapWidth);
+                int ySP = World.seed.Next(0, mapHeight);
+                int rW = World.seed.Next(minRoomSize, maxRoomSize);
+                int rH = World.seed.Next(minRoomSize, maxRoomSize);
 
                 if (!CheckIfHasSpace(xSP, ySP, xSP + rW - 1, ySP + rH - 1)) { i--; continue; }
                 CreateRoom(xSP, ySP, rW, rH);
             }
-            CreateConnections(2, 0);
+            //CreateConnections(2, 0);
+
+            string table = "Dungeon-" + strength.ToString();
+            //FillChunk(table, World.seed.Next(4, 10));
         }
         public override void SetAllWalls()
         {
-            for (int x = 0; x < mapWidth; x++)
+            for (int x = startX * mapWidth; x < (startX * mapWidth) + mapWidth; x++)
             {
-                for (int y = 0; y < mapHeight; y++)
+                for (int y = startY * mapHeight; y < (startY * mapHeight) + mapHeight; y++)
                 {
                     SetTile(x, y, '#', "Stone Wall", "A cold stone wall.", "White", "Gray", true, 0);
                 }
@@ -102,20 +107,20 @@ namespace TheRuinsOfIpsus
         {
             int r1x; int r1y;
 
-            r1x = CMath.seed.Next(1, 80);
-            r1y = CMath.seed.Next(1, 70);
+            r1x = World.seed.Next(1, 80);
+            r1y = World.seed.Next(1, 70);
 
             for (float t = 0; t < 1; t += .001f)
             {
                 int x = (int)((1 - t) * ((1 - t) * r0x + t * r1x) + t * ((1 - t) * r0x + t * r2x));
                 int y = (int)((1 - t) * ((1 - t) * r0y + t * r1y) + t * ((1 - t) * r0y + t * r2y));
-                if (CMath.CheckBounds(x, y)) { if (CMath.seed.Next(0, 100) < 50) { SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Gray_Blue", "Black", false, 1); } 
+                if (CMath.CheckBounds(x, y)) { if (World.seed.Next(0, 100) < 50) { SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Gray_Blue", "Black", false, 1); } 
                     else { SetTile(x, y, '`', "Stone Floor", "A simple stone floor.", "Light_Gray_Blue", "Black", false, 1); } }
             }
         }
         public override void CreateStraightPassage(int r1x, int r1y, int r2x, int r2y)
         {
-            if (CMath.seed.Next(0, 1) == 0)
+            if (World.seed.Next(0, 1) == 0)
             {
                 for (int x = Math.Min(r1x, r2x); x <= Math.Max(r1x, r2x); x++)
                 {

@@ -60,44 +60,6 @@ namespace TheRuinsOfIpsus
                 return false;
             }
         }
-        public static List<Coordinate> ReturnLine(Coordinate origin, Coordinate target)
-        {
-            List<Coordinate> coordinates = new List<Coordinate>();
-            int t;
-            int x = origin.x; int y = origin.y;
-            int delta_x = target.x - origin.x; int delta_y = target.y - origin.y;
-            int abs_delta_x = Math.Abs(delta_x); int abs_delta_y = Math.Abs(delta_y);
-            int sign_x = Math.Sign(delta_x); int sign_y = Math.Sign(delta_y);
-            bool hasConnected = false;
-
-            if (abs_delta_x > abs_delta_y)
-            {
-                t = abs_delta_y * 2 - abs_delta_x;
-                do
-                {
-                    if (t >= 0) { y += sign_y; t -= abs_delta_x * 2; }
-                    x += sign_x;
-                    t += abs_delta_y * 2;
-                    coordinates.Add(new Coordinate(x, y));
-                    if (x == target.x && y == target.y) { hasConnected = true; }
-                }
-                while (!hasConnected);
-            }
-            else
-            {
-                t = abs_delta_x * 2 - abs_delta_y;
-                do
-                {
-                    if (t >= 0) { x += sign_x; t -= abs_delta_y * 2; }
-                    y += sign_y;
-                    t += abs_delta_x * 2;
-                    coordinates.Add(new Coordinate(x, y));
-                    if (x == target.x && y == target.y) { hasConnected = true; }
-                }
-                while (!hasConnected);
-            }
-            return coordinates;
-        }
         public static AI ReturnAI(Entity entityRef)
         {
             foreach (Component component in entityRef.components)
@@ -134,6 +96,7 @@ namespace TheRuinsOfIpsus
                     }
                 }
             }
+            Renderer.CreateConsoleBorder(console);
         }
         public static bool CheckBounds(int x, int y)
         {

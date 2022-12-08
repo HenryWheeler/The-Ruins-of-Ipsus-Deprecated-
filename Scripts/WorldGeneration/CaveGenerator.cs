@@ -13,50 +13,55 @@ namespace TheRuinsOfIpsus
         private int wallsNeeded = 4;
         private int randomFill;
         private int smooth = 5;
-        public void CreateMap(int _mapWidth, int _mapHeight)
+        public void CreateMap(int _startX, int _startY, int _startZ, int _mapWidth, int _mapHeight, int strength)
         {
+            startX = _startX;
+            startY = _startY;
+            startZ = _startZ;
             mapWidth = _mapWidth; mapHeight = _mapHeight;
-            randomFill = CMath.seed.Next(46, 52);
-            Map.outside = false;
+            randomFill = World.seed.Next(48, 52);
             SetAllWalls();
 
-            for (int x = 0; x < mapWidth; x++)
+            for (int x = startX * mapWidth; x < (startX * mapWidth) + mapWidth; x++)
             {
-                for (int y = 0; y < mapHeight; y++)
+                for (int y = startY * mapHeight; y < (startY * mapHeight) + mapHeight; y++)
                 {
-                    if (x > 1 && x < mapWidth - 2 && y > 1 && y < mapHeight - 2)
+                    if (CMath.CheckBounds(x, y))
                     {
-                        if (CMath.seed.Next(0, 100) < randomFill) { if (CMath.seed.Next(0, 100) < 50) { SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Gray_Blue", "Black", false, 1); } 
+                        if (World.seed.Next(0, 100) < randomFill) { if (World.seed.Next(0, 100) < 50) { SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Gray_Blue", "Black", false, 1); } 
                             else { SetTile(x, y, '`', "Stone Floor", "A simple stone floor.", "Light_Gray_Blue", "Black", false, 1); } }
                     }
                 }
             }
             for (int z = 0; z < smooth; z++) { SmoothMap(); }
-            CreateConnections(2, 2);
+            //CreateConnections(2, 2);
+
+            string table = "Cave-" + strength.ToString();
+            //FillChunk(table, World.seed.Next(6, 10));
         }
         public override void SetAllWalls()
         {
-            for (int x = 0; x < mapWidth; x++)
+            for (int x = startX * mapWidth; x < (startX * mapWidth) + mapWidth; x++)
             {
-                for (int y = 0; y < mapHeight; y++)
+                for (int y = startY * mapHeight; y < (startY * mapHeight) + mapHeight; y++)
                 {
-                    if (CMath.seed.Next(0, 100) < 50) { SetTile(x, y, '#', "Stone Wall", "A cold stone wall.", "Dark_Gray", "Purple_Gray", true, 0); }
-                    else { SetTile(x, y, '#', "Stone Wall", "A cold stone wall.", "Dark_Gray", "Light_Purple_Gray", true, 0); }
+                    if (World.seed.Next(0, 100) < 50) { SetTile(x, y, '#', "Stone Wall", "A cold stone wall.", "Light_Gray_Blue", "Black", true, 0); }
+                    else { SetTile(x, y, '#', "Stone Wall", "A cold stone wall.", "Light_Gray_Blue", "Black", true, 0); }
                 }
             }
         }
         public void SmoothMap()
         {
-            for (int x = 0; x < mapWidth; x++)
+            for (int x = startX * mapWidth; x < (startX * mapWidth) + mapWidth; x++)
             {
-                for (int y = 0; y < mapHeight; y++)
+                for (int y = startY * mapHeight; y < (startY * mapHeight) + mapHeight; y++)
                 {
-                    if (x > 1 && x < mapWidth - 2 && y > 1 && y < mapHeight - 2)
+                    if (CMath.CheckBounds(x, y))
                     {
                         int walls = WallCount(x, y);
 
-                        if (walls > wallsNeeded) { if (CMath.seed.Next(0, 100) < 50) { SetTile(x, y, '#', "Stone Wall", "A cold stone wall.", "Dark_Gray", "Purple_Gray", true, 0); } 
-                            else { SetTile(x, y, '#', "Stone Wall", "A cold stone wall.", "Dark_Gray", "Light_Purple_Gray", true, 0); } }
+                        if (walls > wallsNeeded) { if (CMath.seed.Next(0, 100) < 50) { SetTile(x, y, '#', "Stone Wall", "A cold stone wall.", "Light_Gray_Blue", "Black", true, 0); }
+                            else { SetTile(x, y, '#', "Stone Wall", "A cold stone wall.", "Light_Gray_Blue", "Black", true, 0); } }
                         else if (walls < wallsNeeded) { if (CMath.seed.Next(0, 100) < 50) { SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Gray_Blue", "Black", false, 1); } 
                             else { SetTile(x, y, '`', "Stone Floor", "A simple stone floor.", "Light_Gray_Blue", "Black", false, 1); } }
                     }
@@ -125,20 +130,20 @@ namespace TheRuinsOfIpsus
         {
             int r1x; int r1y;
 
-            r1x = CMath.seed.Next(1, 80);
-            r1y = CMath.seed.Next(1, 70);
+            r1x = World.seed.Next(1, 80);
+            r1y = World.seed.Next(1, 70);
 
             for (float t = 0; t < 1; t += .001f)
             {
                 int x = (int)((1 - t) * ((1 - t) * r0x + t * r1x) + t * ((1 - t) * r0x + t * r2x));
                 int y = (int)((1 - t) * ((1 - t) * r0y + t * r1y) + t * ((1 - t) * r0y + t * r2y));
-                if (CMath.CheckBounds(x, y)) { if (CMath.seed.Next(0, 100) < 50) { SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Gray_Blue", "Black", false, 1); } 
+                if (CMath.CheckBounds(x, y)) { if (World.seed.Next(0, 100) < 50) { SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Gray_Blue", "Black", false, 1); } 
                     else { SetTile(x, y, '`', "Stone Floor", "A simple stone floor.", "Light_Gray_Blue", "Black", false, 1); } }
             }
         }
         public override void CreateStraightPassage(int r1x, int r1y, int r2x, int r2y)
         {
-            if (CMath.seed.Next(0, 1) == 0)
+            if (World.seed.Next(0, 1) == 0)
             {
                 for (int x = Math.Min(r1x, r2x); x <= Math.Max(r1x, r2x); x++)
                 {

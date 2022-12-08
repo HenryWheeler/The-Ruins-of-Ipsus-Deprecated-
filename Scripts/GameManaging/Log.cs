@@ -23,6 +23,7 @@ namespace TheRuinsOfIpsus
                 CMath.DisplayToConsole(console, logOut, 1, 1, 0, 0);
                 storedLog.Clear();
             }
+            console.Print(6, 0, " Message Log ", RLColor.White);
         }
         public static void AddToStoredLog(string logAdd, bool display = false)
         {

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace TheRuinsOfIpsus
 {
+    [Serializable]
     public class AnimationFunction: Component
     {
         public Draw[] frame;

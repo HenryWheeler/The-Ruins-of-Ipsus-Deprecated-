@@ -9,22 +9,21 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class TurnFunction: Component
     {
-        public bool turnActive { get; set; }
+        public bool turnActive = false;
         public float actionLeft { get; set; }
-        public bool display { get; set; }
         public void StartTurn()
         { 
             turnActive = true;
             SpecialComponentManager.TriggerTurn(entity, true);
             if (CMath.ReturnAI(entity) != null) { CMath.ReturnAI(entity).EvaluateEnvironment(); } 
-            else if (!display) { EndTurn(); }
-            if (display) { Log.DisplayLog(); StatManager.UpdateStats(entity); } 
+            else if (!entity.display) { EndTurn(); }
+            if (entity.display) { Log.DisplayLog(); StatManager.UpdateStats(entity); } 
         }
         public void EndTurn() 
         { 
             turnActive = false;
             SpecialComponentManager.TriggerTurn(entity, false);
-            if (display)
+            if (entity.display)
             {
                 Coordinate coordinate = entity.GetComponent<Coordinate>();
                 ShadowcastFOV.ClearSight();
@@ -32,7 +31,6 @@ namespace TheRuinsOfIpsus
             }
             TurnManager.ProgressActorTurn(this);
         }
-        public TurnFunction(float _actionLeft, bool _display = false) { turnActive = false; actionLeft = actionLeft; display = _display; }
         public TurnFunction() { }
     }
 }

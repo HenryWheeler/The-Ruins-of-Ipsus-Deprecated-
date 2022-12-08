@@ -19,28 +19,28 @@ namespace TheRuinsOfIpsus
         public static List<List<Entity>> inventoryDisplay = new List<List<Entity>>();
         public InventoryManager(RLConsole _console, Player _player) { console = _console; player = _player; }
         public InventoryManager(Player _player) { player = _player; }
-        public static void GetItem(Entity entity, bool display = false)
+        public static void GetItem(Entity entity)
         {
             Coordinate coordinate = entity.GetComponent<Coordinate>();
             Tile tile = Map.map[coordinate.x, coordinate.y];
             if (tile.item != null)
             {
                 Entity itemRef = tile.item;
-                if (display) Log.AddToStoredLog("You picked up the " + tile.item.GetComponent<Description>().name + ".");
+                if (entity.display) Log.AddToStoredLog("You picked up the " + tile.item.GetComponent<Description>().name + ".");
                 AddToInventory(entity, tile.item); tile.item = null;
                 entity.GetComponent<TurnFunction>().EndTurn();
                 EntityManager.UpdateMap(itemRef);
             }
-            else { if (display) Log.AddToStoredLog("There is nothing to pick up.", true); }
+            else { if (entity.display) Log.AddToStoredLog("There is nothing to pick up.", true); }
         }
-        public static void DropItem(Entity entity, Entity item, bool display = false)
+        public static void DropItem(Entity entity, Entity item)
         {
             Coordinate actorCoordinate = entity.GetComponent<Coordinate>();
             RemoveFromInventory(entity, item);
             Coordinate coordinate = Map.map[actorCoordinate.x, actorCoordinate.y].GetComponent<Coordinate>();
             PlaceItem(coordinate, item);
-            if (item.GetComponent<Equippable>() != null && item.GetComponent<Equippable>().equipped) { UnequipItem(entity, item, display); }
-            if (display) { CloseInventory(); Log.AddToStoredLog("You dropped the " + item.GetComponent<Description>().name + "."); }
+            if (item.GetComponent<Equippable>() != null && item.GetComponent<Equippable>().equipped) { UnequipItem(entity, item); }
+            if (entity.display) { CloseInventory(); Log.AddToStoredLog("You dropped the " + item.GetComponent<Description>().name + "."); }
             entity.GetComponent<TurnFunction>().EndTurn();
         }
         public static void AddToInventory(Entity actor, Entity item)
@@ -55,7 +55,7 @@ namespace TheRuinsOfIpsus
         {
             inventoryOpen = true; player.GetComponent<TurnFunction>().turnActive = false; selection = 0; currentPage = 0;
             StatManager.ClearStats();
-            Renderer.CreateConsoleBorder(console); console.Print(15, 0, " Inventory ", RLColor.White);
+            Renderer.CreateConsoleBorder(console); console.Print((Renderer.rogueWidth / 2) - 5, 0, " Inventory ", RLColor.White);
             Action.InventoryAction(player);
 
             if (player.GetComponent<Inventory>().inventory.Count == 0) { console.Print(2, 2, "Inventory is Empty.", RLColor.White); }
@@ -65,8 +65,7 @@ namespace TheRuinsOfIpsus
         {
             inventoryDisplay.Clear();
             inventoryOpen = false; player.GetComponent<TurnFunction>().turnActive = true;
-            StatManager.DisplayStats();
-            RLKey key = RLKey.Unknown; Action.PlayerAction(player, key);
+            Action.PlayerAction(player);
             StatManager.UpdateStats(player);
         }
         public static void Refresh()
@@ -83,7 +82,7 @@ namespace TheRuinsOfIpsus
             }
             DisplayInventory();
         }
-        public static void EquipItem(Entity entity, Entity item, bool display = false)
+        public static void EquipItem(Entity entity, Entity item)
         {
             if (item.GetComponent<Equippable>() != null)
             {
@@ -91,38 +90,42 @@ namespace TheRuinsOfIpsus
                 {
                     if (entity.GetComponent<BodyPlot>().ReturnSlot(item.GetComponent<Equippable>().slot).item.GetComponent<Equippable>().unequipable)
                     {
-                        UnequipItem(entity, entity.GetComponent<BodyPlot>().ReturnSlot(item.GetComponent<Equippable>().slot).item, display);
+                        UnequipItem(entity, entity.GetComponent<BodyPlot>().ReturnSlot(item.GetComponent<Equippable>().slot).item);
                         item.GetComponent<Equippable>().Equip(entity);
-                        if (display) { Log.AddToStoredLog("You equip the " + item.GetComponent<Description>().name + "."); CloseInventory(); }
+                        if (entity.display) { Log.AddToStoredLog("You equip the " + item.GetComponent<Description>().name + "."); CloseInventory(); }
                         entity.GetComponent<TurnFunction>().EndTurn();
                     }
-                    else if (display) {
+                    else if (entity.display) {
                         Log.AddToStoredLog("You cannot equip the " + item.GetComponent<Description>().name + "because the " + 
                             entity.GetComponent<BodyPlot>().ReturnSlot(item.GetComponent<Equippable>().slot).item.GetComponent<Description>().name + " cannot be unequipped.", true); }
                 }
                 else
                 {
                     item.GetComponent<Equippable>().Equip(entity);
-                    if (display) { Log.AddToStoredLog("You equip the " + item.GetComponent<Description>().name + "."); CloseInventory(); }
+                    if (entity.display) { Log.AddToStoredLog("You equip the " + item.GetComponent<Description>().name + "."); CloseInventory(); }
                     entity.GetComponent<TurnFunction>().EndTurn();
                 }
             }
-            else if (display) { Log.AddToStoredLog("You cannot equip the " + item.GetComponent<Description>().name + ".", true); }
+            else if (entity.display) { Log.AddToStoredLog("You cannot equip the " + item.GetComponent<Description>().name + ".", true); }
         }
-        public static void UnequipItem(Entity entity, Entity item, bool display = false)
+        public static void UnequipItem(Entity entity, Entity item)
         {
             if (item.GetComponent<Equippable>().unequipable)
             {
                 item.GetComponent<Equippable>().Unequip(entity);
-                if (display) { Refresh(); Log.AddToStoredLog("You unequip the " + item.GetComponent<Description>().name + ".", true); }
+                if (entity.display) { Refresh(); Log.AddToStoredLog("You unequip the " + item.GetComponent<Description>().name + ".", true); }
             }
             else { Log.AddToStoredLog("You cannot unequip the " + item.GetComponent<Description>().name + ".", true); }
         }
-        public static void UseItem(Entity entity, Entity item, bool inInventory, bool display = false)
+        public static void UseItem(Entity entity, Entity item, bool inInventory)
         {
-            if (inInventory) { entity.GetComponent<Inventory>().inventory.Remove(item); }
+            if (inInventory)
+            {
+                entity.GetComponent<Inventory>().inventory.Remove(item);
+                if (item.GetComponent<Equippable>() != null && item.GetComponent<Equippable>().equipped) { item.GetComponent<Equippable>().Unequip(entity); }
+            }
             else { Coordinate coordinate = item.GetComponent<Coordinate>(); Map.map[coordinate.x, coordinate.y].item = null; }
-            if (display) { CloseInventory(); }
+            if (entity.display) { CloseInventory(); }
             item.GetComponent<Usable>().Use(entity);
             entity.GetComponent<TurnFunction>().EndTurn();
         }
@@ -165,12 +168,12 @@ namespace TheRuinsOfIpsus
             {
                 string addOn = "";
                 if (item.GetComponent<Equippable>() != null && item.GetComponent<Equippable>().equipped) { addOn = " - Equipped"; }
-                if (selection == x) { output += "X " + item.GetComponent<Description>().name + " " + item.GetComponent<Draw>().fColor + "*" + item.GetComponent<Draw>().character + addOn + " + "; } 
-                else { output += item.GetComponent<Description>().name + " " + item.GetComponent<Draw>().fColor + "*" + item.GetComponent<Draw>().character + addOn + " + "; } 
+                if (selection == x) { output += "X " + item.GetComponent<Description>().name + addOn + " + "; } 
+                else { output += item.GetComponent<Description>().name + addOn + " + "; } 
                 x++;
             }
-            CMath.DisplayToConsole(console, output, 2, 0, 1, 2);
-            console.Print(2, 80, "Page: " + (currentPage + 1) + "/" + inventoryDisplay.Count, RLColor.White);
+            CMath.DisplayToConsole(console, output, 2, 0, 0, 2);
+            console.Print(7, 49, " Page:" + (currentPage + 1) + "/" + inventoryDisplay.Count + " ", RLColor.White);
         }
         public static void MoveSelection(int move)
         {

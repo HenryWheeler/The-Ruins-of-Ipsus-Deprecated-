@@ -49,11 +49,11 @@ namespace TheRuinsOfIpsus
                                 { ai.referenceTarget =  Map.map[tx, ty].actor; ai.mood = "Red*Angry"; return; }
                                 else
                                 {
-                                    if (Map.map[tx, ty].actor.GetComponent<Stats>() != null)
+                                    if (ai.entity.GetComponent<Stats>().acuity <= 10)
                                     {
-                                        foreach (string status in Map.map[tx, ty].actor.GetComponent<Stats>().status)
+                                        foreach (Component status in Map.map[tx, ty].actor.components)
                                         {
-                                            if (ai.hatedEntities.Contains(status)) 
+                                            if (ai.hatedEntities.Contains(status.componentName)) 
                                             { ai.referenceTarget = Map.map[tx, ty].actor; ai.mood = "Red*Angry"; return; }
                                         }
                                     }
@@ -100,16 +100,10 @@ namespace TheRuinsOfIpsus
                 {
                     Map.map[x, y].GetComponent<Visibility>().SetVisible(true);
                     if (!all) { visibleTiles.Add(new Coordinate(x, y)); }
-                    if (Map.map[x, y].item != null) { Map.map[x, y].item.GetComponent<Visibility>().SetVisible(true); }
-                    if (Map.map[x, y].actor != null) { Map.map[x, y].actor.GetComponent<Visibility>().SetVisible(true); }
-                    if (Map.map[x, y].terrain != null) { Map.map[x, y].terrain.GetComponent<Visibility>().SetVisible(true); }
                 }
                 else
                 {
                     Map.map[x, y].GetComponent<Visibility>().SetVisible(false);
-                    if (Map.map[x, y].item != null) { Map.map[x, y].item.GetComponent<Visibility>().SetVisible(false); }
-                    if (Map.map[x, y].actor != null) { Map.map[x, y].actor.GetComponent<Visibility>().SetVisible(false); }
-                    if (Map.map[x, y].terrain != null) { Map.map[x, y].terrain.GetComponent<Visibility>().SetVisible(false); }
                 }
             }
         }
@@ -118,8 +112,6 @@ namespace TheRuinsOfIpsus
             if (CMath.CheckBounds(x, y))
             {
                 if (Map.map[x, y].GetComponent<Visibility>().opaque) { return true; }
-                else if (Map.map[x, y].actor != null && Map.map[x, y].actor.GetComponent<Visibility>().opaque) { return true; }
-                else if (Map.map[x, y].item != null && Map.map[x, y].item.GetComponent<Visibility>().opaque) { return true; }
                 return false;
             }
             return true;

@@ -9,7 +9,7 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class Restrained: OnMoveProperty
     {
-        public override void OnMove(int x1, int y1, int x2, int y2)
+        public override void OnMove(Vector3 initialPosition, Vector3 finalPosition)
         {
             int random = CMath.random.Next(1, 100);
             if (random > 80) 
@@ -21,17 +21,18 @@ namespace TheRuinsOfIpsus
             }
             else 
             {
-                Coordinate coordinate = entity.GetComponent<Coordinate>();
-                int nX = coordinate.x - x1;
-                int nY = coordinate.y - y1;
-                if (CMath.CheckBounds(coordinate.x - nX, coordinate.y - nY))
+                Vector3 vector3 = entity.GetComponent<Coordinate>().vector3;
+                int nX = vector3.x - initialPosition.x;
+                int nY = vector3.y - initialPosition.y;
+                int nZ = vector3.z - initialPosition.z;
+                if (CMath.CheckBounds(vector3.x - nX, vector3.y - nY))
                 {
                     PronounSet pronouns = entity.GetComponent<PronounSet>();
                     if (pronouns.present) { Log.AddToStoredLog(entity.GetComponent<Description>().name + " has failed to free " + pronouns.reflexive + " from " + pronouns.possesive + " restraints."); }
                     else { Log.AddToStoredLog(entity.GetComponent<Description>().name + " have failed to free " + pronouns.reflexive + " from " + pronouns.possesive + " restraints."); }
-                    Map.map[coordinate.x, coordinate.y].actor = null;
-                    coordinate.x -= nX; coordinate.y -= nY;
-                    Map.map[coordinate.x, coordinate.y].actor = entity;
+                    //World.tiles[vector3.x, vector3.y, vector3.z].actor = null;
+                    vector3.x -= nX; vector3.y -= nY; vector3.z -= nZ;
+                    //Map.map[coordinate.x, coordinate.y].actor = entity;
                 }
             }
         }

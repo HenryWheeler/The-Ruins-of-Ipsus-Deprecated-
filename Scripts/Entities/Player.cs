@@ -11,9 +11,7 @@ namespace TheRuinsOfIpsus
     {
         public Player(List<Component> components = null)
         {
-            Program.rootConsole.Update += Update;
             uID = 0;
-            tempID = 0;
 
             if (components != null)
             {
@@ -28,33 +26,22 @@ namespace TheRuinsOfIpsus
                 AddComponent(new Draw("White", "Black", '@'));
                 AddComponent(new Description("You", "It's you."));
                 AddComponent(PronounReferences.pronounSets["Player"]);
-                AddComponent(new Stats(7, 10, 1f, 500, 99, 99, true));
-                AddComponent(new TurnFunction(GetComponent<Stats>().maxAction, true));
-                AddComponent(new Movement(true, true, false, true));
-                AddComponent(new Inventory(true));
+                AddComponent(new Stats(7, 10, 1f, 500, 500, 99, 99));
+                AddComponent(new TurnFunction());
+                AddComponent(new Movement(true, true, false));
+                AddComponent(new Inventory());
                 AddComponent(new BodyPlot("Basic_Humanoid"));
-                AddComponent(new Visibility(false, false, false));
                 AddComponent(new OnHit());
                 AddComponent(new Faction("Human"));
                 AddComponent(new DijkstraProperty());
                 AddComponent(new UpdateCameraOnMove());
+                AddComponent(new PlayerComponent(Program.rootConsole));
 
-                Entity startingWeapon = JsonDataManager.ReturnEntity(2, 1);
+                Entity startingWeapon = JsonDataManager.ReturnEntity(1001);
                 InventoryManager.AddToInventory(this, startingWeapon);
                 Action.PlayerAction(this);  
             }
         }
         public Player() { }
-        public void Update(object sender, UpdateEventArgs e)
-        {
-            RLKeyPress keyPress = Program.rootConsole.Keyboard.GetKeyPress();
-            if (keyPress != null)
-            {
-                if (GetComponent<TurnFunction>().turnActive) { Action.PlayerAction(this, keyPress.Key); }
-                else if (Look.looking) { Action.LookAction(keyPress.Key); }
-                else if (InventoryManager.inventoryOpen) { Action.InventoryAction(this, keyPress.Key); }
-                else if (TargetReticle.targeting) { Action.TargetAction(this, keyPress.Key); }
-            }
-        }
     }
 }

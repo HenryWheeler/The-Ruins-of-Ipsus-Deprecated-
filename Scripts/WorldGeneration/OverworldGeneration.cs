@@ -12,11 +12,12 @@ namespace TheRuinsOfIpsus
         private int wallsNeeded = 4;
         private int randomFill = 52;
         private int smooth = 50;
-        public void CreateOverworld(int _mapWidth, int _mapHeight)
+        public Entity[,] CreateOverworld(int _mapWidth, int _mapHeight)
         {
             mapWidth = _mapWidth; mapHeight = _mapHeight;
-            Map.outside = true;
             SetAllWalls();
+
+            Entity[,] entities = new Entity[mapWidth, mapHeight];
 
             for (int x = 0; x < mapWidth; x++)
             {
@@ -24,7 +25,7 @@ namespace TheRuinsOfIpsus
                 {
                     if (x > 1 && x < mapWidth - 2 && y > 1 && y < mapHeight - 2)
                     {
-                        if (CMath.seed.Next(0, 100) < randomFill)
+                        if (World.seed.Next(0, 100) < randomFill)
                         { SetTile(x, y, '.', "Bare Ground", "The bare dirt ground.", "Brown", "Black", false, 1); }
                     }
                 }
@@ -32,7 +33,7 @@ namespace TheRuinsOfIpsus
 
             List<Entity> water = new List<Entity>();
             List<Entity> land = new List<Entity>();
-            foreach (Tile tile in Map.map) { if (tile != null) { switch (tile.moveType) 
+            foreach (Entity tile in World.tiles) { if (tile != null) { switch (tile.GetComponent<Traversable>().terrainType) 
                     { case 1: { land.Add(tile); break; } 
                         case 2: { water.Add(tile); break; } } } }
             DijkstraMaps.CreateMap(water, "Water", 500); DijkstraMaps.CreateMap(land, "Land", 500);
@@ -42,18 +43,24 @@ namespace TheRuinsOfIpsus
             {
                 if (node != null)
                 {
-                    int random1 = CMath.seed.Next(6, 9);
-                    int random3 = CMath.seed.Next(3, 4);
-                    int random4 = CMath.seed.Next(-3, -1);
-                    if (node.v > random1) { SetTile(node.x, node.y, '^', "Mountain", "A tall spiny peak of stone.", "Gray", "Black", false, 1); }
-                    else if (node.v > 6 && node.v <= random1) { SetTile(node.x, node.y, '*', "Hills", "A series of rolling hills.", "Brown", "Black", true, 0); }
-                    else if (node.v > random3 && node.v <= 6) { SetTile(node.x, node.y, (char)20, "Forest", "A dense patch of scruffy trees.", "Dark_Green", "Black", true, 0); }
-                    else if (node.v > 1 && node.v <= random3) { SetTile(node.x, node.y, '`', "Grasslands", "An open field full of life.", "Light_Green", "Black", false, 1); }
-                    else if (node.v == 1) { SetTile(node.x, node.y, (char)176, "Beach", "A grainy shore of white sand.", "Light_Gray", "Dark_Yellow", false, 1); }
-                    else if (node.v <= 0 && node.v >= random4) { SetTile(node.x, node.y, (char)247, "Shallow Water", "The light water close to shore.", "Light_Blue", "Blue", false, 2); }
-                    else { SetTile(node.x, node.y, (char)247, "Ocean Strong", "The most any sane man will travel in the ocean.", "Blue", "Dark_Blue", false, 2); }
+                    List<Component> components = new List<Component>();
+                    components.Add(new Coordinate(node.x, node.y));
+                    components.Add(new Visibility(false, true, true));
+                    int random1 = World.seed.Next(6, 9);
+                    int random3 = World.seed.Next(3, 4);
+                    int random4 = World.seed.Next(-3, -1);
+                    if (node.v > random1) { components.Add(new Draw("Gray", "Black", '^')); components.Add(new Description("Mountain", "A tall spiny peak of stone.")); components.Add(new Chunk(mapWidth, mapWidth, "Mountain", 1)); }
+                    else if (node.v > 6 && node.v <= random1) { components.Add(new Draw("Brown", "Black", '*')); components.Add(new Description("Hills", "A series of rolling hills.")); components.Add(new Chunk(mapWidth, mapWidth, "Hills", 1)); }
+                    else if (node.v > random3 && node.v <= 6) { components.Add(new Draw("Dark_Green", "Black", (char)20)); components.Add(new Description("Forest", "A dense patch of scruffy trees.")); components.Add(new Chunk(mapWidth, mapWidth, "Forest", 1)); }
+                    else if (node.v > 1 && node.v <= random3) { components.Add(new Draw("Light_Green", "Black", '`')); components.Add(new Description("Grasslands", "An open field full of life.")); components.Add(new Chunk(mapWidth, mapWidth, "Field", 1)); }
+                    else if (node.v == 1) { components.Add(new Draw("Light_Gray", "Dark_Yellow", (char)176)); components.Add(new Description("Beach", "A grainy shore of white sand.")); components.Add(new Chunk(mapWidth, mapWidth, "Shore", 1)); }
+                    else if (node.v <= 0 && node.v >= random4) { components.Add(new Draw("Light_Blue", "Blue", (char)247)); components.Add(new Description("Shallow Water", "The light water close to shore.")); components.Add(new Chunk(mapWidth, mapWidth, "Ocean", 1)); }
+                    else { components.Add(new Draw("Blue", "Dark_Blue", (char)247)); components.Add(new Description("Ocean Strong", "The most any sane man will travel in the ocean.")); components.Add(new Chunk(mapWidth, mapWidth, "Ocean", 2)); }
+                    entities[node.x, node.y] = new Entity(components);
                 }
             }
+
+            return entities;
         }
         public override void SetAllWalls()
         {
@@ -88,7 +95,7 @@ namespace TheRuinsOfIpsus
             {
                 for (int y = sY - 1; y <= sY + 1; y++)
                 {
-                    if (x != sX || y != sY) { if (CMath.CheckBounds(x, y) && Map.map[x, y].moveType == 2) { walls++; } }
+                    if (x != sX || y != sY) { if (CMath.CheckBounds(x, y) && World.tiles[x, y, 0].GetComponent<Traversable>().terrainType == 2) { walls++; } }
                 }
             }
 

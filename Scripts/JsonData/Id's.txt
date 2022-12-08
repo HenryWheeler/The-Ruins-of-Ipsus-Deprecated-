@@ -1,11 +1,15 @@
 ﻿Id Listing
 
-Type followed by UID
+Each number is the entity's UID.
+1-1000 - NPC Entities.
+1001-2000 - Item Entities.
+2001-3000 - Terrain Entities.
 
 Entity Listing:
 
-0-2: Frog
-0-3: Blacklog Spider
-1-1: Test Grass Walk
-1-2: Broken Blade	
-1-3: Test Thing
+0: Player Character
+1: Blacklog Spider
+2: Deepwater Eel
+3: Boring Beetle
+1001: Broken Blade
+1100: Explosive Concoction

@@ -12,8 +12,8 @@ namespace TheRuinsOfIpsus
         public string mood { get; set; }
         public int memory { get; set; }
         public int maxMemory { get; set; }
-        public int evaluationTimer = 0
-;        public string target { get; set; }
+        public int evaluationTimer = 0;
+        public string target { get; set; }
         public Entity referenceTarget { get; set; }
         public List<string> favoredEntities = new List<string>();
         public List<string> hatedEntities = new List<string>();
@@ -26,11 +26,12 @@ namespace TheRuinsOfIpsus
         }
         public void EvaluateEnvironment()
         {
-            if (evaluationTimer > 0) { evaluationTimer--; }
+            Coordinate coordinate = entity.GetComponent<Coordinate>();
+            if (!Renderer.CheckIfInRenderDistance(coordinate))
+            { entity.GetComponent<TurnFunction>().EndTurn(); }
             else
             {
-                Coordinate coordinate = entity.GetComponent<Coordinate>();
-                ShadowcastFOV.Compute(coordinate.x, coordinate.y, entity.GetComponent<Stats>().sight, this, true);
+                ShadowcastFOV.Compute(coordinate.vector3.x, coordinate.vector3.y, entity.GetComponent<Stats>().sight, this, true);
                 if (referenceTarget != null && mood == "Red*Angry")
                 {
                     if (target == null) { target = referenceTarget.GetComponent<Faction>().faction; memory = maxMemory; }
@@ -38,9 +39,9 @@ namespace TheRuinsOfIpsus
                     referenceTarget = null;
                 }
                 else if (memory > 0) { memory--; }
-                else { target = null; mood = "Uncertain"; evaluationTimer = 5; }
+                else { target = null; mood = "Uncertain"; }
+                ExecuteAction();
             }
-            ExecuteAction();
         }
         public abstract void ExecuteAction();
         public void HuntAndAttack()
@@ -49,9 +50,9 @@ namespace TheRuinsOfIpsus
             {
                 Coordinate coordinate = entity.GetComponent<Coordinate>();
                 Node targetCoordinate = DijkstraMaps.PathFromMap(entity, target);
-                if (targetCoordinate.v == 0 && Map.map[coordinate.x + targetCoordinate.x, coordinate.y + targetCoordinate.y].actor != null &&
-                    Map.map[coordinate.x + targetCoordinate.x, coordinate.y + targetCoordinate.y].actor != entity)
-                { AttackManager.MeleeAllStrike(entity, Map.map[coordinate.x + targetCoordinate.x, coordinate.y + targetCoordinate.y].actor); }
+                if (targetCoordinate.v == 0 && Map.map[coordinate.vector3.x + targetCoordinate.x, coordinate.vector3.y + targetCoordinate.y].actor != null &&
+                    Map.map[coordinate.vector3.x + targetCoordinate.x, coordinate.vector3.y + targetCoordinate.y].actor != entity)
+                { AttackManager.MeleeAllStrike(entity, Map.map[coordinate.vector3.x + targetCoordinate.x, coordinate.vector3.y + targetCoordinate.y].actor); }
                 else { entity.GetComponent<Movement>().Move(targetCoordinate.x, targetCoordinate.y); }
             } else { entity.GetComponent<TurnFunction>().EndTurn(); }
         }

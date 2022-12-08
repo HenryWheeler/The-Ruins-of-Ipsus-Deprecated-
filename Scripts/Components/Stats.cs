@@ -14,10 +14,11 @@ namespace TheRuinsOfIpsus
         public float maxAction { get; set; }
         public int hp { get; set; }
         public int hpCap { get; set; }
+        public int mp { get; set; }
+        public int mpCap { get; set; }
         public int strength { get; set; }
         public int acuity { get; set; }
-        public bool display { get; set; }
-        public List<string> status = new List<string>();
+        public List<string> immunities = new List<string>();
         public void ModifyAllStats(Entity entityRef, bool add)
         {
             Stats stats = entityRef.GetComponent<Stats>();
@@ -28,6 +29,8 @@ namespace TheRuinsOfIpsus
                 stats.maxAction += maxAction;
                 stats.hp += hp;
                 stats.hp += hpCap;
+                stats.mp += mp;
+                stats.mp += mpCap;
                 stats.strength += strength;
                 stats.acuity += acuity;
             }
@@ -38,16 +41,17 @@ namespace TheRuinsOfIpsus
                 stats.maxAction -= maxAction;
                 stats.hp -= hp;
                 stats.hp -= hpCap;
+                stats.mp -= mp;
+                stats.mp -= mpCap;
                 stats.strength -= strength;
                 stats.acuity -= acuity;
             }
-            if (display) { StatManager.UpdateStats(entity); }
+            if (entity.display) { StatManager.UpdateStats(entity); }
         }
-        public Stats(int _sight, int _ac, float _maxAction, int _hpCap, int _strength, int _acuity, bool _display = false) 
+        public Stats(int _sight, int _ac, float _maxAction, int _hpCap, int _mpCap, int _strength, int _acuity, List<string> _immunities = null) 
         { 
-            sight = _sight; ac = _ac; maxAction = _maxAction; hp = _hpCap; hpCap = _hpCap;
-            strength = _strength; acuity = _acuity;
-            display = display;
+            sight = _sight; ac = _ac; maxAction = _maxAction; hp = _hpCap; hpCap = _hpCap; mp = _mpCap; mpCap = _mpCap;
+            strength = _strength; acuity = _acuity; immunities = _immunities;
         }
         public Stats() { }
     }

@@ -6,44 +6,45 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class World
     {
-        public World(int width, int height, int depth)
+        public World(int width, int height, int depth, int _seed = 0, bool randomSeed = true)
         {
-            chunks = new Chunk[width, height, depth];
-            chunkWidth = Renderer.mapWidth;
-            chunkHeight = Renderer.mapHeight;
-            chunkSeeds = new double[width, height, depth];
-            for (int x = 0; x < width - 1; x++)
+            if (randomSeed) { seed = new Random(); }
+            else { seed = new Random(_seed); }
+            chunkWidth = width;
+            chunkHeight = height;
+            tiles = new Entity[width * chunkWidth, height * chunkHeight, depth];
+            chunks = new OverworldGeneration().CreateOverworld(chunkWidth, chunkHeight);
+            foreach (Entity entity in chunks) 
             {
-                for (int y = 0; y < height - 1; y++)
+                if (entity != null)
                 {
-                    for (int z = 0; z < depth - 1; y++)
-                    {
-                        chunkSeeds[x, y, z] = CMath.seed.NextDouble();
-                    }
+                    Chunk chunk = entity.GetComponent<Chunk>();
+                    Coordinate coordinate = entity.GetComponent<Coordinate>();
+                    ChunkGenerator.CreateChunk(chunk, coordinate.x, coordinate.y, 0);
                 }
             }
         }
-        public static void CreateChunk(int x, int y, int z, string environment)
-        {
-            chunks[x, y, z] = new Chunk(chunkWidth, chunkHeight, environment, chunkSeeds[x, y, z]);
-        }
-        public static Chunk[,,] chunks;
-        public static double[,,] chunkSeeds; 
+        public static Random seed { get; set; }
+        public static Entity[,] chunks;
+        public static Entity[,,] tiles; 
         public static int chunkWidth { get; set; }
         public static int chunkHeight { get; set; }
     }
     [Serializable]
-    public class Chunk
+    public class Chunk: Component
     {
-        public Chunk(int width, int height, string _environment, double seedStart)
+        public int chunkWidth { get; set; }
+        public int chunkHeight { get; set; }
+        public string environment { get; set; }
+        public int strength { get; set; }
+        public Chunk(int _chunkWidth, int _chunkHeight, string _environment, int _strength)
         {
-            tiles = new Tile[width, height];
+            chunkWidth = _chunkWidth;
+            chunkHeight = _chunkHeight;
             environment = _environment;
-            chunkSeed = new Random((int)Math.Floor(seedStart) + (int)Math.Ceiling(seedStart));
+            strength = _strength;
         }
-        public static Tile[,] tiles { get; set; }
-        public static string environment { get; set; }
-        public static Random chunkSeed { get; set; }
+        public Chunk() { }
     }
     [Serializable]
     public class Map
