@@ -8,17 +8,14 @@ namespace TheRuinsOfIpsus
 {
     public class FieldGenerator: AGenerator
     {
-        public void CreateMap(int _startX, int _startY, int _startZ, int _mapWidth, int _mapHeight, int strength)
+        public void CreateMap(int _mapWidth, int _mapHeight, int strength)
         {
-            startX = _startX;
-            startY = _startY;
-            startZ = _startZ;
             mapWidth = _mapWidth; mapHeight = _mapHeight;
             SetAllWalls();
 
-            for (int x = startX * mapWidth; x < (startX * mapWidth) + mapWidth; x++)
+            for (int x = 0; x < mapWidth; x++)
             {
-                for (int y = startY * mapHeight; y < (startY * mapHeight) + mapHeight; y++)
+                for (int y = 0; y < mapHeight; y++)
                 {
                     if (CMath.CheckBounds(x, y))
                     {
@@ -33,19 +30,19 @@ namespace TheRuinsOfIpsus
                         else if (probability == 2000) { CreateBezierCurve(x, 1, 1, y); }
                         else if (probability < 500 && probability > 495) { SetTile(x, y, '*', "Rock", "A solid hunk of granite.", "Light_Gray", "Dark_Gray", false, 0); }
 
-                        if (Map.map[x, y] == null) { SetTile(x, y, '.', "Bare Ground", "The bare dirt ground.", "Brown", "Black", false, 1); }
+                        if (World.tiles[x, y] == null) { SetTile(x, y, '.', "Bare Ground", "The bare dirt ground.", "Brown", "Black", false, 1); }
                     }
                 }
             }
-
+            CreateSurroundingWalls();
             string table = "Field-" + strength.ToString();
-            //FillChunk(table, World.seed.Next(6, 10));
+            CreateStairs();
         }
         public override void SetAllWalls()
         {
-            for (int x = startX * mapWidth; x < (startX * mapWidth) + mapWidth; x++)
+            for (int x = 0; x < mapWidth; x++)
             {
-                for (int y = startY * mapHeight; y < (startY * mapHeight) + mapHeight; y++)
+                for (int y = 0; y < mapHeight; y++)
                 {
                     int probability = World.seed.Next(0, 100);
                     if (probability > 80) { SetTile(x, y, '"', "Grass", "Soft Green Grass.", "Dark_Green", "Black", false, 1); }
@@ -121,56 +118,13 @@ namespace TheRuinsOfIpsus
             {
                 for (int y = sY - 1; y <= sY + 1; y++)
                 {
-                    if (x != sX || y != sY) { if (CMath.CheckBounds(x, y) && Map.map[x, y] != null && Map.map[x, y].moveType == 2) { walls++; } }
+                    if (x != sX || y != sY) { if (CMath.CheckBounds(x, y) && World.tiles[x, y] != null && World.GetTraversable(new Vector2(x, y)).terrainType == 2) { walls++; } }
                 }
             }
 
             return walls;
         }
-        public override void CreateDiagonalPassage(int r1x, int r1y, int r2x, int r2y)
-        {
-            int t;
-            int x = r1x; int y = r1y;
-            int delta_x = r2x - r1x; int delta_y = r2y - r1y;
-            int abs_delta_x = Math.Abs(delta_x); int abs_delta_y = Math.Abs(delta_y);
-            int sign_x = Math.Sign(delta_x); int sign_y = Math.Sign(delta_y);
-            bool hasConnected = false;
-
-            if (abs_delta_x > abs_delta_y)
-            {
-                t = abs_delta_y * 2 - abs_delta_x;
-                do
-                {
-                    if (t >= 0) { y += sign_y; t -= abs_delta_x * 2; }
-                    x += sign_x;
-                    t += abs_delta_y * 2;
-                    if (Map.map[x, y].moveType == 0)
-                    {
-                        SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
-                        SetTile(x + 1, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
-                    }
-                    if (x == r2x && y == r2y) { hasConnected = true; }
-                }
-                while (!hasConnected);
-            }
-            else
-            {
-                t = abs_delta_x * 2 - abs_delta_y;
-                do
-                {
-                    if (t >= 0) { x += sign_x; t -= abs_delta_y * 2; }
-                    y += sign_y;
-                    t += abs_delta_x * 2;
-                    if (Map.map[x, y].moveType == 0)
-                    {
-                        SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
-                        SetTile(x, y + 1, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
-                    }
-                    if (x == r2x && y == r2y) { hasConnected = true; }
-                }
-                while (!hasConnected);
-            }
-        }
+        public override void CreateDiagonalPassage(int r1x, int r1y, int r2x, int r2y) { }
         public override void CreateBezierCurve(int r0x, int r0y, int r2x, int r2y)
         {
             int r1x; int r1y;
@@ -184,35 +138,11 @@ namespace TheRuinsOfIpsus
                 int y = (int)((1 - t) * ((1 - t) * r0y + t * r1y) + t * ((1 - t) * r0y + t * r2y));
                 if (CMath.CheckBounds(x, y))
                 {
-                    if (CMath.seed.Next(0, 100) < 50) { SetTile(x, y, (char)247, "Water", "A murky pool.", "Light_Blue", "Dark_Blue", false, 2); }
+                    if (World.seed.Next(0, 100) < 50) { SetTile(x, y, (char)247, "Water", "A murky pool.", "Light_Blue", "Dark_Blue", false, 2); }
                     else { SetTile(x, y, (char)247, "Water", "A murky pool.", "Light_Blue", "Blue", false, 2); }
                 }
             }
         }
-        public override void CreateStraightPassage(int r1x, int r1y, int r2x, int r2y)
-        {
-            if (World.seed.Next(0, 1) == 0)
-            {
-                for (int x = Math.Min(r1x, r2x); x <= Math.Max(r1x, r2x); x++)
-                {
-                    SetTile(x, r1y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
-                }
-                for (int y = Math.Min(r1y, r2y); y <= Math.Max(r1y, r2y); y++)
-                {
-                    SetTile(r2x, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
-                }
-            }
-            else
-            {
-                for (int y = Math.Min(r1y, r2y); y <= Math.Max(r1y, r2y); y++)
-                {
-                    SetTile(r1x, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
-                }
-                for (int x = Math.Min(r1x, r2x); x <= Math.Max(r1x, r2x); x++)
-                {
-                    SetTile(x, r2y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
-                }
-            }
-        }
+        public override void CreateStraightPassage(int r1x, int r1y, int r2x, int r2y) { }
     }
 }

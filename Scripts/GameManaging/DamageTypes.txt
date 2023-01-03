@@ -1,0 +1,13 @@
+﻿List of Damage/Status Effect Proper Names
+
+Status Effects:
+1. Poison : Green*Poisoned
+2. Restraint : Restrained
+3. Stoning : Gray*Stoned
+
+Damage Types:
+1. Piercing
+2. Slashing
+3. Bludgeoning
+4. Fire
+5. Frost

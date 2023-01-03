@@ -20,12 +20,12 @@ namespace TheRuinsOfIpsus
             }
             entity.ClearCollections();
         }
-        public static void TriggerOnMove(Entity entity, int x1, int y1, int x2, int y2)
+        public static void TriggerOnMove(Entity entity, Vector2 initialPosition, Vector2 finalPosition)
         {
             List<OnMoveProperty> properties = new List<OnMoveProperty>();
             foreach (Component property in entity.components)
             { if (property.GetType().BaseType.Equals(typeof(OnMoveProperty))) { properties.Add((OnMoveProperty)property); } }
-            foreach (OnMoveProperty property in properties) { property.OnMove(x1, y1, x2, y2); }
+            foreach (OnMoveProperty property in properties) { property.OnMove(initialPosition, finalPosition); }
             entity.ClearCollections();
         }
         public static void TriggerOnHit(Entity entity, Entity attacker, Entity target, int dmg, string type, bool attack)
@@ -55,14 +55,6 @@ namespace TheRuinsOfIpsus
             { if (property.GetType().BaseType.Equals(typeof(OnThrowProperty))) { properties.Add((OnThrowProperty)property); } }
             foreach (OnThrowProperty property in properties) { property.OnThrow(entity, landingSite); }
             itemThrown.ClearCollections();
-        }
-        public static void AddAllToEntity(Entity entityToAddTo, Entity entityToAddWith)
-        {
-            foreach (Component component in entityToAddWith.components) { if (component.special) { entityToAddTo.AddComponent(component); } }
-        }
-        public static void RemoveAllFromEntity(Entity entityToSubtractFrom, Entity entityToSubtractdWith)
-        {
-            foreach (Component component in entityToSubtractdWith.components) { if (component.special) { entityToSubtractFrom.RemoveComponent(component); } }
         }
     }
 }

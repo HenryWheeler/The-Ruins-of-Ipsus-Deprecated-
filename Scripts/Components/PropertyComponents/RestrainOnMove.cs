@@ -9,24 +9,25 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class RestrainOnMove: OnMoveProperty
     {
-        public override void OnMove(Vector3 initialPosition, Vector3 finalPosition)
+        public override void OnMove(Vector2 initialPosition, Vector2 finalPosition)
         {
-            int chance = CMath.random.Next(1, 100);
+            int chance = World.random.Next(1, 100);
             if (chance > 75)
             {
-                Vector3 vector3 = entity.GetComponent<Coordinate>().vector3;
-                if (Map.map[coordinate.x, coordinate.y].actor != null)
+                //Vector2 vector3 = entity.GetComponent<Coordinate>().vector2;
+                Traversable traversable = World.GetTraversable(finalPosition);
+                if (traversable.actorLayer != null)
                 {
-                    if (!Map.map[coordinate.x, coordinate.y].actor.GetComponent<Stats>().immunities.Contains("Restraint")) 
+                    if (!traversable.actorLayer.GetComponent<Stats>().immunities.Contains("Restraint")) 
                     {
-                        Map.map[coordinate.x, coordinate.y].actor.AddComponent(new Restrained());
-                        if (Map.map[coordinate.x, coordinate.y].actor.GetComponent<PronounSet>().present) { Log.AddToStoredLog(Map.map[coordinate.x, coordinate.y].actor.GetComponent<Description>().name + " has been restrained in the " + entity.GetComponent<Description>().name + "."); }
-                        else { Log.AddToStoredLog(Map.map[coordinate.x, coordinate.y].actor.GetComponent<Description>().name + " have been restrained in the " + entity.GetComponent<Description>().name + "."); }
-                        Map.map[coordinate.x, coordinate.y].terrain = null;
+                        traversable.actorLayer.GetComponent<OnHit>().statusEffects.Add("Restrained");
+                        if (traversable.actorLayer.GetComponent<PronounSet>().present) { Log.AddToStoredLog(traversable.actorLayer.GetComponent<Description>().name + " has been restrained in the " + entity.GetComponent<Description>().name + "."); }
+                        else { Log.AddToStoredLog(traversable.actorLayer.GetComponent<Description>().name + " have been restrained in the " + entity.GetComponent<Description>().name + "."); }
+                        traversable.obstacleLayer = null;
                     }                       
                 }
             }
         }
-        public RestrainOnMove() { special = true; }
+        public RestrainOnMove() { }
     }
 }

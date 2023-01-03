@@ -1,35 +1,84 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using RLNET;
 
 namespace TheRuinsOfIpsus
 {
     public class Log
     {
-        private static RLConsole console;
-        private static List<string> storedLog = new List<string>();
+        public static RLConsole console;
+        private static Queue<string> log = new Queue<string>();
+        private static int maxLogCount = 10;
         private static string spacer { get; set; }
-        public Log(RLConsole _console) { console = _console; spacer = " + "; }
+        public Log(RLConsole _console) 
+        { 
+            console = _console;
+            spacer = " + ";
+            for (int i = 0; i < maxLogCount; i++)
+            {
+                log.Enqueue("");
+            }
+        }
         public static void DisplayLog()
         {
             ClearLogDisplay();
 
-            if (storedLog.Count != 0)
-            {
-                //storedLog.Reverse();
+            int m = 0;
+            int y = 0;
+            int c = 1;
 
-                string logOut = null;
-                foreach (string log in storedLog) { logOut += log; }
-                CMath.DisplayToConsole(console, logOut, 1, 1, 0, 0);
-                storedLog.Clear();
+            string[] temp = log.ToArray<string>();
+            //temp.Reverse();
+
+            for (int i = temp.Length - 1; i >= 0; i--)
+            {
+                string[] outPut = temp[i].Split(' ');
+
+                foreach (string text in outPut)
+                {
+                    string[] split = text.Split('*');
+                    if (split.Count() == 1)
+                    {
+                        if (split[0].Contains("+")) { y += 2 + m; c = 1; }
+                        else
+                        {
+                            if (c + split[0].Length > console.Width - 4) { y += 2 + m; c = 1; }
+                            console.Print(c + 1, y, split[0], RLColor.Blend(RLColor.Gray, RLColor.White, 1 - .05f * (i * 2)));
+                            c += split[0].Length + 1;
+                        }
+                    }
+                    else
+                    {
+                        if (split[1].Contains("+")) { y += 2 + m; c = 1; }
+                        else
+                        {
+                            if (c + split[0].Length > console.Width - 4) { y += 2 + m; c = 1; }
+                            console.Print(c + 1, y, split[1], RLColor.Blend(RLColor.Gray, RLColor.White, 1 - .05f * (i * 2)));
+                            c += split[1].Length + 1;
+                        }
+                    }
+                }
             }
+            Renderer.CreateConsoleBorder(console);
             console.Print(6, 0, " Message Log ", RLColor.White);
         }
-        public static void AddToStoredLog(string logAdd, bool display = false)
+        public static void AddToStoredLog(string logAdd)
         {
-            string newString = null; newString = spacer + logAdd;
-            storedLog.Add(newString);
-            if (display) DisplayLog();
+            string newString = spacer + logAdd;
+            log.Enqueue(newString);
+            if (log.Count > maxLogCount) 
+            {
+                log.Dequeue();
+            }
+        }
+        public static void Add(string logAdd)
+        {
+            log.Enqueue(spacer + logAdd);
+            if (log.Count > maxLogCount)
+            {
+                log.Dequeue();
+            }
         }
         public static void ClearLogDisplay()
         {

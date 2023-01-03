@@ -8,97 +8,222 @@ namespace TheRuinsOfIpsus
 {
     public class EntityManager
     {
-        public static Dictionary<string, List<Entity>> entities = new Dictionary<string, List<Entity>>();
+        public static Dictionary<string, List<Entity>> actors = new Dictionary<string, List<Entity>>();
+        public static List<Entity> items = new List<Entity>();
+        public static List<Entity> obstacles = new List<Entity>();
         public static Dictionary<int, Entity> entityReferences = new Dictionary<int, Entity>();
-        public EntityManager()
+        public static void UpdateAll()
+        {
+            if (actors.Count != 0)
+            {
+                foreach (List<Entity> entities in actors.Values)
+                {
+                    UpdateMap(entities[0]);
+                }
+            }
+            if (items.Count != 0) 
+            {
+                UpdateMap(items[0]); 
+            }
+            if (obstacles.Count != 0) 
+            { 
+                UpdateMap(obstacles[0]);
+            }
+        }
+        public static void LoadAllEntities()
         {
             List<Entity> entities = JsonDataManager.PullAllEntities();
             foreach (Entity entity in entities)
             {
                 if (entity != null)
                 {
-                    entityReferences.Add(entity.uID, entity);
+                    entityReferences.Add(entity.GetComponent<ID>().id, entity);
                 }
             }
         }
-        public static void UpdateAll()
+        public static void ClearAllIndexes()
         {
-            foreach (List<Entity> entities in entities.Values)
-            { if (entities != null) { UpdateMap(entities[0]); } }
-        }
-        public static void AddEntity(Entity entity) 
-        {
-            if (entity.GetComponent<Faction>() != null)
+            foreach (List<Entity> entities in actors.Values)
             {
-                if (!entities.ContainsKey(entity.GetComponent<Faction>().faction)) 
-                { entities.Add(entity.GetComponent<Faction>().faction, new List<Entity>()); }
-                entities[entity.GetComponent<Faction>().faction].Add(entity);
+                foreach (Entity actor in entities)
+                {
+                    if (actor != null && actor.GetComponent<TurnFunction>() != null && actor.GetComponent<ID>().id != 0)
+                    { TurnManager.RemoveActor(actor.GetComponent<TurnFunction>()); }
+                }
+            }
+            actors.Clear();
+            items.Clear(); 
+            obstacles.Clear();
+        }
+        public static void AddEntity(Entity entity, bool update = true) 
+        {
+            int id = entity.GetComponent<ID>().id;
+            if (id <= 1000) 
+            {
+                string faction = entity.GetComponent<Faction>().faction;
+                if (!actors.ContainsKey(faction))
+                {
+                    actors.Add(faction, new List<Entity>());
+                }
+                actors[faction].Add(entity);
+            }
+            else if (id > 1000 && id <= 2000)
+            {
+                items.Add(entity); 
             }
             else
-            {
-                if (!entities.ContainsKey("Items"))
-                { entities.Add("Items", new List<Entity>()); }
-                entities["Items"].Add(entity);
+            { 
+                obstacles.Add(entity); 
             }
-            UpdateMap(entity);
-        }
-        public static void RemoveEntity(Entity entity)
-        {
-            UpdateMap(entity);
-            if (entity.GetComponent<Faction>() != null)
+
+            if (update)
             {
-                entities[entity.GetComponent<Faction>().faction].Remove(entity);
-                if (entities[entity.GetComponent<Faction>().faction].Count == 0) 
-                { entities.Remove(entity.GetComponent<Faction>().faction); }
+                UpdateMap(entity);
+            }
+        }
+        public static void RemoveEntity(Entity entity, bool update = true)
+        {
+            int id = entity.GetComponent<ID>().id;
+            if (id <= 1000) 
+            {
+                string faction = entity.GetComponent<Faction>().faction;
+                actors[faction].Remove(entity);
+                if (actors[faction].Count == 0)
+                {
+                    actors.Remove(faction);
+                    DijkstraMaps.maps.Remove(faction);
+                }
+                else
+                {
+                    UpdateMap(entity);
+                }
+            }
+            else if (id > 1000 && id <= 2000) 
+            { 
+                items.Remove(entity);
+                if (items.Count == 0)
+                {
+                    DijkstraMaps.maps.Remove("Items");
+                }
+                else
+                {
+                    UpdateMap(entity);
+                }
             }
             else
-            {
-                entities["Items"].Remove(entity);
-                if (entities["Items"].Count == 0)
-                { entities.Remove("Items"); }
+            { 
+                obstacles.Remove(entity);
+                if (obstacles.Count == 0)
+                {
+                    DijkstraMaps.maps.Remove("Obstacles");
+                }
+                else
+                {
+                    UpdateMap(entity);
+                }
             }
         }
         public static void UpdateMap(Entity entity) 
         {
-            if (entity.GetComponent<Faction>() != null)
+            int id = entity.GetComponent<ID>().id;
+            if (id >= 0 && id <= 1000)
             {
                 string faction = entity.GetComponent<Faction>().faction;
-                if (entities.ContainsKey(faction)) { DijkstraMaps.CreateMap(entities[faction], faction, 50); }
+                DijkstraMaps.CreateMap(actors[faction], faction);
             }
-            else { if (entities.ContainsKey("Items")) { DijkstraMaps.CreateMap(entities["Items"], entity.GetComponent<Description>().name, 50); } }
+            else if (id > 1000 && id <= 2000) { DijkstraMaps.CreateMap(items, "Items"); }
+            else { DijkstraMaps.CreateMap(obstacles, "Obstacles"); }
         }
-        public static void FillChunk(string tableName, int amountToSpawn)
-        { for (int i = 0; i < amountToSpawn; i++) { CreateEntity(0, 0, SpawnTableManager.RetrieveRandomEntity(tableName, true), true, true); } }
-        public static Entity CreateEntity(int x, int y, int uID, bool random, bool seeded = false)
+        public static Entity CreateEntity(Vector2 vector3, int uID, bool random, bool seeded = false)
         {
             Entity entity = JsonDataManager.ReturnEntity(uID);
             if (random)
             {
-                x = 0; y = 0;
+                vector3.x = 0; vector3.y = 0;
                 bool sufficient = false;
                 while (!sufficient)
                 {
-                    if (!CMath.CheckBounds(x, y) || !entity.GetComponent<Movement>().moveTypes.Contains(Map.map[x, y].moveType))
+                    if (seeded)
                     {
-                        if (seeded)
+                        vector3.x = World.seed.Next(0, Program.gameMapWidth);
+                        vector3.y = World.seed.Next(0, Program.gameMapHeight);
+                    }
+                    else
+                    {
+                        vector3.x = World.random.Next(0, Program.gameMapWidth);
+                        vector3.y = World.random.Next(0, Program.gameMapHeight);
+                    }
+                    if (CMath.CheckBounds(vector3.x, vector3.y))
+                    {
+                        if (entity.GetComponent<Movement>() != null)
                         {
-                            x = World.seed.Next(0, Program.gameMapWidth);
-                            y = World.seed.Next(0, Program.gameMapHeight);
+                            if (entity.GetComponent<Movement>().moveTypes.Contains(World.GetTraversable(vector3).terrainType))
+                            { sufficient = true; }
                         }
                         else
                         {
-                            x = CMath.random.Next(0, Program.gameMapWidth);
-                            y = CMath.random.Next(0, Program.gameMapHeight);
+                            if (World.GetTraversable(vector3).terrainType != 0)
+                            { sufficient = true; }
                         }
                     }
-                    else { sufficient = true; }
+                }
+            }
+
+            if (seeded)
+            {
+                AddEntity(entity, false);
+            }
+            else
+            {
+                AddEntity(entity);
+            }
+
+            entity.GetComponent<Coordinate>().vector2 = vector3;
+            int id = entity.GetComponent<ID>().id;
+            if (id <= 1000) { World.GetTraversable(vector3).actorLayer = entity; }
+            else if (id > 1000 && id <= 2000) { World.GetTraversable(vector3).itemLayer = entity; }
+            else { World.GetTraversable(vector3).obstacleLayer = entity; }
+            return entity;
+        }
+        public static Entity CreateEntity(Vector2 vector3, Entity entity, bool random, bool seeded = false)
+        {
+            if (random)
+            {
+                vector3.x = 0; vector3.y = 0;
+                bool sufficient = false;
+                while (!sufficient)
+                {
+                    if (seeded)
+                    {
+                        vector3.x = World.seed.Next(0, Program.gameMapWidth);
+                        vector3.y = World.seed.Next(0, Program.gameMapHeight);
+                    }
+                    else
+                    {
+                        vector3.x = World.random.Next(0, Program.gameMapWidth);
+                        vector3.y = World.random.Next(0, Program.gameMapHeight);
+                    }
+                    if (CMath.CheckBounds(vector3.x, vector3.y))
+                    {
+                        if (entity.GetComponent<Movement>() != null)
+                        {
+                            if (entity.GetComponent<Movement>().moveTypes.Contains(World.GetTraversable(vector3).terrainType))
+                            { sufficient = true; }
+                        }
+                        else
+                        {
+                            if (World.GetTraversable(vector3).terrainType != 0)
+                            { sufficient = true; }
+                        }
+                    }
                 }
             }
             AddEntity(entity);
-            entity.GetComponent<Coordinate>().x = x;
-            entity.GetComponent<Coordinate>().y = y;
-            if (CMath.ReturnAI(entity) != null) { Map.map[x, y].actor = entity; }
-            else { Map.map[x, y].item = entity; }
+            entity.GetComponent<Coordinate>().vector2 = vector3;
+            int id = entity.GetComponent<ID>().id;
+            if (id <= 1000) { World.GetTraversable(vector3).actorLayer = entity; }
+            else if (id > 1000 && id <= 2000) { World.GetTraversable(vector3).itemLayer = entity; }
+            else { World.GetTraversable(vector3).obstacleLayer = entity; }
             return entity;
         }
         public static Entity ReloadEntity(Entity entityRef)
@@ -121,7 +246,7 @@ namespace TheRuinsOfIpsus
                         foreach (EquipmentSlot entity in entityToUse.GetComponent<BodyPlot>().bodyPlot) { if (entity != null && entity.item != null) { entities.Add(entity.item); } }
                         foreach (Entity id in entities) { new Entity(id).GetComponent<Equippable>().Equip(entityToUse); }
                     }
-                    if (CMath.ReturnAI(entityToUse) != null) { CMath.ReturnAI(entityRef).target = null; }
+                    if (CMath.ReturnAI(entityToUse) != null) { CMath.ReturnAI(entityToUse).target = null; }
                 }
                 AddEntity(entityToUse);
                 return entityToUse;
@@ -131,36 +256,30 @@ namespace TheRuinsOfIpsus
         public static void CreateNewEntityTest()
         {
             Entity entity = new Entity();
-            entity.uID = 4;
-            entity.AddComponent(new Stats(5, 14, .50f, 16, 5, 14, 2));
-            entity.AddComponent(new Movement(true));
+            entity.AddComponent(new ID(2));
+            entity.AddComponent(new Stats(7, 16, .25f, 20, 2, 2, new List<string>() { "Restraint", "Stoning" }));
+            entity.AddComponent(new Movement(new List<int> { 1 }));
             entity.AddComponent(new Inventory());
-            entity.AddComponent(new BodyPlot("Basic_Crustacean"));
-            entity.AddComponent(new Faction("Crustacean"));
+            entity.AddComponent(new BodyPlot());
+            entity.AddComponent(new Faction("Beast"));
             entity.AddComponent(PronounReferences.pronounSets["Nueter"]);
             entity.AddComponent(new TurnFunction());
             entity.AddComponent(new OnHit());
-            entity.AddComponent(new Draw("Red", "Black", 'c'));
-            entity.AddComponent(new Description("Red*Boiler Red*Crab", "This crab has adopted the methods normally used to cook it, and instead has repurposed them to cook everything around it."));
+            entity.AddComponent(new Draw("White", "Black", 's'));
+            entity.AddComponent(new Description("Marmoreal Spider", "These spiders appear as if made of marble. They hold still for hours they lull prey into dropping their guard before unleashing their gray*stoning bite."));
             entity.AddComponent(new Coordinate(0, 0));
-            entity.AddComponent(new ScavengerAI());
-            CMath.ReturnAI(entity).hatedEntities.Add("Sea_Beast");
+            entity.AddComponent(new Interactable(new List<string>() { "Attack", "Pet" }));
+            //entity.AddComponent(new SpiderAI());
+            //CMath.ReturnAI(entity).hatedEntities.Add("Restrained");
 
             Entity MightyClaw = new Entity();
-            MightyClaw.AddComponent(new Equippable("Main_Hand", true, false));
+            MightyClaw.AddComponent(new Equippable("Weapon", true));
             MightyClaw.AddComponent(new Draw("White", "Black", '/'));
-            MightyClaw.AddComponent(new Description("Big Claw", "A large pinching claw."));
-            MightyClaw.AddComponent(new AttackFunction(1, 8, 0, 0, "Piercing", "Melee"));
+            MightyClaw.AddComponent(new Description("Marble Fangs", "A pair of stony marble teeth."));
+            MightyClaw.AddComponent(new AttackFunction("1-1-6-0-0", "Piercing"));
             MightyClaw.AddComponent(new Coordinate());
+            MightyClaw.AddComponent(new InflictStoningOnHit(0));
             MightyClaw.GetComponent<Equippable>().Equip(entity);
-
-            Entity MiniClaw = new Entity();
-            MiniClaw.AddComponent(new Equippable("Off_Hand", true, false));
-            MiniClaw.AddComponent(new Draw("White", "Black", '/'));
-            MiniClaw.AddComponent(new Description("Small Claw", "A small pinching claw."));
-            MiniClaw.AddComponent(new AttackFunction(1, 4, 0, 0, "Piercing", "Melee"));
-            MiniClaw.AddComponent(new Coordinate());
-            MiniClaw.GetComponent<Equippable>().Equip(entity);
 
             JsonDataManager.SaveEntity(entity);
         }

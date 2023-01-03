@@ -10,7 +10,10 @@ namespace TheRuinsOfIpsus
     public class Faction: Component
     {
         public string faction { get; set; }
-        public Faction(string _faction) { faction = _faction; }
+        public Faction(string _faction) 
+        { 
+            faction = _faction; 
+        }
         public Faction() { }
     }
 }

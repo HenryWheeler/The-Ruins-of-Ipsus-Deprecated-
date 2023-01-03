@@ -11,7 +11,11 @@ namespace TheRuinsOfIpsus
     {
         public static RLConsole console;
         private static string spacer { get; set; }
-        public StatManager(RLConsole _console) { console = _console; spacer = " + "; }
+        public StatManager(RLConsole _console) 
+        { 
+            console = _console; 
+            spacer = " + ";
+        }
         public static void UpdateStats(Entity entity)
         {
             ClearStats();
@@ -20,28 +24,40 @@ namespace TheRuinsOfIpsus
 
             string display = "";
 
-            display += "Red*Health: " + stats.hp + "/" + stats.hpCap + spacer;
-            display += "Light_Gray*Armor: " + stats.ac + spacer;
-            display += "Yellow*Celerity: " + stats.maxAction + spacer;
-            display += "Brown*Might: " + stats.strength + " (" + (stats.strength - 10)/2 + ")" + spacer;
-            display += "Blue*Acuity: " + stats.acuity + " (" + (stats.acuity - 10)/2 + ")" + spacer;
-            display += "Sight: " + stats.sight + spacer;
+            display += $"Red*Health: {stats.hp}/{stats.hpCap}{spacer}";
+            display += $"Light_Gray*Armor: {stats.ac}{spacer}";
+            display += $"Yellow*Celerity: {stats.maxAction}{spacer}";
+            display += $"Brown*Might: {stats.strength}{spacer}";
+            display += $"Blue*Acuity: {stats.acuity}{spacer}";
+            display += $"Sight: {stats.sight}{spacer}";
 
-            //display += "Equipment: " + spacer;
-            //foreach (EquipmentSlot slot in entity.GetComponent<BodyPlot>().bodyPlot)
-            //{
-            //    if (slot != null)
-            //    {
-            //        if (slot.item != null) { display += slot.name + ": " + slot.item.GetComponent<Description>().name + spacer; }
-            //        else { display += slot.name + ": Empty" + spacer; }
-            //    }
-            //}
-
-            display += "Status:" + spacer;
-
-            foreach (Component component in entity.components)
+            display += "Equipment: " + spacer;
+            foreach (EquipmentSlot slot in entity.GetComponent<BodyPlot>().bodyPlot)
             {
-                if (component.special && component.componentName != "") { display += component.componentName + ", "; }
+                if (slot != null)
+                {
+                    if (slot.item != null) 
+                    {
+                        display += $"{slot.name}: {slot.item.GetComponent<Description>().name},{spacer}"; 
+                    }
+                    else 
+                    {
+                        display += $"{slot.name}: Empty,{spacer}"; 
+                    }
+                }
+            }
+
+            display += $"Status:{spacer}";
+            for (int i = 0; i < entity.GetComponent<OnHit>().statusEffects.Count; i++)
+            {
+                if (i == entity.GetComponent<OnHit>().statusEffects.Count - 1)
+                { 
+                    display += $"{entity.GetComponent<OnHit>().statusEffects[i]}."; 
+                } 
+                else 
+                { 
+                    display += $"{entity.GetComponent<OnHit>().statusEffects[i]}, "; 
+                }
             }
 
             CMath.DisplayToConsole(console, display, 0, 2, 1);

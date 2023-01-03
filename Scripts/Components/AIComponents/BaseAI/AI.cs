@@ -9,106 +9,252 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public abstract class AI : Component
     {
-        public string mood { get; set; }
-        public int memory { get; set; }
-        public int maxMemory { get; set; }
-        public int evaluationTimer = 0;
-        public string target { get; set; }
-        public Entity referenceTarget { get; set; }
+        public enum State
+        {
+            Asleep,
+            Angry,
+            Fearful,
+            Curious,
+            Awake,
+            Bored,
+        }
+
+        public enum Input
+        {
+            Noise,
+            Hunger,
+            Hurt,
+            Call,
+            Tired,
+            Hatred,
+            Bored,
+            None
+        }
+        public class StateMachine
+        {
+            readonly State currentState;
+            readonly Input currentInput;
+            public StateMachine(State _state, Input _input)
+            {
+                currentState = _state;
+                currentInput = _input;
+            }
+            public override int GetHashCode()
+            {
+                return 17 + 31 * currentState.GetHashCode() + 31 * currentInput.GetHashCode();
+            }
+            public override bool Equals(object obj)
+            {
+                StateMachine other = obj as StateMachine;
+                return other != null && currentState == other.currentState && currentInput == other.currentInput;
+            }
+        }
+        public Dictionary<StateMachine, State> transitions = new Dictionary<StateMachine, State>();
+        public State currentState = State.Asleep;
+        public Input currentInput = Input.None;
         public List<string> favoredEntities = new List<string>();
         public List<string> hatedEntities = new List<string>();
+        public Entity target { get; set; }
+        public int interest { get; set; }
+        public int baseInterest { get; set; }
+        public void Process()
+        {
+            Observe();
+            StateMachine stateMachine = new StateMachine(currentState, currentInput);
+            if (transitions.ContainsKey(stateMachine))
+            {
+                currentState = transitions[stateMachine];
+                currentInput = Input.None;
+            }
+            ExecuteAction();
+        }
+        public abstract void ExecuteAction();
+        public abstract void SetTransitions();
+        public void Observe()
+        {
+            //Stats stats = entity.GetComponent<Stats>();
+            if (currentState == State.Asleep)
+            {
+                //Low level of observation
+                //Check for noise
+                //Create relevant input
+            }
+            else if (currentState == State.Curious)
+            {
+                //Hight level of observation
+                //Check for noise
+                CallObservation(true);
+            }
+            else
+            {
+                //Medium level of observation
+                //Check for noise
+                CallObservation(false);
+            }
+        }
         public void OnHit(Entity attacker)
         {
             if (attacker.GetComponent<Faction>() != null && !hatedEntities.Contains(attacker.GetComponent<Faction>().faction)) 
-            { hatedEntities.Add(attacker.GetComponent<Faction>().faction); target = attacker.GetComponent<Faction>().faction; }
-            referenceTarget = attacker;
-            mood = "Red*Angry"; memory = maxMemory;
-        }
-        public void EvaluateEnvironment()
-        {
-            Coordinate coordinate = entity.GetComponent<Coordinate>();
-            if (!Renderer.CheckIfInRenderDistance(coordinate))
-            { entity.GetComponent<TurnFunction>().EndTurn(); }
-            else
             {
-                ShadowcastFOV.Compute(coordinate.vector3.x, coordinate.vector3.y, entity.GetComponent<Stats>().sight, this, true);
-                if (referenceTarget != null && mood == "Red*Angry")
+                hatedEntities.Add(attacker.GetComponent<Faction>().faction);
+            }
+            target = attacker;
+            interest = 100;
+            currentInput = Input.Hurt;
+        }
+        public void CallObservation(bool highLevel)
+        {
+            Input input = Input.None;
+            Vector2 startPos = entity.GetComponent<Coordinate>().vector2;
+            int rangeLimit = entity.GetComponent<Stats>().sight;
+
+            for (uint octant = 0; octant < 8; octant++)
+            {
+                input = Compute(octant, startPos.x, startPos.y, rangeLimit, 1, new Slope(1, 1), new Slope(0, 1), 1, highLevel);
+                if (input != Input.None && !highLevel)
                 {
-                    if (target == null) { target = referenceTarget.GetComponent<Faction>().faction; memory = maxMemory; }
-                    else if (target == referenceTarget.GetComponent<Faction>().faction) { memory = maxMemory; }
-                    referenceTarget = null;
+                    break;
                 }
-                else if (memory > 0) { memory--; }
-                else { target = null; mood = "Uncertain"; }
-                ExecuteAction();
             }
-        }
-        public abstract void ExecuteAction();
-        public void HuntAndAttack()
-        {
-            if (target != null)
+            if (input != Input.None)
             {
-                Coordinate coordinate = entity.GetComponent<Coordinate>();
-                Node targetCoordinate = DijkstraMaps.PathFromMap(entity, target);
-                if (targetCoordinate.v == 0 && Map.map[coordinate.vector3.x + targetCoordinate.x, coordinate.vector3.y + targetCoordinate.y].actor != null &&
-                    Map.map[coordinate.vector3.x + targetCoordinate.x, coordinate.vector3.y + targetCoordinate.y].actor != entity)
-                { AttackManager.MeleeAllStrike(entity, Map.map[coordinate.vector3.x + targetCoordinate.x, coordinate.vector3.y + targetCoordinate.y].actor); }
-                else { entity.GetComponent<Movement>().Move(targetCoordinate.x, targetCoordinate.y); }
-            } else { entity.GetComponent<TurnFunction>().EndTurn(); }
-        }
-        public int ReturnHatred(Entity entity)
-        {
-            if (this.entity.GetComponent<Faction>() != null && entity.GetComponent<Faction>() != null)
-            {
-                if (favoredEntities.Contains(entity.GetComponent<Faction>().faction)
-                    || favoredEntities.Contains(entity.GetComponent<Description>().name)) { return 0; }
-                else if (hatedEntities.Contains(entity.GetComponent<Faction>().faction)
-                    || hatedEntities.Contains(entity.GetComponent<Description>().name)) { return 1000; }
-                else if (entity.GetComponent<Commerce>() != null) { return 500 - entity.GetComponent<Commerce>().value; }
-                else { return 0; }
+                currentInput = input;
             }
             else
             {
-                if (favoredEntities.Contains(entity.GetComponent<Description>().name)) { return 0; }
-                else if (hatedEntities.Contains(entity.GetComponent<Description>().name)) { return 1000; }
-                else if (entity.GetComponent<Commerce>() != null) { return 500 - entity.GetComponent<Commerce>().value; }
-                else { return 0; }
+                if (interest <= 0)
+                {
+                    currentInput = Input.Bored;
+                    target = null;
+                }
             }
         }
-        public int ReturnConviction(Entity entity, int hatred)
+        public Input Compute(uint octant, int oX, int oY, int rangeLimit, int x, Slope top, Slope bottom, int currentInterest, bool highLevel)
         {
-            int acuity = entity.GetComponent<Stats>().acuity;
-            if (acuity <= 0) { return 0; }
-            else if (acuity >= 1 && acuity <= 10)
+            Input greatestInput = Input.None;
+            for (; (uint)x <= (uint)rangeLimit; x++)
             {
-                return (1000 * hatred * (PercievedStrength(entity) 
-                    / PercievedStrength(this.entity))) / (int)CMath.Distance(this.entity.GetComponent<Coordinate>(), entity.GetComponent<Coordinate>());
+                int topY = top.X == 1 ? x : ((x * 2 + 1) * top.Y + top.X - 1) / (top.X * 2);
+                int bottomY = bottom.Y == 0 ? 0 : ((x * 2 - 1) * bottom.Y + bottom.X) / (bottom.X * 2);
+
+                int wasOpaque = -1;
+                for (int y = topY; y >= bottomY; y--)
+                {
+                    int tx = oX, ty = oY;
+                    switch (octant)
+                    {
+                        case 0: tx += x; ty -= y; break;
+                        case 1: tx += y; ty -= x; break;
+                        case 2: tx -= y; ty -= x; break;
+                        case 3: tx -= x; ty -= y; break;
+                        case 4: tx -= x; ty += y; break;
+                        case 5: tx -= y; ty += x; break;
+                        case 6: tx += y; ty += x; break;
+                        case 7: tx += x; ty += y; break;
+                    }
+
+                    bool inRange = rangeLimit < 0 || CMath.Distance(oX, oY, tx, ty) <= rangeLimit;
+                    if (inRange && (y != topY || top.Y * x >= top.X * y) && (y != bottomY || bottom.Y * x <= bottom.X * y))
+                    {
+                        Traversable traversable = World.tiles[tx, ty].GetComponent<Traversable>();
+                        if (CMath.CheckBounds(tx, ty) && traversable.actorLayer != null && traversable.actorLayer != entity)
+                        {
+                            int referenceInterest = ReturnFeelings(traversable.actorLayer);
+                            if (interest < referenceInterest)
+                            {
+                                //Check for entities relative hatred or fear, etc, of the target
+                                //For now default to 25 interest
+                                target = traversable.actorLayer;
+                                greatestInput = Input.Hatred;
+                                currentInterest = referenceInterest;
+                                if (!highLevel)
+                                {
+                                    interest = currentInterest;
+                                    return greatestInput;
+                                }
+                            }
+                        }
+                    }
+
+                    bool isOpaque = !inRange || BlocksLight(new Vector2(tx, ty));
+                    if (x != rangeLimit)
+                    {
+                        if (isOpaque)
+                        {
+                            if (wasOpaque == 0)
+                            {
+                                Slope newBottom = new Slope(y * 2 + 1, x * 2 - 1);
+                                if (!inRange || y == bottomY) { bottom = newBottom; break; }
+                                else { greatestInput = Compute(octant, oX, oY, rangeLimit, x + 1, top, newBottom, currentInterest, highLevel); }
+                            }
+                            wasOpaque = 1;
+                        }
+                        else
+                        {
+                            if (wasOpaque > 0) top = new Slope(y * 2 + 1, x * 2 + 1);
+                            wasOpaque = 0;
+                        }
+                    }
+                }
+                if (wasOpaque != 0) break;
             }
-            else
+            if (greatestInput != Input.None)
             {
-                return (500 * hatred * (PercievedStrength(entity) / PercievedStrength(this.entity) + 500 * hatred * (PercievedDanger(entity)
-                 / PercievedDanger(this.entity)))) / (int)CMath.Distance(this.entity.GetComponent<Coordinate>(), entity.GetComponent<Coordinate>());
+                interest = currentInterest;
             }
+            return greatestInput;
         }
-        public int PercievedStrength(Entity entity)
+        public bool BlocksLight(Vector2 vector2)
         {
+            if (CMath.CheckBounds(vector2.x, vector2.y))
+            {
+                if (World.tiles[vector2.x, vector2.y].GetComponent<Visibility>().opaque) { return true; }
+                return false;
+            }
+            return true;
+        }
+        public int ReturnFeelings(Entity entity)
+        {
+            string faction = entity.GetComponent<Faction>().faction;
             Stats stats = entity.GetComponent<Stats>();
-            int value = (stats.strength + stats.acuity + (stats.hp / 10)) * (int)Math.Max(stats.maxAction, 1);
-            if (value == 0) { value = 1; }
-            return value;
-        }
-        public int PercievedDanger(Entity entity)
-        {
-            if (entity.GetComponent<BodyPlot>() != null)
+            Stats AIStats = this.entity.GetComponent<Stats>();
+            if (!favoredEntities.Contains(faction) && hatedEntities.Contains(faction))
             {
-                int dangerValue = 1;
-                foreach (EquipmentSlot slot in entity.GetComponent<BodyPlot>().bodyPlot)
+                if (AIStats.acuity < 0)
                 {
-                    if (slot.item != null && slot.item.GetComponent<Commerce>() != null) { dangerValue *= slot.item.GetComponent<Commerce>().value; }
+                    return baseInterest - stats.hp;
                 }
-                return dangerValue;
+                else if (AIStats.acuity < 3)
+                {
+                    int baseInterest = this.baseInterest;
+                    baseInterest -= stats.hp + (stats.strength * 5) + (stats.acuity * 5);
+                    baseInterest -= AIStats.hp + (AIStats.strength * 5) + (AIStats.acuity * 5);
+                    return baseInterest;
+                }
+                else
+                {
+                    
+                    int baseInterest = this.baseInterest;
+                    baseInterest -= stats.hp + (stats.strength * 3) + (stats.acuity * 3) + (stats.ac * 3);
+                    baseInterest -= AIStats.hp + (AIStats.strength * 3) + (AIStats.acuity * 3) + (AIStats.ac * 3);
+                    foreach (string status in entity.GetComponent<OnHit>().statusEffects)
+                    {
+                        if (hatedEntities.Contains(status))
+                        {
+                            baseInterest += 25;
+                        }
+                        else
+                        {
+                            baseInterest += 5;
+                        }
+                    }
+                    return baseInterest;
+                }
             }
-            else { return 1; }
+            else
+            {
+                return 0;
+            }
         }
         public AI() { }
     }

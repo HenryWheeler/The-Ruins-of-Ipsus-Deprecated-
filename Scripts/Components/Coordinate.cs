@@ -9,24 +9,37 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class Coordinate: Component
     {
-        public Vector3 vector3 { get; set; }
-        public void CombineVectors(Vector3 vector3) 
+        public Vector2 vector2 { get; set; }
+        public void CombineVectors(Vector2 vector2) 
         { 
-            this.vector3.x += vector3.x; 
-            this.vector3.y += vector3.y; 
-            this.vector3.z += vector3.z; 
+            this.vector2.x += vector2.x; 
+            this.vector2.y += vector2.y; 
         }
-        public Coordinate(int x, int y, int z) { vector3 = new Vector3(x, y, z); }
-        public Coordinate(Vector3 _vector3) { vector3 = _vector3; }
+        public Coordinate(int x, int y) 
+        { 
+            vector2 = new Vector2(x, y); 
+        }
+        public Coordinate(Vector2 _vector2) 
+        { 
+            vector2 = _vector2;
+        }
         public Coordinate() { }
     }
     [Serializable]
-    public class Vector3
+    public class Vector2
     {
         public int x { get; set; }
         public int y { get; set; }
-        public int z { get; set; }
-        public Vector3(int _x, int _y, int _z) { x = _x; y = _y; z = _z; }
-        public Vector3() { }
+        public Vector2(int _x, int _y) 
+        { 
+            x = _x; 
+            y = _y; 
+        }
+        public Vector2(Vector2 _1, Vector2 _2)
+        {
+            x = _1.x + _2.x;
+            y = _1.y + _2.y;
+        }
+        public Vector2() { }
     }
 }

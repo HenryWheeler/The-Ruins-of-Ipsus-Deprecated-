@@ -47,7 +47,6 @@ namespace TheRuinsOfIpsus
             actionHeight = _actionHeight;
             rootConsole.Render += Render;
         }
-        public static bool CheckIfInRenderDistance(Coordinate coordinate) { if (coordinate.x > maxX || coordinate.x < minX || coordinate.y > maxY || coordinate.y < minY) { return false; } else { return true; } }
         public void Render(object sender, UpdateEventArgs e)
         {
             rootConsole.Clear();
@@ -74,7 +73,7 @@ namespace TheRuinsOfIpsus
             else { rootConsole.Print((rootConsole.Width / 2) - 10, (rootConsole.Height / 2) - 3, "Load Save Game: [L]", RLColor.Gray); }
             rootConsole.Print((rootConsole.Width / 2) - 5, rootConsole.Height / 2, "Quit: [Q]", RLColor.White);
         }
-        public static void StartAnimationThread(List<SFX> sfx, int repeatCount, int delay)
+        public static void StartAnimationThread(List<Entity> sfx, int repeatCount, int delay)
         {
             if (!threadRunning)
             {
@@ -87,7 +86,7 @@ namespace TheRuinsOfIpsus
                 thread.Start();
             }
         }
-        public static void WaitList(List<SFX> sfx, int repeatCount, int delay)
+        public static void WaitList(List<Entity> sfx, int repeatCount, int delay)
         {
             try
             {
@@ -102,7 +101,7 @@ namespace TheRuinsOfIpsus
             }
             catch (Exception ex) { ex = null; return; }
         }
-        public static void PlayAnimation(List<SFX> sfx, int repeatCount, int delay)
+        public static void PlayAnimation(List<Entity> sfx, int repeatCount, int delay)
         {
             try
             {
@@ -111,12 +110,11 @@ namespace TheRuinsOfIpsus
                 int current = 0;
                 do
                 {
-                    foreach (SFX frame in sfx)
+                    foreach (Entity frame in sfx)
                     {
                         if (frame != null)
                         {
-                            Coordinate coordinate = frame.GetComponent<Coordinate>();
-                            Map.sfx[coordinate.x, coordinate.y] = frame;
+                            World.GetTraversable(frame.GetComponent<Coordinate>().vector2).sfxLayer = frame;
                             frame.GetComponent<AnimationFunction>().ProgressFrame();
                         }
                     }
@@ -124,12 +122,11 @@ namespace TheRuinsOfIpsus
                     Thread.Sleep(delay);
                     current++;
                 } while (current != repeatCount);
-                foreach (SFX frame in sfx)
+                foreach (Entity frame in sfx)
                 {
                     if (frame != null)
                     {
-                        Coordinate coordinate = frame.GetComponent<Coordinate>();
-                        Map.sfx[coordinate.x, coordinate.y] = null;
+                        World.GetTraversable(frame.GetComponent<Coordinate>().vector2).sfxLayer = null;
                     }
                 }
                 threadRunning = false;
@@ -139,11 +136,11 @@ namespace TheRuinsOfIpsus
             }
             catch (Exception ex) { ex = null; return; }
         }
-        public static void MoveCamera(Coordinate currentPosition)
+        public static void MoveCamera(Vector2 vector3)
         {
-            minX = currentPosition.x - mapWidth / 2;
+            minX = vector3.x - mapWidth / 2;
             maxX = minX + mapWidth;
-            minY = currentPosition.y - mapHeight / 2;
+            minY = vector3.y - mapHeight / 2;
             maxY = minY + mapHeight;
         }
         public static void RenderMap()
@@ -159,14 +156,15 @@ namespace TheRuinsOfIpsus
                 {
                     if (CMath.CheckBounds(tx, ty))
                     {
-                        Tile tile = Map.map[tx, ty];
+                        Entity tile = World.tiles[tx, ty];
                         Visibility visibility = tile.GetComponent<Visibility>();
-                        if (Map.sfx[tx, ty] != null) { Map.sfx[tx, ty].GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
+                        Traversable traversable = tile.GetComponent<Traversable>();
+                        if (traversable.sfxLayer != null) { traversable.sfxLayer.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
                         else if (!visibility.visible && !visibility.explored) { mapConsole.Set(x, y, RLColor.Black, RLColor.Black, tile.GetComponent<Draw>().character); }
                         else if (!visibility.visible && visibility.explored) { Draw draw = tile.GetComponent<Draw>(); mapConsole.Set(x, y, ColorFinder.ColorPicker("Dark_Gray"), RLColor.Blend(RLColor.Black, ColorFinder.ColorPicker(draw.bColor), .55f), draw.character); }
-                        else if (tile.actor != null) { tile.actor.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
-                        else if (tile.item != null) { tile.item.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
-                        else if (tile.terrain != null) { tile.terrain.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
+                        else if (traversable.actorLayer != null) { traversable.actorLayer.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
+                        else if (traversable.itemLayer != null) { traversable.itemLayer.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
+                        else if (traversable.obstacleLayer != null) { traversable.obstacleLayer.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
                         else { tile.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
                     }
                     else { mapConsole.Set(x, y, ColorFinder.ColorPicker("Gray"), ColorFinder.ColorPicker("Black"), '+'); }
@@ -205,6 +203,7 @@ namespace TheRuinsOfIpsus
                     else if (x == 0 || x == w) { console.Set(x, y, RLColor.White, RLColor.Black, (char)179); }
                 }
             }
+            if (console == messageConsole) { console.Print(6, 0, " Message Log ", RLColor.White); }
         }
     }
 }

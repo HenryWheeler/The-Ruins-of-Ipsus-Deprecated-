@@ -10,7 +10,10 @@ namespace TheRuinsOfIpsus
     public class Commerce: Component
     {
         public int value { get; set; }
-        public Commerce(int _value) { value = _value; }
+        public Commerce(int _value)
+        { 
+            value = _value;
+        }
         public Commerce() { }
     }
 }

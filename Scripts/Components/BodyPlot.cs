@@ -9,22 +9,35 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class BodyPlot: Component
     {
-        public string plotString { get; set; }
         public EquipmentSlot[] bodyPlot { get; set; }
         public EquipmentSlot ReturnSlot(string slotName)
         {
-            foreach (EquipmentSlot slot in bodyPlot) { if (slot != null && slot.name == slotName) { return slot; } }
+            foreach (EquipmentSlot slot in bodyPlot) 
+            { 
+                if (slot != null && slot.name == slotName)
+                { 
+                    return slot; 
+                } 
+            }
             return null;
         }
-        public BodyPlot(string _plotString) 
+        public BodyPlot() 
         { 
-            plotString = _plotString;  
-            bodyPlot = new EquipmentSlot[BodyPlots.bodyPlots[_plotString].Count()]; 
-            for (int i = 0; i < BodyPlots.bodyPlots[_plotString].Count(); i++)
-            {
-                bodyPlot[i] = new EquipmentSlot(BodyPlots.bodyPlots[_plotString][i].name);
-            }
+            bodyPlot = new EquipmentSlot[4];
+            bodyPlot[0] = new EquipmentSlot("Armor");
+            bodyPlot[1] = new EquipmentSlot("Weapon");
+            bodyPlot[2] = new EquipmentSlot("Off Hand");
+            bodyPlot[3] = new EquipmentSlot("Magic Item");
         }
-        public BodyPlot() { }
+    }
+    public class EquipmentSlot
+    {
+        public string name { get; set; }
+        public Entity item { get; set; }
+        public EquipmentSlot(string _name)
+        {
+            name = _name;
+        }
+        public EquipmentSlot() { }
     }
 }

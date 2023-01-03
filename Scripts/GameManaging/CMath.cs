@@ -9,18 +9,15 @@ namespace TheRuinsOfIpsus
 {
     public class CMath
     {
-        public static Random seed { get; set; }
-        public static Random random { get; set; }
-        public static int seedInt { get; set; }
-        public CMath(int _seed) { seed = new Random(_seed); random = new Random(); seedInt = _seed; }
         public static double Distance(int oX, int oY, int eX, int eY) { return Math.Sqrt(Math.Pow(eX - oX, 2) + Math.Pow(eY - oY, 2)); }
-        public static double Distance(Coordinate one, Coordinate two)
+        public static int Distance(Coordinate one, Coordinate two)
         {
-            int returnValue = (int)Math.Sqrt(Math.Pow(two.x - one.x, 2) + Math.Pow(two.y - one.y, 2));
+            Vector2 origin = one.vector2; Vector2 destination = two.vector2;
+            int returnValue = (int)Math.Sqrt(Math.Pow(destination.x - origin.x, 2) + Math.Pow(destination.y - origin.y, 2));
             if (returnValue == 0) { return 1; }
-            else return (int)Math.Sqrt(Math.Pow(two.x - one.x, 2) + Math.Pow(two.y - one.y, 2));
+            else { return returnValue; }
         }
-        public static bool PathBlocked(Coordinate coordinate, Coordinate coordinate2, int range)
+        public static bool PathBlocked(Vector2 coordinate, Vector2 coordinate2, int range)
         {
             int oX = coordinate.x; int oY = coordinate.y;
             int eX = coordinate2.x; int eY = coordinate2.y;
@@ -43,7 +40,7 @@ namespace TheRuinsOfIpsus
                     t += abs_delta_y * 2;
                     if (x == eX && y == eY) { return true; }
                 }
-                while (Map.map[x, y].actor == null && Map.map[x, y].moveType != 0);
+                while (World.GetTraversable(new Vector2(x, y)).actorLayer == null && World.GetTraversable(new Vector2(x, y)).terrainType != 0);
                 return false;
             }
             else
@@ -56,7 +53,7 @@ namespace TheRuinsOfIpsus
                     t += abs_delta_x * 2;
                     if (x == eX && y == eY) { return true; }
                 }
-                while (!Map.map[x, y].GetComponent<Visibility>().opaque);
+                while (World.GetTraversable(new Vector2(x, y)).actorLayer == null && World.GetTraversable(new Vector2(x, y)).terrainType != 0);
                 return false;
             }
         }
@@ -70,6 +67,7 @@ namespace TheRuinsOfIpsus
         }
         public static void DisplayToConsole(RLConsole console, string logOut, int a, int b, int m = 0, int y = 2)
         {
+            console.Clear();
             string[] outPut = logOut.Split(' ');
             int c = a;
             foreach (string text in outPut)

@@ -9,57 +9,113 @@ namespace TheRuinsOfIpsus
 {
     public class Look
     {
-        public static Player player;
+        public static Entity player;
         public static int x { get; set; }
         public static int y { get; set; }
         public static bool looking = false;
-        public Look(Player _player) { player = _player; }
+        public Look(Entity _player) { player = _player; }
         public static void StartLooking(Coordinate coordinate) 
         { 
-            x = coordinate.x; y = coordinate.y; 
-            looking = true; player.GetComponent<TurnFunction>().turnActive = false; 
-            Move(0, 0); RLKey key = RLKey.Unknown; Action.LookAction(key);
+            x = coordinate.vector2.x; 
+            y = coordinate.vector2.y;
+            looking = true; 
+            player.GetComponent<TurnFunction>().turnActive = false; 
+            Move(0, 0); 
+            Action.LookAction();
         }
         public static void StopLooking() 
         { 
-            player.GetComponent<TurnFunction>().turnActive = true; 
+            player.GetComponent<TurnFunction>().turnActive = true;
+            Renderer.MoveCamera(player.GetComponent<Coordinate>().vector2);
             looking = false;
-            Map.sfx[x, y] = null;
-            RLKey key = RLKey.Unknown; Action.PlayerAction(player, key); 
-            Log.ClearLogDisplay(); 
+            World.GetTraversable(new Vector2(x, y)).sfxLayer = null;
+            Action.PlayerAction(player);
+            Log.DisplayLog();
         }
         public static void Move(int _x, int _y)
         {
             if (CMath.CheckBounds(x + _x, y + _y))
             {
-                Map.sfx[x, y] = null;
+                World.GetTraversable(new Vector2(x, y)).sfxLayer = null;
                 x += _x; y += _y;
+                Traversable traversable = World.GetTraversable(new Vector2(x, y));
                 Description description = null;
-                if (!Map.map[x, y].GetComponent<Visibility>().visible) { Log.AddToStoredLog("You cannot look at what you cannot see.", true); Map.sfx[x, y] = new SFX(x, y, 'X', "Yellow", "Black", false, true); }
-                else if (Map.map[x, y].actor != null) { description = Map.map[x, y].actor.GetComponent<Description>(); Map.sfx[x, y] = new SFX(x, y, 'X', "Yellow", "Black", false, true); }
-                else if (Map.map[x, y].item != null) { description = Map.map[x, y].item.GetComponent<Description>(); Map.sfx[x, y] = new SFX(x, y, 'X', "Yellow", "Black", false, true); }
-                else if (Map.map[x, y].terrain != null) { description = Map.map[x, y].terrain.GetComponent<Description>(); Map.sfx[x, y] = new SFX(x, y, 'X', "Yellow", "Black", false, true); }
-                else { description = Map.map[x, y].GetComponent<Description>(); Map.sfx[x, y] = new SFX(x, y, 'X', "Yellow", "Black", false, true); }
+                if (!World.tiles[x, y].GetComponent<Visibility>().visible) 
+                {
+                    CMath.DisplayToConsole(Log.console, "You cannot look at what you cannot see.", 1, 1); 
+                }
+                else if (traversable.actorLayer != null) 
+                { 
+                    description = traversable.actorLayer.GetComponent<Description>();
+                }
+                else if (traversable.itemLayer != null)
+                { 
+                    description = traversable.itemLayer.GetComponent<Description>(); 
+                }
+                else if (traversable.obstacleLayer != null) 
+                { 
+                    description = traversable.obstacleLayer.GetComponent<Description>();
+                }
+                else 
+                { 
+                    description = World.tiles[x, y].GetComponent<Description>();
+                }
                 if (description != null)
                 {
                     string display = "";
 
                     if (description.entity != null && description.entity.GetComponent<PronounSet>() != null)
                     {
-                        if (description.entity.GetComponent<PronounSet>().present) { display += description.Describe() + " + + " + description.name + " is: + "; }
-                        else { display += description.Describe() + " + + " + description.name + " are: + "; }
-                        string compare = display;
-                        if (CMath.ReturnAI(description.entity) != null) { display += CMath.ReturnAI(description.entity).mood + ", "; }
-                        foreach (Component component in description.entity.components)
-                        {
-                            if (component.special && component.componentName != "") { display += component.componentName + ", "; }
+                        if (description.entity.GetComponent<PronounSet>().present) 
+                        { 
+                            display += $"{description.Describe()} + + {description.name} is: + "; 
                         }
-                        if (display == compare) { display = description.Describe();}
+                        else 
+                        {
+                            display += $"{description.Describe()} + + {description.name} are: + ";
+                        }
+
+                        string compare = display;
+                        if (CMath.ReturnAI(description.entity) != null) 
+                        { 
+                            display += $"{CMath.ReturnAI(description.entity).currentState}, "; 
+                        }
+
+                        for (int i = 0; i < description.entity.GetComponent<OnHit>().statusEffects.Count; i++)
+                        {
+                            if (i == description.entity.GetComponent<OnHit>().statusEffects.Count - 1) 
+                            { 
+                                display += $"{description.entity.GetComponent<OnHit>().statusEffects[i]}.";
+                            }
+                            else 
+                            {
+                                display += $"{description.entity.GetComponent<OnHit>().statusEffects[i]}, ";
+                            }
+                        }
+
+                        if (display == compare) 
+                        { 
+                            display = description.Describe();
+                        }
                     }
                     else { display += description.Describe(); }
-                    Log.AddToStoredLog(display, true);
+                    CMath.DisplayToConsole(Log.console, display, 1, 1);
+                    traversable.sfxLayer = Reticle(x, y, 'X', "Yellow");
+                }
+                else
+                {
+                    traversable.sfxLayer = Reticle(x, y, 'X', "Gray");
                 }
             }
+            Renderer.MoveCamera(new Vector2(x, y));
+        }
+        public static Entity Reticle(int x, int y, char character, string fColor)
+        {
+            return new Entity(new List<Component> 
+            { 
+                new Coordinate(x, y), 
+                new Draw(fColor, "Black", character) 
+            });
         }
     }
 }

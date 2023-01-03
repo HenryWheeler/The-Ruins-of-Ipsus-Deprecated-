@@ -4,22 +4,23 @@ using System.Collections.Generic;
 
 namespace TheRuinsOfIpsus
 {
+    public struct Slope
+    {
+        public Slope(int y, int x) { Y = y; X = x; }
+        public readonly int Y, X;
+    }
     public static class ShadowcastFOV
     {
         public static List<Coordinate> visibleTiles = new List<Coordinate>();
-        public static void Compute(int x, int y, int rangeLimit, AI ai = null, bool aiUse = false)
+        public static void Compute(Vector2 vector2, int rangeLimit)
         {
-            //ClearList();
-            if (!aiUse) { SetVisible(x, y, true); }
-            if (Map.outside && !aiUse) { for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, 75, 1, new Slope(1, 1), new Slope(0, 1), aiUse, ai); }
-            else for (uint octant = 0; octant < 8; octant++) Compute(octant, x, y, rangeLimit, 1, new Slope(1, 1), new Slope(0, 1), aiUse, ai);
+            SetVisible(vector2, true);
+            for (uint octant = 0; octant < 8; octant++) 
+            {
+                Compute(octant, vector2.x, vector2.y, rangeLimit, 1, new Slope(1, 1), new Slope(0, 1)); 
+            }
         }
-        public struct Slope 
-        {
-            public Slope(int y, int x) { Y = y; X = x; }
-            public readonly int Y, X;
-        }
-        static void Compute(uint octant, int oX, int oY, int rangeLimit, int x, Slope top, Slope bottom, bool aiUse, AI ai = null)
+        static void Compute(uint octant, int oX, int oY, int rangeLimit, int x, Slope top, Slope bottom)
         {
             for (; (uint)x <= (uint)rangeLimit; x++)
             {
@@ -39,31 +40,32 @@ namespace TheRuinsOfIpsus
                     }
 
                     bool inRange = rangeLimit < 0 || CMath.Distance(oX, oY, tx, ty) <= rangeLimit;
-                    if(inRange && (y != topY || top.Y*x >= top.X*y) && (y != bottomY || bottom.Y*x <= bottom.X*y))
+                    if (inRange && (y != topY || top.Y*x >= top.X*y) && (y != bottomY || bottom.Y*x <= bottom.X*y))
                     {
-                        if (aiUse) 
-                        {
-                            if (CMath.CheckBounds(tx, ty) && Map.map[tx, ty].actor != null && Map.map[tx, ty].actor != ai.entity)
-                            {
-                                if (ai.ReturnHatred(Map.map[tx, ty].actor) > 0)
-                                { ai.referenceTarget =  Map.map[tx, ty].actor; ai.mood = "Red*Angry"; return; }
-                                else
-                                {
-                                    if (ai.entity.GetComponent<Stats>().acuity <= 10)
-                                    {
-                                        foreach (Component status in Map.map[tx, ty].actor.components)
-                                        {
-                                            if (ai.hatedEntities.Contains(status.componentName)) 
-                                            { ai.referenceTarget = Map.map[tx, ty].actor; ai.mood = "Red*Angry"; return; }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else if (!aiUse) { SetVisible(tx, ty, true); }
+                        //if (aiUse) 
+                        //{
+                        //    Traversable traversable = World.GetTraversable(new Vector2(tx, ty));
+                        //    if (CMath.CheckBounds(tx, ty) && traversable.actorLayer != null && traversable.actorLayer != ai.entity)
+                        //    {
+                        //        if (ai.ReturnHatred(traversable.actorLayer) > 0)
+                        //        { ai.referenceTarget = traversable.actorLayer; ai.mood = "Red*Angry"; return; }
+                        //        else
+                        //        {
+                        //            if (ai.entity.GetComponent<Stats>().acuity <= 10)
+                        //            {
+                        //                foreach (string status in traversable.actorLayer.GetComponent<OnHit>().statusEffects)
+                        //                {
+                        //                    if (ai.hatedEntities.Contains(status)) 
+                        //                    { ai.referenceTarget = traversable.actorLayer; ai.mood = "Red*Angry"; return; }
+                        //                }
+                        //            }
+                        //        }
+                        //    }
+                        //}
+                        SetVisible(new Vector2(tx, ty), true);
                     }
 
-                    bool isOpaque = !inRange || BlocksLight(tx, ty);
+                    bool isOpaque = !inRange || BlocksLight(new Vector2(tx, ty));
                     if (x != rangeLimit)
                     {
                         if (isOpaque)
@@ -72,7 +74,7 @@ namespace TheRuinsOfIpsus
                             {
                                 Slope newBottom = new Slope(y * 2 + 1, x * 2 - 1);
                                 if (!inRange || y == bottomY) { bottom = newBottom; break; }
-                                else { Compute(octant, oX, oY, rangeLimit, x + 1, top, newBottom, aiUse, ai); }
+                                else { Compute(octant, oX, oY, rangeLimit, x + 1, top, newBottom); }
                             }
                             wasOpaque = 1;
                         }
@@ -88,30 +90,30 @@ namespace TheRuinsOfIpsus
         }
         public static void ClearSight()
         {
-            foreach (Coordinate coordinate in visibleTiles) { SetVisible(coordinate.x, coordinate.y, false); }
+            foreach (Coordinate coordinate in visibleTiles) { SetVisible(coordinate.vector2, false); }
             ClearList();
         }
         public static void ClearList() { visibleTiles.Clear(); }
-        public static void SetVisible(int x, int y, bool visible, bool all = false)
+        public static void SetVisible(Vector2 vector2, bool visible, bool all = false)
         {
-            if (CMath.CheckBounds(x, y))
+            if (CMath.CheckBounds(vector2.x, vector2.y))
             {
                 if (visible)
                 {
-                    Map.map[x, y].GetComponent<Visibility>().SetVisible(true);
-                    if (!all) { visibleTiles.Add(new Coordinate(x, y)); }
+                    World.tiles[vector2.x, vector2.y].GetComponent<Visibility>().SetVisible(true);
+                    if (!all) { visibleTiles.Add(new Coordinate(vector2)); }
                 }
                 else
                 {
-                    Map.map[x, y].GetComponent<Visibility>().SetVisible(false);
+                    World.tiles[vector2.x, vector2.y].GetComponent<Visibility>().SetVisible(false);
                 }
             }
         }
-        public static bool BlocksLight(int x, int y)
+        public static bool BlocksLight(Vector2 vector2)
         {
-            if (CMath.CheckBounds(x, y))
+            if (CMath.CheckBounds(vector2.x, vector2.y))
             {
-                if (Map.map[x, y].GetComponent<Visibility>().opaque) { return true; }
+                if (World.tiles[vector2.x, vector2.y].GetComponent<Visibility>().opaque) { return true; }
                 return false;
             }
             return true;

@@ -14,13 +14,32 @@ namespace TheRuinsOfIpsus
             RLKeyPress keyPress = Program.rootConsole.Keyboard.GetKeyPress();
             if (keyPress != null)
             {
-                if (entity.GetComponent<TurnFunction>().turnActive) { Action.PlayerAction((Player)entity, keyPress.Key); }
-                else if (Look.looking) { Action.LookAction(keyPress.Key); }
-                else if (InventoryManager.inventoryOpen) { Action.InventoryAction((Player)entity, keyPress.Key); }
-                else if (TargetReticle.targeting) { Action.TargetAction((Player)entity, keyPress.Key); }
+                if (entity.GetComponent<TurnFunction>().turnActive) 
+                { 
+                    Action.PlayerAction(entity, keyPress.Key); 
+                }
+                else if (Look.looking) 
+                { 
+                    Action.LookAction(keyPress.Key);
+                }
+                else if (InventoryManager.inventoryOpen) 
+                {
+                    Action.InventoryAction(entity, keyPress.Key); 
+                }
+                else if (TargetReticle.targeting) 
+                {
+                    Action.TargetAction(entity, keyPress.Key);
+                }
+                else if (Action.interacting) 
+                {
+                    Action.Interaction(entity, keyPress.Key);
+                }
             }
         }
-        public PlayerComponent(RLRootConsole console) { console.Update += Update; }
+        public PlayerComponent(RLRootConsole console) 
+        { 
+            console.Update += Update; 
+        }
         public PlayerComponent() { }
     }
 }

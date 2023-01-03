@@ -11,8 +11,20 @@ namespace TheRuinsOfIpsus
     {
         public string name { get; set; }
         public string description { get; set; }
-        public string Describe() { return name + " + + " + description; }
-        public Description(string _name, string _description) { name = _name; description = _description; }
+        public string Describe() 
+        { 
+            return name + " + + " + description; 
+        }
+        public Description(string _name, string _description) 
+        { 
+            name = _name; 
+            description = _description; 
+        }
+        public Description(Description _description) 
+        { 
+            name = _description.name; 
+            description = _description.description; 
+        }
         public Description() { }
     }
 }

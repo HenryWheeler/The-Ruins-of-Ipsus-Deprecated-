@@ -49,7 +49,7 @@ namespace TheRuinsOfIpsus
         public static void SaveEntity(Entity entity)
         {
             if (!Directory.Exists(entityPath)) Directory.CreateDirectory(entityPath);
-            File.WriteAllText(Path.Combine(entityPath, "Entity-"+ entity.uID + ".json"), JsonConvert.SerializeObject(entity, options));
+            File.WriteAllText(Path.Combine(entityPath, "Entity-"+ entity.GetComponent<ID>().id + ".json"), JsonConvert.SerializeObject(entity, options));
         }
         public static void SaveTable(SpawnTable table)
         {

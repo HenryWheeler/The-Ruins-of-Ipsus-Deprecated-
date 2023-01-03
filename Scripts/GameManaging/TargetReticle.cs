@@ -13,44 +13,49 @@ namespace TheRuinsOfIpsus
         public static int y;
         public static bool targeting = false;
         public static bool inInventory { get; set; }
-        private static Player player;
-        private static List<SFX> sfxPos;
-        public TargetReticle(Player _player) { player = _player; sfxPos = new List<SFX>(); }
+        private static Entity player;
+        private static List<Vector2> sfxPositions = new List<Vector2>();
+        public TargetReticle(Entity _player) { player = _player; }
         public static void StartTargeting(bool _inInventory)
         {
             inInventory = _inInventory;
             if (inInventory) { InventoryManager.CloseInventory(); }
-            Coordinate coordinate = player.GetComponent<Coordinate>();
-            x = coordinate.x; y = coordinate.y;
+            Vector2 vector3 = player.GetComponent<Coordinate>().vector2;
+            x = vector3.x; y = vector3.y;
             targeting = true; player.GetComponent<TurnFunction>().turnActive = false;
             Move(0, 0);
             RLKey key = RLKey.Unknown; Action.TargetAction(player, key);
         }
+        private static void ClearSFXPositions()
+        {
+            foreach (Vector2 position in sfxPositions) { World.tiles[position.x, position.y].GetComponent<Traversable>().sfxLayer = null; }
+            sfxPositions.Clear();
+        }
         public static void StopTargeting()
         {
             targeting = false; player.GetComponent<TurnFunction>().turnActive = true;
-            foreach (SFX sfx in sfxPos) { Coordinate coordinate = sfx.GetComponent<Coordinate>(); Map.sfx[coordinate.x, coordinate.y] = null; }
-            sfxPos.Clear();
+            ClearSFXPositions();
+            Renderer.MoveCamera(player.GetComponent<Coordinate>().vector2);
             if (!inInventory) { Action.PlayerAction(player); }
             else { InventoryManager.OpenInventory(); }
-            Log.ClearLogDisplay();
+            Log.DisplayLog();
         }
         public static void Move(int _x, int _y)
         {
             if (CMath.CheckBounds(x + _x, y + _y))
             {
-                foreach (SFX sfx in sfxPos) { Coordinate coordinate = sfx.GetComponent<Coordinate>(); Map.sfx[coordinate.x, coordinate.y] = null; }
-                sfxPos.Clear();
+                ClearSFXPositions();
                 x += _x; y += _y;
-                CreateLine(player.GetComponent<Stats>().strength);
+                CreateLine(player.GetComponent<Stats>().strength + 10);
             }
+            Renderer.MoveCamera(new Vector2(x, y));
         }
         public static void CreateLine(int range)
         {
-            Coordinate coordinate = player.GetComponent<Coordinate>();
+            Vector2 vector3 = player.GetComponent<Coordinate>().vector2;
             int t;
-            int x = coordinate.x; int y = coordinate.y;
-            int delta_x = TargetReticle.x - coordinate.x; int delta_y = TargetReticle.y - coordinate.y;
+            int x = vector3.x; int y = vector3.y;
+            int delta_x = TargetReticle.x - vector3.x; int delta_y = TargetReticle.y - vector3.y;
             int abs_delta_x = Math.Abs(delta_x); int abs_delta_y = Math.Abs(delta_y);
             int sign_x = Math.Sign(delta_x); int sign_y = Math.Sign(delta_y);
             bool hasConnected = false;
@@ -66,13 +71,43 @@ namespace TheRuinsOfIpsus
                     if (x == TargetReticle.x && y == TargetReticle.y) 
                     {
                         hasConnected = true;
-                        if (CMath.Distance(coordinate.x, coordinate.y, x, y) < range) { sfxPos.Add(Reticle(x, y, 'X', "Yellow")); }
-                        else { sfxPos.Add(Reticle(x, y, 'X', "Gray")); Log.AddToStoredLog("Your target is out of range.", true); } 
+                        if (CMath.Distance(vector3.x, vector3.y, x, y) < range) 
+                        { 
+                            if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
+                            {
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, 'X', "Yellow");
+                            }
+                            else
+                            {
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, 'X', "Gray");
+                                CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
+                            }
+                        }
+                        else 
+                        { 
+                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, 'X', "Gray");
+                            CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1); 
+                        } 
                     }
                     else 
-                    { 
-                        if (CMath.Distance(coordinate.x, coordinate.y, x, y) < range) { sfxPos.Add(Reticle(x, y, '.', "White")); }
-                        else { sfxPos.Add(Reticle(x, y, '.', "Gray")); }
+                    {
+                        if (CMath.Distance(vector3.x, vector3.y, x, y) < range)
+                        {
+                            if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
+                            {
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, '.', "Yellow");
+                            }
+                            else
+                            {
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, '.', "Gray");
+                                CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
+                            }
+                        }
+                        else
+                        {
+                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, '.', "Gray");
+                            CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1);
+                        }
                     }
                 }
                 while (!hasConnected);
@@ -88,49 +123,67 @@ namespace TheRuinsOfIpsus
                     if (x == TargetReticle.x && y == TargetReticle.y)
                     {
                         hasConnected = true;
-                        if (CMath.Distance(coordinate.x, coordinate.y, x, y) < range) { sfxPos.Add(Reticle(x, y, 'X', "Yellow")); }
-                        else { sfxPos.Add(Reticle(x, y, 'X', "Gray")); Log.AddToStoredLog("Your target is out of range.", true); }
+                        if (CMath.Distance(vector3.x, vector3.y, x, y) < range)
+                        {
+                            if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
+                            {
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, 'X', "Yellow");
+                            }
+                            else
+                            {
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, 'X', "Gray");
+                                CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
+                            }
+                        }
+                        else
+                        {
+                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, 'X', "Gray");
+                            CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1);
+                        }
                     }
                     else
                     {
-                        if (CMath.Distance(coordinate.x, coordinate.y, x, y) < range) { sfxPos.Add(Reticle(x, y, '.', "White")); }
-                        else { sfxPos.Add(Reticle(x, y, '.', "Gray")); }
+                        if (CMath.Distance(vector3.x, vector3.y, x, y) < range)
+                        {
+                            if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
+                            {
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, '.', "Yellow");
+                            }
+                            else
+                            {
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, '.', "Gray");
+                                CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
+                            }
+                        }
+                        else
+                        {
+                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, '.', "Gray");
+                            CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1);
+                        }
                     }
                 }
                 while (!hasConnected);
             }
         }
-        public static Coordinate ReturnFire(Entity entity, Entity target, int range)
+        public static void ThrowWeapon(Entity weaponUsed)
         {
-            if (target == null)
+            int range = player.GetComponent<Stats>().strength + 10;
+            Vector2 refVector3 = player.GetComponent<Coordinate>().vector2;
+            if (CMath.Distance(refVector3.x, refVector3.y, x, y) < range)
             {
-                if (Map.map[x, y].GetComponent<Visibility>().visible)
+                if (CMath.PathBlocked(player.GetComponent<Coordinate>().vector2, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
                 {
-                    Coordinate refCoordinate = entity.GetComponent<Coordinate>();
-                    if (CMath.Distance(refCoordinate.x, refCoordinate.y, x, y) < range)
-                    {
-                        if (CMath.PathBlocked(player.GetComponent<Coordinate>(), new Coordinate(x, y), range))
-                        {
-                            foreach (SFX sfx in sfxPos) { Coordinate coordinate = sfx.GetComponent<Coordinate>(); Map.sfx[coordinate.x, coordinate.y] = null; }
-                            sfxPos.Clear();
-                            return new Coordinate(x, y);
-                        }
-                        else { Log.AddToStoredLog("Your target is blocked.", true); return null; }
-                    }
-                    else { Log.AddToStoredLog("Your target is out of range.", true); return null; }
+                    ClearSFXPositions();
+                    StopTargeting();
+                    AttackManager.ThrowWeapon(player, new Coordinate(x, y), weaponUsed);
                 }
-                else { Log.AddToStoredLog("You cannot fire at what you cannot see.", true); return null; }
+                else { CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1); return; }
             }
-            else
-            {
-                return null;
-            }
+            else { CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1); return; }
         }
-        public static SFX Reticle(int x, int y, char character, string color)
+        public static Entity Reticle(int x, int y, char character, string fColor)
         {
-            SFX sfx = null;
-            sfx = new SFX(x, y, character, color, "Black", false, true);
-            Map.sfx[x, y] = sfx; return sfx; 
+            return new Entity(new List<Component> { new Coordinate(x, y), new Draw(fColor, "Black", character) });
         }
     }
 }

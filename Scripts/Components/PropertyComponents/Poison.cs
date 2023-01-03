@@ -11,22 +11,21 @@ namespace TheRuinsOfIpsus
     {
         public int timeLeft { get; set; }
         public int strength { get; set; }
-        public bool display { get; set; }
         public override void OnTurn()
         {
-            timeLeft--; if (timeLeft == 0) { entity.collectionsToRemove.Add(this); 
-                if (entity.GetComponent<Stats>() != null && entity.display)
-                { Log.AddToStoredLog("The poison ailing " + entity.GetComponent<PronounSet>().subjective + " has subsided."); }
+            timeLeft--; if (timeLeft == 0) { entity.collectionsToRemove.Add(this); entity.GetComponent<OnHit>().statusEffects.Remove("Green*Poisoned");
+                if (entity.display)
+                { Log.AddToStoredLog("The Green*poison ailing " + entity.GetComponent<PronounSet>().subjective + " has subsided."); }
             } 
             else
             {
-                int dmg = CMath.random.Next(strength - 2, strength + 2);
+                int dmg = World.random.Next(strength - 2, strength + 2);
                 entity.GetComponent<OnHit>().LowerHealth(dmg);
                 if (entity.GetComponent<Stats>() != null && entity.display) 
-                { Log.AddToStoredLog("The poison drains " + dmg + " points of " + entity.GetComponent<PronounSet>().possesive + " health away."); }
+                { Log.AddToStoredLog("The Green*poison drains " + dmg + " points of " + entity.GetComponent<PronounSet>().possesive + " health away."); }
             }
         }
-        public Poison(int _timeLeft, int _strength, bool _display = false) { timeLeft = _timeLeft; strength = _strength; display = _display; special = true; componentName = "Green*Poisoned"; start = true; }
-        public Poison() { special = true; componentName = "Green*Poisoned"; start = true; }
+        public Poison(int _timeLeft, int _strength) { timeLeft = _timeLeft; strength = _strength; start = true; }
+        public Poison() { start = true; }
     }
 }

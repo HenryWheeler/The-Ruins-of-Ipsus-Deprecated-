@@ -12,8 +12,8 @@ namespace TheRuinsOfIpsus
         public void Throw(Entity user, Coordinate landingSite) { SpecialComponentManager.TriggerOnThrow(user, entity, landingSite); }
         public void ConsumeItem()
         {
-            Coordinate coordinate = entity.GetComponent<Coordinate>();
-            if (Map.map[coordinate.x, coordinate.y].item == entity) { Map.map[coordinate.x, coordinate.y].item = null; }
+            Vector2 vector3 = entity.GetComponent<Coordinate>().vector2;
+            if (World.GetTraversable(vector3).itemLayer == entity) { World.GetTraversable(vector3).itemLayer = null; }
         }
         public Throwable() { }
     }

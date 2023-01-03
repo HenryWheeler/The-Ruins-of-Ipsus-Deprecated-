@@ -10,32 +10,78 @@ namespace TheRuinsOfIpsus
     public class Movement: Component
     {
         public List<int> moveTypes = new List<int>();
-        public void Move(int _x, int _y)
+        public void Move(Vector2 newPosition)
         {
-            Coordinate coordinate = entity.GetComponent<Coordinate>();
-
-            if (CMath.CheckBounds(coordinate.x + _x, coordinate.y + _y) && moveTypes.Contains(Map.map[coordinate.x + _x, coordinate.y + _y].moveType))
+            if (entity.GetComponent<OnHit>().statusEffects.Contains("Restrained"))
             {
-                if (Map.map[coordinate.x + _x, coordinate.y + _y].actor == null)
+                PronounSet pronouns = entity.GetComponent<PronounSet>();
+                if (World.random.Next(1, 21) + ((entity.GetComponent<Stats>().strength - 10) / 2) > 10)
                 {
-                    Map.map[coordinate.x, coordinate.y].actor = null;
-                    coordinate.x += _x; coordinate.y += _y;
-                    Map.map[coordinate.x, coordinate.y].actor = entity;
-                    SpecialComponentManager.TriggerOnMove(entity, coordinate.x - _x, coordinate.y - _y, coordinate.x, coordinate.y);
-                    if (Map.map[coordinate.x, coordinate.y].terrain != null) { SpecialComponentManager.TriggerOnMove(Map.map[coordinate.x, coordinate.y].terrain, coordinate.x - _x, coordinate.y - _y, coordinate.x, coordinate.y); }
-                    entity.GetComponent<TurnFunction>().EndTurn();
+                    if (pronouns.present)
+                    { 
+                        Log.Add($"{entity.GetComponent<Description>().name} has freed {pronouns.reflexive} from {pronouns.possesive} restraints."); 
+                    }
+                    else 
+                    { 
+                        Log.Add($"{entity.GetComponent<Description>().name} have freed {pronouns.reflexive} from {pronouns.possesive} restraints."); 
+                    }
+                    entity.GetComponent<OnHit>().statusEffects.Remove("Restrained");
                 }
-                else if (entity.display) { AttackManager.MeleeAllStrike(entity, Map.map[coordinate.x + _x, coordinate.y + _y].actor); }
-                else { entity.GetComponent<TurnFunction>().EndTurn(); }
+                else
+                {
+                    if (pronouns.present) 
+                    { 
+                        Log.Add($"{entity.GetComponent<Description>().name} struggles in {pronouns.possesive} restraints."); 
+                    }
+                    else
+                    { 
+                        Log.Add($"{ entity.GetComponent<Description>().name} struggle in {pronouns.possesive} restraints."); 
+                    }
+                }
+                entity.GetComponent<TurnFunction>().EndTurn();
             }
-            else if (entity.display) { Log.AddToStoredLog("You cannot move there.", true); }
-            else { entity.GetComponent<TurnFunction>().EndTurn(); }
+            else
+            {
+                Vector2 originalPosition = entity.GetComponent<Coordinate>().vector2;
+                Traversable newTraversable = World.GetTraversable(newPosition);
+                if (CMath.CheckBounds(newPosition.x, newPosition.y) && moveTypes.Contains(newTraversable.terrainType))
+                {
+                    if (newTraversable.actorLayer == null)
+                    {
+                        World.GetTraversable(originalPosition).actorLayer = null;
+                        entity.GetComponent<Coordinate>().vector2 = newPosition;
+                        newTraversable.actorLayer = entity;
+                        SpecialComponentManager.TriggerOnMove(entity, originalPosition, newPosition);
+                        if (newTraversable.obstacleLayer != null)
+                        { 
+                            SpecialComponentManager.TriggerOnMove(newTraversable.obstacleLayer, originalPosition, newPosition);
+                        }
+                        entity.GetComponent<TurnFunction>().EndTurn();
+                        EntityManager.UpdateMap(entity);
+                    }
+                    else if (entity.display) 
+                    { 
+                        AttackManager.MeleeAllStrike(entity, newTraversable.actorLayer); 
+                    }
+                    else 
+                    {
+                        entity.GetComponent<TurnFunction>().EndTurn();
+                    }
+                }
+                else if (entity.display) 
+                { 
+                    Log.Add("You cannot move there.");
+                    Log.DisplayLog();
+                }
+                else 
+                {
+                    entity.GetComponent<TurnFunction>().EndTurn(); 
+                }
+            }
         }
-        public Movement(bool canWalk = false, bool canSwim = false, bool canPhase = false) 
+        public Movement(List<int> _moveTypes) 
         {
-            if (canWalk) { moveTypes.Add(1); }
-            if (canSwim) { moveTypes.Add(2); }
-            if (canPhase) { moveTypes.Add(0); }
+            moveTypes = _moveTypes;
         }
         public Movement() { }
     }

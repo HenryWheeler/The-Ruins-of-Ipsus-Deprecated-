@@ -20,8 +20,8 @@ namespace TheRuinsOfIpsus
         {
             if (spawnTables.ContainsKey(table))
             {
-                if (useSeed) { return spawnTables[table].table[CMath.seed.Next(1, spawnTables[table].table.Count)]; }
-                else { return spawnTables[table].table[CMath.random.Next(1, spawnTables[table].table.Count)]; }
+                if (useSeed) { return spawnTables[table].table[World.seed.Next(1, spawnTables[table].table.Count + 1)]; }
+                else { return spawnTables[table].table[World.random.Next(1, spawnTables[table].table.Count + 1)]; }
             } else { return 0; }
         }
     }

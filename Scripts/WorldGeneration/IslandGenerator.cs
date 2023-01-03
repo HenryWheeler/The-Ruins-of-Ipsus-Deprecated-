@@ -11,18 +11,15 @@ namespace TheRuinsOfIpsus
         private int wallsNeeded = 4;
         private int randomFill;
         private int smooth = 5;
-        public void CreateMap(int _startX, int _startY, int _startZ, int _mapWidth, int _mapHeight, int strength)
+        public void CreateMap(int _mapWidth, int _mapHeight, int strength)
         {
-            startX = _startX;
-            startY = _startY;
-            startZ = _startZ;
             mapWidth = _mapWidth; mapHeight = _mapHeight;
             randomFill = World.seed.Next(46, 52);
             SetAllWalls();
 
-            for (int x = startX * mapWidth; x < (startX * mapWidth) + mapWidth; x++)
+            for (int x = 0; x < mapWidth; x++)
             {
-                for (int y = startY * mapHeight; y < (startY * mapHeight) + mapHeight; y++)
+                for (int y = 0; y < mapHeight; y++)
                 {
                     if (CMath.CheckBounds(x, y))
                     {
@@ -38,30 +35,30 @@ namespace TheRuinsOfIpsus
                 }
             }
             for (int z = 0; z < smooth; z++) { SmoothMap(); }
-            //SetSandyShore();
-
-            string table = "Shore-" + strength.ToString();
-            //FillChunk(table, World.seed.Next(8, 12));
+            SetSandyShore();
+            CreateSurroundingWalls();
+            CreateStairs();
         }
         public void SetSandyShore()
         {
-            foreach (Tile tile in Map.map)
+            foreach (Entity tile in World.tiles)
             {
-                if (tile != null && tile.moveType == 1)
+                if (tile != null && tile.GetComponent<Traversable>().terrainType == 1)
                 {
-                    Coordinate coordinate = tile.GetComponent<Coordinate>();
-                    if (WaterCount(coordinate.x, coordinate.y) != 0) 
+                    Vector2 coordinate = tile.GetComponent<Coordinate>().vector2;
+                    if (WaterCount(coordinate.x, coordinate.y) != 0)
                     {
                         if (World.seed.Next(0, 100) < 50) { SetTile(coordinate.x, coordinate.y, (char)176, "Sandy Shore", "A grainy shore of white sand.", "Light_Gray", "Dark_Yellow", false, 1); }
-                        else { SetTile(coordinate.x, coordinate.y, (char)176, "Sandy Shore", "A grainy shore of white sand.", "Light_Gray", "Dark_Yellow_Gray", false, 1); } }
+                        else { SetTile(coordinate.x, coordinate.y, (char)176, "Sandy Shore", "A grainy shore of white sand.", "Light_Gray", "Dark_Yellow_Gray", false, 1); }
+                    }
                 }
             }
         }
         public override void SetAllWalls()
         {
-            for (int x = startX * mapWidth; x < (startX * mapWidth) + mapWidth; x++)
+            for (int x = 0; x < mapWidth; x++)
             {
-                for (int y = startY * mapHeight; y < (startY * mapHeight) + mapHeight; y++)
+                for (int y = 0; y < mapHeight; y++)
                 {
                     if (World.seed.Next(0, 100) < 50) { SetTile(x, y, (char)247, "Water", "A murky pool.", "Light_Blue", "Dark_Blue", false, 2); }
                     else { SetTile(x, y, (char)247, "Water", "A murky pool.", "Light_Blue", "Blue", false, 2); }
@@ -70,9 +67,9 @@ namespace TheRuinsOfIpsus
         }
         public void SmoothMap()
         {
-            for (int x = startX * mapWidth; x < (startX * mapWidth) + mapWidth; x++)
+            for (int x = 0; x < mapWidth; x++)
             {
-                for (int y = startY * mapHeight; y < (startY * mapHeight) + mapHeight; y++)
+                for (int y = 0; y < mapHeight; y++)
                 {
                     if (CMath.CheckBounds(x, y))
                     {
@@ -102,7 +99,7 @@ namespace TheRuinsOfIpsus
             {
                 for (int y = sY - 1; y <= sY + 1; y++)
                 {
-                    if (x != sX || y != sY) { if (CMath.CheckBounds(x, y) && Map.map[x, y].moveType == 2) { walls++; } }
+                    if (x != sX || y != sY) { if (CMath.CheckBounds(x, y) && World.GetTraversable(new Vector2(x, y)).terrainType == 2) { walls++; } }
                 }
             }
 

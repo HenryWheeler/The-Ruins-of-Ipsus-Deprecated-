@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public class SpellCasting: Component
+    class ID: Component
     {
-
+        public int id { get; set; }
+        public ID(int _id) { id = _id; }
+        public ID() { }
     }
 }

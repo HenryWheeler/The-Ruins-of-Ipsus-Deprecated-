@@ -27,14 +27,13 @@ namespace TheRuinsOfIpsus
         private static readonly int actionHeight = 15;
         private static RLConsole actionConsole;
 
-        public static Player player;
+        public static Entity player;
         public static bool gameActive = false;
 
         public static int gameMapWidth = 50;
         public static int gameMapHeight = 50;
         public static void Main()
         {
-
             RLSettings settings = new RLSettings();
             settings.BitmapFile = "ascii_6x6.png";
             settings.CharWidth = 6;
@@ -47,36 +46,40 @@ namespace TheRuinsOfIpsus
             settings.ResizeType = RLResizeType.None;
             settings.StartWindowState = RLWindowState.Maximized;
             
-
             rootConsole = new RLRootConsole(settings);
-
             mapConsole = new RLConsole(mapWidth, mapHeight);
             messageConsole = new RLConsole(messageWidth, messageHeight);
             rogueConsole = new RLConsole(rogueWidth, rogueHeight);
             actionConsole = new RLConsole(actionWidth, actionHeight);
 
+            LoadFunctions();
+
+            rootConsole.Run(60);
+        }
+        public static void LoadFunctions()
+        {
             Renderer renderer = new Renderer(rootConsole, mapConsole, mapWidth, mapHeight, messageConsole, messageWidth, messageHeight, rogueConsole, rogueWidth, rogueHeight, actionConsole, actionWidth, actionHeight);
             Log log = new Log(messageConsole);
             Action action = new Action(actionConsole);
-            BodyPlots bodyPlots = new BodyPlots();
             Menu update = new Menu(rootConsole);
             StatManager stats = new StatManager(rogueConsole);
             SaveDataManager saveDataManager = new SaveDataManager();
             JsonDataManager jsonDataManager = new JsonDataManager();
             PronounReferences pronounReferences = new PronounReferences();
             SpawnTableManager spawnTableManager = new SpawnTableManager();
-
-            rootConsole.Run(60);
+            EntityManager.LoadAllEntities();
         }
-        public static void ReloadPlayer(List<Component> components)
+        public static void LoadPlayerFunctions(Entity player)
         {
-            player = new Player(components);
-            rootConsole.Update += player.GetComponent<PlayerComponent>().Update;
-            player.display = true;
-
             InventoryManager inventory = new InventoryManager(rogueConsole, player);
             Look look = new Look(player);
             TargetReticle reticle = new TargetReticle(player);
+        }
+        public static void ReloadPlayer(List<Component> components)
+        {
+            player = new Entity(components, 0, true);
+            rootConsole.Update += player.GetComponent<PlayerComponent>().Update;
+            player.display = true;
 
             List<Entity> entities = new List<Entity>();
             foreach (Entity entity in player.GetComponent<Inventory>().inventory) { if (entity != null) { entities.Add(entity); } }
@@ -85,71 +88,85 @@ namespace TheRuinsOfIpsus
             entities.Clear();
             foreach (EquipmentSlot entity in player.GetComponent<BodyPlot>().bodyPlot) { if (entity != null && entity.item != null) { entities.Add(entity.item); } }
             foreach (Entity id in entities) { new Entity(id).GetComponent<Equippable>().Equip(player); } 
-            Coordinate coordinate = player.GetComponent<Coordinate>();
-            Map.map[coordinate.x, coordinate.y].actor = player;
+            Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
+            World.GetTraversable(vector2).actorLayer = player;
             StatManager.UpdateStats(player);
             TurnManager.AddActor(player.GetComponent<TurnFunction>());
             Action.PlayerAction(player);
-            ShadowcastFOV.Compute(coordinate.x, coordinate.y, player.GetComponent<Stats>().sight);
-            player.GetComponent<UpdateCameraOnMove>().OnMove(coordinate.x, coordinate.y, coordinate.x, coordinate.y);
+            ShadowcastFOV.Compute(vector2, player.GetComponent<Stats>().sight);
+            player.GetComponent<UpdateCameraOnMove>().OnMove(vector2, vector2);
             player.GetComponent<TurnFunction>().StartTurn();
 
             EntityManager.AddEntity(player);
         }
-        public static void NewGame()
+        public static void CreateNewPlayer()
         {
-            EntityManager entityManager = new EntityManager();
-
-            World world = new World(mapWidth, mapHeight, 1);
-
-            List<Tile> tiles = new List<Tile>();
-            foreach (Tile tile in Map.map) { if (tile != null && tile.moveType != 0) { tiles.Add(tile); } }
-            Coordinate useTile = tiles[CMath.seed.Next(0, tiles.Count - 1)].GetComponent<Coordinate>();
-            player = new Player(null);
+            player = new Entity();
             player.display = true;
-            Map.map[useTile.x, useTile.y].actor = player;
-            Coordinate playerCoordinate = player.GetComponent<Coordinate>();
-            playerCoordinate.x = useTile.x; playerCoordinate.y = useTile.y;
+            player.AddComponent(new ID(0));
+            player.AddComponent(new Coordinate(0, 0));
+            player.AddComponent(new Draw("White", "Black", '@'));
+            player.AddComponent(new Description("You", "It's you."));
+            player.AddComponent(PronounReferences.pronounSets["Player"]);
+            player.AddComponent(new Stats(7, 10, 1f, 20, 1, 1));
+            player.AddComponent(new TurnFunction());
+            player.AddComponent(new Movement(new List<int> { 1, 2 }));
+            player.AddComponent(new Inventory());
+            player.AddComponent(new BodyPlot());
+            player.AddComponent(new OnHit());
+            player.AddComponent(new Faction("Player"));
+            player.AddComponent(new DijkstraProperty());
+            player.AddComponent(new UpdateCameraOnMove());
+            player.AddComponent(new PlayerComponent(rootConsole));
+            Entity startingWeapon = new Entity(new List<Component>() 
+            {
+                new Coordinate(0, 0),
+                new ID(1001),
+                new Draw("White", "Black", '/'),
+                new Description("Testing Weapon", "Testing"),
+                new Equippable("Weapon", true),
+                new AttackFunction("1-1-4-0-0", "Slashing"),
+                new Usable(),
+                new Throwable(),
+                new ExplodeOnUse(3),
+                new ExplodeOnThrow(3)
+            });
+            InventoryManager.AddToInventory(player, startingWeapon);
+
+            Action.PlayerAction(player);
+            EntityManager.AddEntity(player);
             TurnManager.AddActor(player.GetComponent<TurnFunction>());
             StatManager.UpdateStats(player);
-            InventoryManager inventory = new InventoryManager(rogueConsole, player);
-            Look look = new Look(player);
-            TargetReticle reticle = new TargetReticle(player);
-
-            //EntitySpawner.CreateNewEntityTest();
-
-            EntityManager.AddEntity(player);
-
-            ShadowcastFOV.Compute(playerCoordinate.x, playerCoordinate.y, player.GetComponent<Stats>().sight);
-            Log.AddToStoredLog("Welcome to the Ruins of Ipsus", true);
             player.GetComponent<TurnFunction>().StartTurn();
-            EntityManager.UpdateAll();
-            Renderer.MoveCamera(playerCoordinate);
+        }
+        public static void NewGame()
+        {
+            World world = new World(gameMapWidth, gameMapHeight);
+            CreateNewPlayer();
+            World.GenerateNewFloor(true);
+            LoadPlayerFunctions(player);
+            Log.Add("Welcome to the Ruins of Ipsus");
+            Log.DisplayLog();
+            //EntityManager.CreateNewEntityTest();
+
             gameActive = true;
         }
         public static void LoadSave(SaveData saveData)
         {
-            EntityManager entityManager = new EntityManager();
-            World world = new World(mapWidth, mapHeight, 1, saveData.seed, false);
+            EntityManager.LoadAllEntities();
+            World world = new World(gameMapWidth, gameMapHeight, saveData.depth, saveData.seed);
 
-            foreach (Tile tile in saveData.tiles)
-            {
-                if (tile != null)
-                {
-                    Coordinate coordinate = tile.GetComponent<Coordinate>();
-                    Map.map[coordinate.x, coordinate.y] = tile;
-                    if (tile.actor != null && tile.actor != player) { tile.actor = EntityManager.ReloadEntity(tile.actor); }
-                    else { tile.actor = null; }
-                    if (tile.item != null) { tile.item = EntityManager.ReloadEntity(tile.actor); }
-                    else { tile.item = null; }
-                    if (tile.terrain != null) { tile.terrain = EntityManager.ReloadEntity(tile.terrain); }
-                    else { tile.terrain = null; }
-                }
-            }
+            foreach (Entity actor in saveData.actors) { if (actor != null) { Entity entity = EntityManager.ReloadEntity(actor); World.GetTraversable(entity.GetComponent<Coordinate>().vector2).actorLayer = entity; } }
+            foreach (Entity item in saveData.items) { if (item != null) { Entity entity = EntityManager.ReloadEntity(item); World.GetTraversable(entity.GetComponent<Coordinate>().vector2).actorLayer = entity; } }
+            foreach (Entity terrain in saveData.terrain) { if (terrain != null) { Entity entity = EntityManager.ReloadEntity(terrain); World.GetTraversable(entity.GetComponent<Coordinate>().vector2).actorLayer = entity; } }
+            foreach (Entity tile in World.tiles) { if (tile != null) { Vector2 vector2 = tile.GetComponent<Coordinate>().vector2; if (saveData.visibility[vector2.x, vector2.y] != null) { tile.RemoveComponent(tile.GetComponent<Visibility>()); tile.AddComponent(saveData.visibility[vector2.x, vector2.y]); } } }
+
             ReloadPlayer(saveData.player.components);
-            EntityManager.UpdateAll();
-            Renderer.MoveCamera(player.GetComponent<Coordinate>());
-            Log.AddToStoredLog("Welcome to the Ruins of Ipsus", true);
+            LoadPlayerFunctions(player);
+            RecordKeeper.record = saveData.records;
+            Renderer.MoveCamera(player.GetComponent<Coordinate>().vector2);
+            Log.Add("Welcome to the Ruins of Ipsus");
+            Log.DisplayLog();
             gameActive = true;
         }
     }

@@ -15,9 +15,26 @@ namespace TheRuinsOfIpsus
         { 
             turnActive = true;
             SpecialComponentManager.TriggerTurn(entity, true);
-            if (CMath.ReturnAI(entity) != null) { CMath.ReturnAI(entity).EvaluateEnvironment(); } 
-            else if (!entity.display) { EndTurn(); }
-            if (entity.display) { Log.DisplayLog(); StatManager.UpdateStats(entity); } 
+            if (entity != null)
+            {
+                if (CMath.ReturnAI(entity) != null) 
+                {
+                    CMath.ReturnAI(entity).Process();
+                }
+                else if (!entity.display) 
+                {
+                    EndTurn();
+                }
+                if (entity.display) 
+                {
+                    Log.DisplayLog();
+                    StatManager.UpdateStats(entity); 
+                }
+            }
+            else 
+            { 
+                TurnManager.ProgressTurnOrder();
+            }
         }
         public void EndTurn() 
         { 
@@ -25,9 +42,9 @@ namespace TheRuinsOfIpsus
             SpecialComponentManager.TriggerTurn(entity, false);
             if (entity.display)
             {
-                Coordinate coordinate = entity.GetComponent<Coordinate>();
+                Vector2 vector3 = entity.GetComponent<Coordinate>().vector2;
                 ShadowcastFOV.ClearSight();
-                ShadowcastFOV.Compute(coordinate.x, coordinate.y, entity.GetComponent<Stats>().sight);
+                ShadowcastFOV.Compute(vector3, entity.GetComponent<Stats>().sight);
             }
             TurnManager.ProgressActorTurn(this);
         }

@@ -9,8 +9,6 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class Component
     {
-        public bool special = false;
-        public string componentName = "";
         public Entity entity { get; set; }
         public Component() { }
     }

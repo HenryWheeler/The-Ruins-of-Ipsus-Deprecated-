@@ -9,7 +9,10 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class DijkstraProperty: OnTurnProperty
     {
-        public override void OnTurn() { EntityManager.UpdateAll(); }
-        public DijkstraProperty() { special = true; start = false; }
+        public override void OnTurn()
+        { 
+            //EntityManager.UpdateAll(); 
+        }
+        public DijkstraProperty() { start = false; }
     }
 }

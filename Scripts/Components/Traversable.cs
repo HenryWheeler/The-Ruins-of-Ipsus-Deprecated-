@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 
 namespace TheRuinsOfIpsus
 {
-    class Traversable: Component
+    public class Traversable: Component
     {
         public int terrainType { get; set; }
+        public Entity sfxLayer { get; set; }
+        public Entity actorLayer { get; set; }
+        public Entity itemLayer { get; set; }
+        public Entity obstacleLayer { get; set; }
         public Traversable(int _terrainType) { terrainType = _terrainType; }
         public Traversable() { }
     }

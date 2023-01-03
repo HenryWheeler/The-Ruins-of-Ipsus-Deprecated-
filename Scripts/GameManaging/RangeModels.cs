@@ -12,10 +12,11 @@ namespace TheRuinsOfIpsus
         private static List<Coordinate> returnCoordinates = new List<Coordinate>();
         public static List<Coordinate> SphereRangeModel(Coordinate startingPoint, int size, bool includeStart)
         {
+            Vector2 vector = startingPoint.vector2;
             ClearCoordinates();
             for (uint octant = 0; octant < 8; octant++)
             {
-                ComputeSphere(octant, startingPoint.x, startingPoint.y, size, 1, new Slope(1, 1), new Slope(0, 1));
+                ComputeSphere(octant, vector.x, vector.y, size, 1, new Slope(1, 1), new Slope(0, 1));
             }
             if (includeStart) { returnCoordinates.Add(startingPoint); }
             return returnCoordinates;
@@ -33,8 +34,8 @@ namespace TheRuinsOfIpsus
         {
             List<Coordinate> coordinates = new List<Coordinate>();
             int t;
-            int x = origin.x; int y = origin.y;
-            int delta_x = target.x - origin.x; int delta_y = target.y - origin.y;
+            int x = origin.vector2.x; int y = origin.vector2.y;
+            int delta_x = target.vector2.x - origin.vector2.x; int delta_y = target.vector2.y - origin.vector2.y;
             int abs_delta_x = Math.Abs(delta_x); int abs_delta_y = Math.Abs(delta_y);
             int sign_x = Math.Sign(delta_x); int sign_y = Math.Sign(delta_y);
             bool hasConnected = false;
@@ -48,7 +49,7 @@ namespace TheRuinsOfIpsus
                     x += sign_x;
                     t += abs_delta_y * 2;
                     coordinates.Add(new Coordinate(x, y));
-                    if (x == target.x && y == target.y) { hasConnected = true; }
+                    if (x == target.vector2.x && y == target.vector2.y) { hasConnected = true; }
                 }
                 while (!hasConnected);
             }
@@ -61,7 +62,7 @@ namespace TheRuinsOfIpsus
                     y += sign_y;
                     t += abs_delta_x * 2;
                     coordinates.Add(new Coordinate(x, y));
-                    if (x == target.x && y == target.y) { hasConnected = true; }
+                    if (x == target.vector2.x && y == target.vector2.y) { hasConnected = true; }
                 }
                 while (!hasConnected);
             }
@@ -96,7 +97,7 @@ namespace TheRuinsOfIpsus
                         returnCoordinates.Add(new Coordinate(tx, ty));
                     }
 
-                    bool isOpaque = !inRange || BlocksLight(tx, ty);
+                    bool isOpaque = !inRange || BlocksLight(new Vector2(tx, ty));
                     if (x != rangeLimit)
                     {
                         if (isOpaque)

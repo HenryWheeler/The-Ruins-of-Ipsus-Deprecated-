@@ -8,15 +8,14 @@ using System.Threading.Tasks;
 
 namespace TheRuinsOfIpsus
 {
-    public class CaveGenerator: AGenerator
+    public class TestingGenerator: AGenerator
     {
         private int wallsNeeded = 4;
-        private int randomFill;
+        private int randomFill = 100;
         private int smooth = 5;
         public void CreateMap(int _mapWidth, int _mapHeight, int strength)
         {
             mapWidth = _mapWidth; mapHeight = _mapHeight;
-            randomFill = World.seed.Next(48, 52);
             SetAllWalls();
 
             for (int x = 3; x < mapWidth - 3; x++)
@@ -25,17 +24,52 @@ namespace TheRuinsOfIpsus
                 {
                     if (CMath.CheckBounds(x, y))
                     {
-                        if (World.seed.Next(0, 100) < randomFill) { if (World.seed.Next(0, 100) < 50) { SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Gray_Blue", "Black", false, 1); } 
-                        else { SetTile(x, y, '`', "Stone Floor", "A simple stone floor.", "Light_Gray_Blue", "Black", false, 1); } }
+                        if (World.seed.Next(0, 100) < randomFill) 
+                        { 
+                            if (World.seed.Next(0, 100) < 50) 
+                            { 
+                                SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Gray_Blue", "Black", false, 1); 
+                            } 
+                            else 
+                            {
+                                SetTile(x, y, '`', "Stone Floor", "A simple stone floor.", "Light_Gray_Blue", "Black", false, 1); 
+                            } 
+                        }
                     }
                 }
             }
             for (int z = 0; z < smooth; z++) { SmoothMap(); }
             CreateSurroundingWalls();
-            CreateConnections(3, 2);
-            string table = "Cave-" + strength.ToString();
-            //FillChunk(table, World.seed.Next(6, 10));
             CreateStairs();
+
+            foreach (Entity tile in World.tiles)
+            {
+                if (tile.GetComponent<Traversable>().terrainType == 1)
+                {
+                    if (World.seed.Next(0, 100) == 99)
+                    {
+                        TurnFunction function = new TurnFunction();
+                        EntityManager.CreateEntity(tile.GetComponent<Coordinate>().vector2, new Entity(new List<Component>()
+                            {
+                                new ID(1),
+                                tile.GetComponent<Coordinate>(),
+                                new Draw("Red", "Black", 'E'),
+                                new Description("Test Entity", "Testing."),
+                                PronounReferences.pronounSets["Nueter"],
+                                new Stats(5, 10, .8f, 5, 0, 0),
+                                function,
+                                new TestAI(new List<string>(), new List<string>() { "Player" }, 50),
+                                new Movement(new List<int> { 1, 2 }),
+                                new Inventory(),
+                                new BodyPlot(),
+                                new OnHit(),
+                                new Faction("Beast"),
+                                new Interactable(new List<string>() { "Attack" })
+                        }), false, false);
+                        TurnManager.AddActor(function);
+                    }
+                }
+            }
         }
         public override void SetAllWalls()
         {

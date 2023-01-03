@@ -9,15 +9,15 @@ namespace TheRuinsOfIpsus
 {
     public class DungeonGenerator: AGenerator
     {
-        private int roomsToGenerate = 15;
+        private int roomsToGenerate = 20;
         private int minRoomSize = 5;
         private int maxRoomSize = 12;
-        public void CreateMap(int _startX, int _startY, int _startZ, int _mapWidth, int _mapHeight, int strength)
+        public void CreateMap(int _mapWidth, int _mapHeight, int strength)
         {
-            startX = _startX;
-            startY = _startY;
-            startZ = _startZ;
             mapWidth = _mapWidth; mapHeight = _mapHeight;
+            roomsToGenerate = World.seed.Next(15, 25);
+            minRoomSize = World.seed.Next(4, 7);
+            maxRoomSize = World.seed.Next(12, 15);
 
             SetAllWalls();
 
@@ -31,16 +31,17 @@ namespace TheRuinsOfIpsus
                 if (!CheckIfHasSpace(xSP, ySP, xSP + rW - 1, ySP + rH - 1)) { i--; continue; }
                 CreateRoom(xSP, ySP, rW, rH);
             }
-            //CreateConnections(2, 0);
+            CreateConnections(3, 0);
 
             string table = "Dungeon-" + strength.ToString();
             //FillChunk(table, World.seed.Next(4, 10));
+            CreateStairs();
         }
         public override void SetAllWalls()
         {
-            for (int x = startX * mapWidth; x < (startX * mapWidth) + mapWidth; x++)
+            for (int x = 0; x < mapWidth; x++)
             {
-                for (int y = startY * mapHeight; y < (startY * mapHeight) + mapHeight; y++)
+                for (int y = 0; y < mapHeight; y++)
                 {
                     SetTile(x, y, '#', "Stone Wall", "A cold stone wall.", "White", "Gray", true, 0);
                 }
@@ -76,7 +77,7 @@ namespace TheRuinsOfIpsus
                     if (t >= 0) { y += sign_y; t -= abs_delta_x * 2; }
                     x += sign_x;
                     t += abs_delta_y * 2;
-                    if (Map.map[x, y].moveType == 0)
+                    if (World.GetTraversable(new Vector2(x, y)).terrainType == 0)
                     {
                         SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
                         SetTile(x + 1, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
@@ -93,7 +94,7 @@ namespace TheRuinsOfIpsus
                     if (t >= 0) { x += sign_x; t -= abs_delta_y * 2; }
                     y += sign_y;
                     t += abs_delta_x * 2;
-                    if (Map.map[x, y].moveType == 0)
+                    if (World.GetTraversable(new Vector2(x, y)).terrainType == 0)
                     {
                         SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
                         SetTile(x, y + 1, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
@@ -114,8 +115,8 @@ namespace TheRuinsOfIpsus
             {
                 int x = (int)((1 - t) * ((1 - t) * r0x + t * r1x) + t * ((1 - t) * r0x + t * r2x));
                 int y = (int)((1 - t) * ((1 - t) * r0y + t * r1y) + t * ((1 - t) * r0y + t * r2y));
-                if (CMath.CheckBounds(x, y)) { if (World.seed.Next(0, 100) < 50) { SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Gray_Blue", "Black", false, 1); } 
-                    else { SetTile(x, y, '`', "Stone Floor", "A simple stone floor.", "Light_Gray_Blue", "Black", false, 1); } }
+                if (CMath.CheckBounds(x, y)) { if (World.seed.Next(0, 100) < 50) { SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1); } 
+                else { SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1); } }
             }
         }
         public override void CreateStraightPassage(int r1x, int r1y, int r2x, int r2y)

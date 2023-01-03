@@ -9,7 +9,7 @@ namespace TheRuinsOfIpsus
     [Serializable]
     class UpdateCameraOnMove: OnMoveProperty
     {
-        public override void OnMove(int x1, int y1, int x2, int y2) { Renderer.MoveCamera(entity.GetComponent<Coordinate>()); }
-        public UpdateCameraOnMove() { special = true; }
+        public override void OnMove(Vector2 initialPosition, Vector2 finalPosition) { Renderer.MoveCamera(entity.GetComponent<Coordinate>().vector2); }
+        public UpdateCameraOnMove() { }
     }
 }
