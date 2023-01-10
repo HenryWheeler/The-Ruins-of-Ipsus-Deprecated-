@@ -50,6 +50,15 @@ namespace TheRuinsOfIpsus
                 { 
                     Log.Add($"{attacker.GetComponent<Description>().name} hit you for {dmg} damage with the {weaponName}."); 
                 }
+
+                Entity hitParticle = new Entity(new List<Component>
+                        {
+                            new Coordinate(0, 0),
+                            new Draw("Red", "Black", (char)3),
+                            new ParticleComponent(2, 1, "None", 1, new Draw[] { new Draw("Red", "Black", (char)3) })
+                        });
+                Vector2 vector2 = entity.GetComponent<Coordinate>().vector2;
+                Renderer.AddParticle(vector2.x, vector2.y, hitParticle);
             }
         }
         public void LowerHealth(int dmg)
@@ -67,6 +76,14 @@ namespace TheRuinsOfIpsus
         }
         public void Death() 
         {
+            Entity hitParticle = new Entity(new List<Component>
+                        {
+                            new Coordinate(0, 0),
+                            new Draw("Red", "Black", 'X'),
+                            new ParticleComponent(2, 1, "None", 1, new Draw[] { new Draw("Red", "Black", 'X') })
+                        });
+            Vector2 vector2 = entity.GetComponent<Coordinate>().vector2;
+            Renderer.AddParticle(vector2.x, vector2.y, hitParticle);
             Log.Add($"{entity.GetComponent<Description>().name} has died.");
             entity.GetComponent<TurnFunction>().turnActive = false; 
 

@@ -9,7 +9,7 @@ namespace TheRuinsOfIpsus
     {
         public static RLConsole console;
         private static Queue<string> log = new Queue<string>();
-        private static int maxLogCount = 10;
+        private static int maxLogCount = 15;
         private static string spacer { get; set; }
         public Log(RLConsole _console) 
         { 
@@ -44,7 +44,14 @@ namespace TheRuinsOfIpsus
                         else
                         {
                             if (c + split[0].Length > console.Width - 4) { y += 2 + m; c = 1; }
-                            console.Print(c + 1, y, split[0], RLColor.Blend(RLColor.Gray, RLColor.White, 1 - .05f * (i * 2)));
+                            if (i == temp.Length - 1)
+                            {
+                                console.Print(c + 1, y, split[0], RLColor.Green);
+                            }
+                            else
+                            {
+                                console.Print(c + 1, y, split[0], RLColor.Blend(RLColor.Gray, RLColor.White, 1 - .05f * (i * 2)));
+                            }
                             c += split[0].Length + 1;
                         }
                     }
@@ -54,7 +61,14 @@ namespace TheRuinsOfIpsus
                         else
                         {
                             if (c + split[0].Length > console.Width - 4) { y += 2 + m; c = 1; }
-                            console.Print(c + 1, y, split[1], RLColor.Blend(RLColor.Gray, RLColor.White, 1 - .05f * (i * 2)));
+                            if (i == temp.Length - 1)
+                            {
+                                console.Print(c + 1, y, split[1], RLColor.Green);
+                            }
+                            else
+                            {
+                                console.Print(c + 1, y, split[1], RLColor.Blend(RLColor.Gray, RLColor.White, 1 - .05f * (i * 2)));
+                            }
                             c += split[1].Length + 1;
                         }
                     }

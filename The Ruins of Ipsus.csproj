@@ -119,6 +119,8 @@
   <ItemGroup>
     <Compile Include="Scripts\Components\AIComponents\BaseAI\AI.cs" />
     <Compile Include="Scripts\Components\AIComponents\BaseAI\AIActions.cs" />
+    <Compile Include="Scripts\Components\AIComponents\GuardAI.cs" />
+    <Compile Include="Scripts\Components\AIComponents\PatrolFunction.cs" />
     <Compile Include="Scripts\Components\AIComponents\TestAI.cs" />
     <Compile Include="Scripts\Components\AnimationFunction.cs" />
     <Compile Include="Scripts\Components\AttackFunction.cs" />
@@ -127,6 +129,7 @@
     <Compile Include="Scripts\Components\Component.cs" />
     <Compile Include="Scripts\Components\Coordinate.cs" />
     <Compile Include="Scripts\Components\Description.cs" />
+    <Compile Include="Scripts\Components\DoorFunction.cs" />
     <Compile Include="Scripts\Components\Faction.cs" />
     <Compile Include="Scripts\Components\ID.cs" />
     <Compile Include="Scripts\Components\Interactable.cs" />
@@ -210,4 +213,8 @@
     </PropertyGroup>
     <Error Condition="!Exists('packages\System.Text.Json.6.0.6\build\System.Text.Json.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\System.Text.Json.6.0.6\build\System.Text.Json.targets'))" />
   </Target>
+  <PropertyGroup>
+    <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
+if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
+  </PropertyGroup>
 </Project>

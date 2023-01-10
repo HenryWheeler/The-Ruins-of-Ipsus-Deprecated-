@@ -17,6 +17,8 @@ namespace TheRuinsOfIpsus
             Curious,
             Awake,
             Bored,
+            Patrolling,
+
         }
 
         public enum Input
@@ -156,7 +158,7 @@ namespace TheRuinsOfIpsus
                     bool inRange = rangeLimit < 0 || CMath.Distance(oX, oY, tx, ty) <= rangeLimit;
                     if (inRange && (y != topY || top.Y * x >= top.X * y) && (y != bottomY || bottom.Y * x <= bottom.X * y))
                     {
-                        Traversable traversable = World.tiles[tx, ty].GetComponent<Traversable>();
+                        Traversable traversable = World.tiles[tx, ty];
                         if (CMath.CheckBounds(tx, ty) && traversable.actorLayer != null && traversable.actorLayer != entity)
                         {
                             int referenceInterest = ReturnFeelings(traversable.actorLayer);
@@ -208,7 +210,15 @@ namespace TheRuinsOfIpsus
         {
             if (CMath.CheckBounds(vector2.x, vector2.y))
             {
-                if (World.tiles[vector2.x, vector2.y].GetComponent<Visibility>().opaque) { return true; }
+                Traversable traversable = World.tiles[vector2.x, vector2.y];
+                if (traversable.entity.GetComponent<Visibility>().opaque)
+                {
+                    return true;
+                }
+                else if (traversable.obstacleLayer != null && traversable.obstacleLayer.GetComponent<Visibility>().opaque)
+                {
+                    return true;
+                }
                 return false;
             }
             return true;

@@ -23,6 +23,10 @@ namespace TheRuinsOfIpsus
         private static int actionHeight;
         public static bool inventoryOpen = false;
         public static bool threadRunning = false;
+        public static List<ParticleComponent> particles = new List<ParticleComponent>();
+        public static int current = 1;
+        public static bool running = false;
+        public static bool playingAnimation = false;
         public static int minX { get; set; }
         public static int maxX { get; set; }
         public static int minY { get; set; }
@@ -46,6 +50,11 @@ namespace TheRuinsOfIpsus
             actionWidth = _actionWidth;
             actionHeight = _actionHeight;
             rootConsole.Render += Render;
+
+            running = true;
+
+            Thread thread = new Thread(() => RenderParticles());
+            thread.Start();
         }
         public void Render(object sender, UpdateEventArgs e)
         {
@@ -60,6 +69,45 @@ namespace TheRuinsOfIpsus
             else { RenderMenu(); }
             rootConsole.Draw();
         }
+        public static void AddParticle(int x, int y, Entity particle)
+        {
+            particle.GetComponent<Coordinate>().vector2 = new Vector2(x, y);
+            World.tiles[x, y].sfxLayer = particle;
+            particles.Add(particle.GetComponent<ParticleComponent>());
+        }
+        public static void RenderParticles()
+        {
+            while (running)
+            {
+                if (particles.Count > 0)
+                {
+                    for (int i = 0; i < particles.Count; i++)
+                    {
+                        ParticleComponent particle = particles[i];
+                        switch (particle.speed)
+                        {
+                            case 1: { if (current == 1) { break; } else { continue; } }
+                            case 2: { if (current == 2 || current == 7) { break; } else { continue; } }
+                            case 3: { if (current == 3 || current == 6 || current == 9) { break; } else { continue; } }
+                            case 4: { if (current == 2 || current == 4 || current == 6 || current == 8 || current == 10) { break; } else { continue; } }
+                            case 5: { break; }
+                        }
+                        particle.Progress();
+                    }
+                }
+
+                Thread.Sleep(TimeSpan.FromMilliseconds(16.66f));
+
+                if (current == 10)
+                {
+                    current = 1;
+                }
+                else
+                {
+                    current++;
+                }
+            }
+        }  
         public void RenderMenu()
         {
             CreateConsoleBorder(rootConsole);
@@ -156,18 +204,30 @@ namespace TheRuinsOfIpsus
                 {
                     if (CMath.CheckBounds(tx, ty))
                     {
-                        Entity tile = World.tiles[tx, ty];
+                        Entity tile = World.tiles[tx, ty].entity;
                         Visibility visibility = tile.GetComponent<Visibility>();
                         Traversable traversable = tile.GetComponent<Traversable>();
                         if (traversable.sfxLayer != null) { traversable.sfxLayer.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
-                        else if (!visibility.visible && !visibility.explored) { mapConsole.Set(x, y, RLColor.Black, RLColor.Black, tile.GetComponent<Draw>().character); }
-                        else if (!visibility.visible && visibility.explored) { Draw draw = tile.GetComponent<Draw>(); mapConsole.Set(x, y, ColorFinder.ColorPicker("Dark_Gray"), RLColor.Blend(RLColor.Black, ColorFinder.ColorPicker(draw.bColor), .55f), draw.character); }
+                        else if (!visibility.visible && !visibility.explored) { mapConsole.Set(x, y, RLColor.Black, RLColor.Black, '?'); }
+                        else if (!visibility.visible && visibility.explored)
+                        {
+                            if (traversable.obstacleLayer != null)
+                            {
+                                Draw draw = traversable.obstacleLayer.GetComponent<Draw>();
+                                mapConsole.Set(x, y, ColorFinder.ColorPicker("Dark_Gray"), RLColor.Blend(RLColor.Black, ColorFinder.ColorPicker(draw.bColor), .55f), draw.character);
+                            }
+                            else
+                            {
+                                Draw draw = tile.GetComponent<Draw>();
+                                mapConsole.Set(x, y, ColorFinder.ColorPicker("Dark_Gray"), RLColor.Blend(RLColor.Black, ColorFinder.ColorPicker(draw.bColor), .55f), draw.character);
+                            }
+                        }
                         else if (traversable.actorLayer != null) { traversable.actorLayer.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
                         else if (traversable.itemLayer != null) { traversable.itemLayer.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
                         else if (traversable.obstacleLayer != null) { traversable.obstacleLayer.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
                         else { tile.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
                     }
-                    else { mapConsole.Set(x, y, ColorFinder.ColorPicker("Gray"), ColorFinder.ColorPicker("Black"), '+'); }
+                    else { mapConsole.Set(x, y, RLColor.Black, RLColor.Black, '?'); }
                     x++;
                 }
                 y++;
@@ -204,6 +264,151 @@ namespace TheRuinsOfIpsus
                 }
             }
             if (console == messageConsole) { console.Print(6, 0, " Message Log ", RLColor.White); }
+        }
+    }
+    public class ParticleComponent: Component
+    {
+        public int life { get; set; }
+        public int speed { get; set; }
+        public string direction { get; set; }
+        public int threshold { get; set; }
+        public int currentThreshold = 0;
+        public Draw[] particles { get; set; }
+        public int currentParticle = 0;
+        public bool animation = false;
+        public void Progress()
+        {
+            Vector2 position = entity.GetComponent<Coordinate>().vector2;
+
+            if (CMath.CheckBounds(position.x, position.y))
+            {
+                World.tiles[position.x, position.y].sfxLayer = null;
+            }
+
+            switch (direction)
+            {
+                case "Target":
+                    {
+                        Vector2 newPosition = DijkstraMaps.PathFromMap(position, "ParticlePath");
+                        if (position == newPosition)
+                        {
+                            KillParticle();
+                            return;
+                        }
+                        position = newPosition;
+                        break;
+                    }
+                case "None": { break; }
+                case "North": 
+                    {
+                        position.y--;
+                        break; 
+                    }
+                case "NorthEast": 
+                    {
+                        position.x--; 
+                        position.y--;
+                        break;
+                    }
+                case "East": 
+                    { 
+                        position.x--; 
+                        break;
+                    }
+                case "SouthEast":
+                    {
+                        position.x--;
+                        position.y++;  
+                        break;
+                    }
+                case "South":
+                    {
+                        position.y++;
+                        break;
+                    }
+                case "SouthWest":
+                    {
+                        position.x++; 
+                        position.y++;
+                        break;
+                    }
+                case "West":
+                    {
+                        position.x++;
+                        break;
+                    }
+                case "NorthWest": 
+                    {
+                        position.x++; 
+                        position.y--;
+                        break; 
+                    }
+            }
+
+            if (CMath.CheckBounds(position.x, position.y))
+            {
+                World.tiles[position.x, position.y].sfxLayer = entity;
+            }
+
+            currentThreshold--;
+
+            if (currentThreshold <= 0)
+            {
+                currentThreshold = threshold;
+                if (currentParticle == particles.Length - 1)
+                {
+                    currentParticle = 0;
+                }
+                else
+                {
+                    currentParticle++;
+                }
+
+                Draw draw = entity.GetComponent<Draw>();
+                draw.character = particles[currentParticle].character;
+                draw.fColor = particles[currentParticle].fColor;
+                draw.bColor = particles[currentParticle].bColor;
+            }
+
+            life--;
+            if (life <= 0 && direction != "Target")
+            {
+                KillParticle();
+                return;
+            }
+        }
+        public void KillParticle()
+        {
+            Vector2 position = entity.GetComponent<Coordinate>().vector2;
+            Renderer.particles.Remove(this);
+            if (CMath.CheckBounds(position.x, position.y))
+            {
+                World.tiles[position.x, position.y].sfxLayer = null;
+            }
+            if (animation)
+            {
+                Renderer.playingAnimation = false;
+            }
+        }
+        public ParticleComponent(int _life, int _speed, string _direction, int _threshHold, Draw[] _particles, Vector2 target = null, bool animation = false)
+        {
+            life = _life;
+            speed = _speed;
+            direction = _direction;
+            threshold = _threshHold;
+            particles = _particles;
+
+            if (target != null)
+            {
+                DijkstraMaps.CreateMap(target, "ParticlePath");
+                direction = "Target";
+            }
+
+            if (animation)
+            {
+                animation = true;
+                Renderer.playingAnimation = true;
+            }
         }
     }
 }

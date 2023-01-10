@@ -1,142 +1,202 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace TheRuinsOfIpsus
 {
     public class DijkstraMaps
     {
-        public static Dictionary<string, Node[,]> maps = new Dictionary<string, Node[,]>();
+        public DijkstraMaps(int width, int height)
+        {
+            gameMapWidth = width;
+            gameMapHeight = height;
+
+            baseIntArray = new int[gameMapWidth, gameMapWidth];
+
+            for (int x = 0; x < gameMapWidth; x++)
+            {
+                for (int y = 0; y < gameMapHeight; y++)
+                {
+                    baseIntArray[x, y] = 1000;
+                }
+            }
+        }
+        private static int gameMapWidth { get; set; }
+        private static int gameMapHeight { get; set; }
+        private static int[,] baseIntArray { get; set; }
+        public static Dictionary<string, int[,]> maps = new Dictionary<string, int[,]>();
         public static void CreateMap(Entity coordinate, string name)
         {
-            List<Entity> entity = new List<Entity>(); entity.Add(coordinate);
-            CreateMap(entity, name);
-        }
-        public static void CreateMap(List<Entity> coordinates, string name)
-        {
-            //Log.Add($"Running map {name} with {coordinates.Count} entry coordinates");
-            int current = 0;
-            Node[,] map = new Node[Program.gameMapWidth, Program.gameMapHeight];
-            for (int x = 0; x < Program.gameMapWidth; x++)
+            List<Entity> entity = new List<Entity>
             {
-                for (int y = 0; y < Program.gameMapHeight; y++)
-                {
-                    map[x, y] = new Node(x, y, 1000);
-                }
-            }
-            //foreach (Node node in map) { map[node.x, node.y] = new Node(node.x, node.y, 1000); }
-            foreach (Entity entity in coordinates) 
-            { 
-                Vector2 vector3 = entity.GetComponent<Coordinate>().vector2;
-                map[vector3.x, vector3.y] = new Node(vector3.x, vector3.y, 0);
+                coordinate
+            }; CreateMap(entity, name, 500);
+        }
+        public static void CreateMap(Vector2 coordinate, string name)
+        {
+            List<Entity> entity = new List<Entity>
+            {
+                new Entity(new List<Component>() { new Coordinate(coordinate) })
+            }; CreateMap(entity, name, 500);
+        }
+        public static void CreateMap(List<Entity> coordinates, string name, int strength = 25)
+        {
+            ConcurrentQueue<Vector2> checkList = new ConcurrentQueue<Vector2>();
+            HashSet<Vector2> tempList = new HashSet<Vector2>();
+            int[,] intArray = (int[,])baseIntArray.Clone();
+            for (int o = 0; o < coordinates.Count; o++)
+            {
+                Vector2 vector3 = coordinates[o].GetComponent<Coordinate>().vector2;
+                intArray[vector3.x, vector3.y] = 0;
+                checkList.Enqueue(vector3);
+                tempList.Add(vector3);
             }
 
-            Node finalNode;
-            do
+            //var watch1 = Stopwatch.StartNew();
+            for (int o = 0; o < strength; o++)
             {
-                finalNode = null;
-                foreach (Node node in map)
+                for (int i = 0; i < checkList.Count; i++)
                 {
-                    if (node != null && node.v == current)
+                    checkList.TryDequeue(out Vector2 vector2);
+                    CheckNeighbors(intArray, tempList, checkList, vector2.x, vector2.y);
+                }
+                //Log.Add($"{checkList.Count} queued for {name}");
+                tempList.Clear();
+            }
+            //Log.Add($"{name}: {watch1.ElapsedTicks} ticks && {watch1.ElapsedMilliseconds} miliseconds");
+            //StatManager.Average(watch1.ElapsedTicks);
+
+            AddMap(intArray, name);
+        }
+        private static void CheckNeighbors(int[,] intArray, HashSet<Vector2> tempList, ConcurrentQueue<Vector2> checkList, int x, int y)
+        {
+            int current = intArray[x, y];
+            for (int y2 = y - 1; y2 <= y + 1; y2++)
+            {
+                if (CheckBoundsAndWalls(x, y2) && intArray[x, y2] > current)
+                {
+                    Vector2 vector21 = new Vector2(x, y2);
+                    if (!tempList.Contains(vector21))
                     {
-                        for (int y = node.y - 1; y <= node.y + 1; y++)
-                        {
-                            for (int x = node.x - 1; x <= node.x + 1; x++)
-                            {
-                                if (CMath.CheckBounds(x, y))
-                                {
-                                    Traversable traversable = World.tiles[x, y].GetComponent<Traversable>();
-                                    if (traversable.terrainType != 0 && map[x, y].v > current)
-                                    {
-                                        if (traversable.actorLayer == null) 
-                                        {
-                                            map[x, y].v = current + 1;
-                                            finalNode = node; 
-                                        }
-                                        else 
-                                        {
-                                            map[x, y].v = current + 70;
-                                            finalNode = node; 
-                                        }
-                                        Draw draw = World.tiles[x, y].GetComponent<Draw>();
-                                        //draw.character = (char)current;
-                                    }
-                                    else { continue; }
-                                }
-                                else continue;
-                            }
-                        }
+                        intArray[x, y2] = current + 1;
+                        tempList.Add(vector21);
+                        checkList.Enqueue(vector21);
                     }
                 }
-                current++;
-            } while (finalNode != null);
-
-            AddMap(map, name);
-        }
-        public static void CombineThenCreate(Node[,] map1, Node[,] map2, string name)
-        {
-            Node[,] map = new Node[Program.gameMapWidth, Program.gameMapHeight];
-            foreach (Entity tile in World.tiles)
-            {
-                if (tile != null)
-                {
-                    Vector2 vector3 = tile.GetComponent<Coordinate>().vector2;
-                    if (CMath.CheckBounds(vector3.x, vector3.y) && map1[vector3.x, vector3.y] != null && map2[vector3.x, vector3.y] != null)
-                    { map[vector3.x, vector3.y] = new Node(vector3.x, vector3.y, map1[vector3.x, vector3.y].v + map2[vector3.x, vector3.y].v); }
-                }
+                else { continue; }
             }
-            AddMap(map, name);
+            for (int x2 = x - 1; x2 <= x + 1; x2++)
+            {
+                if (CheckBoundsAndWalls(x2, y) && intArray[x2, y] > current)
+                {
+                    Vector2 vector21 = new Vector2(x2, y);
+                    if (!tempList.Contains(vector21))
+                    {
+                        intArray[x2, y] = current + 1;
+                        tempList.Add(vector21);
+                        checkList.Enqueue(vector21);
+                    }
+                }
+                else { continue; }
+            }
         }
-        public static void ReverseMap(Node[,] map, string name) { foreach (Node node in map) { if (node != null) { node.v *= -1; } } AddMap(map, name); }
-        private static void AddMap(Node[,] map, string name)
+        private static bool CheckBoundsAndWalls(int x, int y)
         {
-            if (maps.ContainsKey(name)) { maps[name] = map; }
-            else maps.Add(name, map);
+            return x >= 0 && x <= Program.gameMapWidth && y >= 0 && y <= Program.gameMapHeight && World.tiles[x, y].terrainType != 0;
         }
-        public static void DiscardAll() { maps.Clear(); }
+        private static void AddMap(int[,] map, string name)
+        {
+            if (maps.ContainsKey(name))
+            {
+                maps[name] = map;
+            }
+            else
+            {
+                maps.Add(name, map);
+            }
+        }
+        public static void DiscardAll() 
+        {
+            maps.Clear(); 
+        }
         public static Vector2 PathFromMap(Entity entity, string mapName)
         {
-            Vector2 vector3 = entity.GetComponent<Coordinate>().vector2;
-            Node[,] map;
-            if (maps.ContainsKey(mapName)) { map = maps[mapName]; }
+            Vector2 start = entity.GetComponent<Coordinate>().vector2;
+            int[,] map;
+            if (maps.ContainsKey(mapName)) 
+            { 
+                map = (int[,])maps[mapName].Clone(); 
+            }
             else { return null; }
 
-            Node start = map[vector3.x, vector3.y];
-            Node target = start;
+            Vector2 target = start;
+            float v = map[start.x, start.y];
 
             for (int y = start.y - 1; y <= start.y + 1; y++)
             {
                 for (int x = start.x - 1; x <= start.x + 1; x++)
                 {
-                    if (CMath.CheckBounds(x, y))
+                    if (CheckBoundsAndWalls(x, y))
                     {
-                        if (map[x, y].v == 0) 
+                        if (map[x, y] == 0) 
                         {
-                            target = map[x, y]; 
-                            return new Vector2(target.x, target.y); 
-                        }
-                        else if ((y == start.y - 1 && x == start.x - 1) || (y == start.y - 1 && x == start.x + 1) || (y == start.y + 1 && x == start.x - 1) || (y == start.y + 1 && x == start.x + 1))
-                        {
-                            if (entity.GetComponent<Movement>().moveTypes.Contains(World.GetTraversable(new Vector2(x, y)).terrainType) && map[x, y].v + .5f < target.v) 
-                            {
-                                target = map[x, y]; target.v += .5f;
-                            }
-                            else continue;
+                            target = new Vector2(x, y); 
+                            return target; 
                         }
                         else
                         {
-                            if (entity.GetComponent<Movement>().moveTypes.Contains(World.GetTraversable(new Vector2(x, y)).terrainType) && map[x, y].v < target.v) 
-                            { 
-                                target = map[x, y]; 
+                            if (entity.GetComponent<Movement>().moveTypes.Contains(World.tiles[x, y].terrainType) && map[x, y] < v) 
+                            {
+                                target = new Vector2(x, y);
+                                v = map[x, y];
                             }
                             else continue;
                         }
                     }
                 }
             }
-            return new Vector2(target.x, target.y);
+            return target;
+        }
+        public static Vector2 PathFromMap(Vector2 start, string mapName)
+        {
+            int[,] map;
+            if (maps.ContainsKey(mapName))
+            {
+                map = (int[,])maps[mapName].Clone();
+            }
+            else { return null; }
+
+            Vector2 target = start;
+            float v = map[start.x, start.y];
+
+            for (int y = start.y - 1; y <= start.y + 1; y++)
+            {
+                for (int x = start.x - 1; x <= start.x + 1; x++)
+                {
+                    if (CheckBoundsAndWalls(x, y))
+                    {
+                        if (map[x, y] == 0)
+                        {
+                            target = new Vector2(x, y);
+                            return target;
+                        }
+                        else
+                        {
+                            if (map[x, y] < v)
+                            {
+                                target = new Vector2(x, y);
+                                v = map[x, y];
+                            }
+                            else continue;
+                        }
+                    }
+                }
+            }
+            return target;
         }
     }
     public class Node

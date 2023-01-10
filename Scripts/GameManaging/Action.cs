@@ -56,38 +56,38 @@ namespace TheRuinsOfIpsus
                     case RLKey.KeypadMinus:
                         {
                             Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
-                            if (World.tiles[vector2.x, vector2.y].GetComponent<Draw>().character == '<') { World.GenerateNewFloor(true); }
+                            if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '<') { World.GenerateNewFloor(true); }
                             break;
                         }
                     case RLKey.KeypadPlus:
                         {
                             Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
-                            if (World.tiles[vector2.x, vector2.y].GetComponent<Draw>().character == '>') { World.GenerateNewFloor(false); }
+                            if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '>') { World.GenerateNewFloor(false); }
                             break;
                         }
                     case RLKey.Plus:
                         {
                             Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
-                            if (World.tiles[vector2.x, vector2.y].GetComponent<Draw>().character == '>') { World.GenerateNewFloor(true); }
+                            if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '>') { World.GenerateNewFloor(true); }
                             break;
                         }
                     case RLKey.Minus:
                         {
                             Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
-                            if (World.tiles[vector2.x, vector2.y].GetComponent<Draw>().character == '<') { World.GenerateNewFloor(false); }
+                            if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '<') { World.GenerateNewFloor(false); }
                             break;
                         }
                     case RLKey.Period: player.GetComponent<TurnFunction>().EndTurn(); break;
                     case RLKey.L: Look.StartLooking(player.GetComponent<Coordinate>()); break;
-                    case RLKey.I: InventoryManager.OpenInventory(); break;
-                    case RLKey.G: InventoryManager.GetItem(player); break;
-                    case RLKey.J: SaveDataManager.CreateSave(); Program.rootConsole.Close(); break;
+                    case RLKey.I: InventoryManager.OpenInventory(); Log.DisplayLog(); break;
+                    case RLKey.G: InventoryManager.GetItem(player); Log.DisplayLog(); break;
+                    case RLKey.J: SaveDataManager.CreateSave(); Program.gameActive = false; Renderer.running = false; Program.rootConsole.Close(); break;
                     case RLKey.V:
-                        foreach (Entity tile in World.tiles)
+                        foreach (Traversable tile in World.tiles)
                         {
                             if (tile != null)
                             {
-                                Vector2 vector2 = tile.GetComponent<Coordinate>().vector2;
+                                Vector2 vector2 = tile.entity.GetComponent<Coordinate>().vector2;
                                 ShadowcastFOV.SetVisible(vector2, true, true);
                             }
                         }
@@ -150,10 +150,44 @@ namespace TheRuinsOfIpsus
                     {
                         case RLKey.A:
                             {
-                                EscapeInteraction(player);
                                 if (chosenEntity.GetComponent<Interactable>().interactions.Contains("Attack"))
-                                { 
+                                {
+                                    EscapeInteraction(player);
                                     AttackManager.MeleeAllStrike(player, chosenEntity); 
+                                }
+                                else
+                                {
+                                    ReturnFalseMethodMessage();
+                                }
+                                break;
+                            }
+                        case RLKey.O:
+                            {
+                                if (chosenEntity.GetComponent<Interactable>().interactions.Contains("Openable"))
+                                {
+                                    DoorFunction doorFunction = chosenEntity.GetComponent<DoorFunction>();
+                                    if (doorFunction != null)
+                                    {
+                                        if (doorFunction.open)
+                                        {
+                                            doorFunction.Close();
+                                            Log.Add("You close the door");
+                                        }
+                                        else
+                                        {
+                                            doorFunction.Open();
+                                            Log.Add("You open the door.");
+                                        }
+                                        EscapeInteraction(player);
+                                    }
+                                    else
+                                    {
+                                        ReturnFalseMethodMessage();
+                                    }
+                                }
+                                else
+                                {
+                                    ReturnFalseMethodMessage();
                                 }
                                 break;
                             }
@@ -162,8 +196,19 @@ namespace TheRuinsOfIpsus
                 }
             }
         }
+        public static void ReturnFalseMethodMessage()
+        {
+            DisplayActions("You cannot interact via that method. Choose another method of interaction");
+        }
         public static void EscapeInteraction(Entity player)
-        { player.GetComponent<TurnFunction>().turnActive = true; interacting = false; choosingDirection = false; choosingTarget = false; PlayerAction(player); Log.DisplayLog(); }
+        { 
+            player.GetComponent<TurnFunction>().turnActive = true; 
+            interacting = false; 
+            choosingDirection = false; 
+            choosingTarget = false; 
+            PlayerAction(player);
+            Log.DisplayLog(); 
+        }
         public static void InventoryAction(Entity player, RLKey key = RLKey.Unknown)
         {
             DisplayActions("Close Inventory:[I/Escape]" + " Use Item:[U]" + " Change Selection:[NumPad]" + " Throw Item:[T]" + " Drop Item:[D]" + " Equip/Unequip:[E]");
@@ -301,7 +346,14 @@ namespace TheRuinsOfIpsus
                 interactionText = "How do you interact?";
                 foreach (string interaction in chosenEntity.GetComponent<Interactable>().interactions)
                 {
-                    interactionKeyText += interaction +":[" + interaction.ToArray()[0] + "], ";
+                    if (interaction == "Openable")
+                    {
+                        interactionKeyText += $"Open/Close:[{interaction.ToArray()[0]}], ";
+                    }
+                    else
+                    {
+                        interactionKeyText += $"{interaction}:[{interaction.ToArray()[0]}]";
+                    }
                 }
                 interactionKeyText += " + End Interaction: + [Escape]";
                 Interaction(player);

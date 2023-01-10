@@ -268,7 +268,7 @@ namespace TheRuinsOfIpsus
             entity.AddComponent(new Draw("White", "Black", 's'));
             entity.AddComponent(new Description("Marmoreal Spider", "These spiders appear as if made of marble. They hold still for hours they lull prey into dropping their guard before unleashing their gray*stoning bite."));
             entity.AddComponent(new Coordinate(0, 0));
-            entity.AddComponent(new Interactable(new List<string>() { "Attack", "Pet" }));
+            entity.AddComponent(new Interactable(new HashSet<string>() { "Attack", "Pet" }));
             //entity.AddComponent(new SpiderAI());
             //CMath.ReturnAI(entity).hatedEntities.Add("Restrained");
 

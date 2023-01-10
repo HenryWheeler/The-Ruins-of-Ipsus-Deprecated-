@@ -12,7 +12,7 @@ namespace TheRuinsOfIpsus
             random = new Random();
             mapWidth = width;
             mapHeight = height;
-            tiles = new Entity[width, height];
+            tiles = new Traversable[width, height];
             depth = -1;
 
             for (int x = 0; x < mapWidth; x++)
@@ -27,7 +27,7 @@ namespace TheRuinsOfIpsus
         {
             mapWidth = width;
             mapHeight = height;
-            tiles = new Entity[width, height];
+            tiles = new Traversable[width, height];
             depth = _depth;
             random = new Random();
 
@@ -65,9 +65,9 @@ namespace TheRuinsOfIpsus
             FloorSwitchCase(testing);
 
             List<Entity> tiles = new List<Entity>();
-            foreach (Entity tile in World.tiles) { if (tile != null && tile.GetComponent<Traversable>().terrainType != 0) { tiles.Add(tile); } }
+            foreach (Traversable tile in World.tiles) { if (tile != null && tile.entity.GetComponent<Traversable>().terrainType != 0) { tiles.Add(tile.entity); } }
             Vector2 vector2 = tiles[seed.Next(0, tiles.Count - 1)].GetComponent<Coordinate>().vector2;
-            GetTraversable(vector2).actorLayer = Program.player;
+            World.tiles[vector2.x, vector2.y].actorLayer = Program.player;
             Program.player.GetComponent<Coordinate>().vector2 = vector2;
             Renderer.MoveCamera(vector2);
             ShadowcastFOV.Compute(vector2, Program.player.GetComponent<Stats>().sight);
@@ -115,30 +115,17 @@ namespace TheRuinsOfIpsus
                 }
             }
         }
-        public static Traversable GetTraversable(Vector2 vector2) { return tiles[vector2.x, vector2.y].GetComponent<Traversable>(); }
+        public static Traversable GetTraversable(Vector2 vector2) 
+        {
+            return tiles[vector2.x, vector2.y]; 
+        }
         public static Random seed { get; set; }
         public static int seedInt { get; set; }
         public static Random random { get; set; }
-        public static Entity[,] tiles;
+        public static Traversable[,] tiles;
         public static int mapWidth { get; set; }
         public static int mapHeight { get; set; }
         public static int depth { get; set; }
         public static bool testing = true;
-    }
-    [Serializable]
-    public class Chunk: Component
-    {
-        public int chunkWidth { get; set; }
-        public int chunkHeight { get; set; }
-        public string environment { get; set; }
-        public int strength { get; set; }
-        public Chunk(int _chunkWidth, int _chunkHeight, string _environment, int _strength)
-        {
-            chunkWidth = _chunkWidth;
-            chunkHeight = _chunkHeight;
-            environment = _environment;
-            strength = _strength;
-        }
-        public Chunk() { }
     }
 }

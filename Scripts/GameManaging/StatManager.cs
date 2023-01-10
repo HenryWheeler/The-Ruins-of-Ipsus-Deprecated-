@@ -11,10 +11,26 @@ namespace TheRuinsOfIpsus
     {
         public static RLConsole console;
         private static string spacer { get; set; }
+        public static float average = 0;
+        public static List<float> averages = new List<float>();
         public StatManager(RLConsole _console) 
         { 
             console = _console; 
             spacer = " + ";
+        }
+        public static void Average(long time)
+        {
+            averages.Add(time);
+
+            float newAverage = 0;
+
+            foreach (float current in averages)
+            {
+                newAverage += current;
+            }
+            newAverage /= averages.Count;
+            average = newAverage;
+            UpdateStats(Program.player);
         }
         public static void UpdateStats(Entity entity)
         {
@@ -24,11 +40,13 @@ namespace TheRuinsOfIpsus
 
             string display = "";
 
+            //display += $"Average Tick Speed: {average}{spacer}";
+            //display += $"Average Millisecond Speed: {average / 10000}{spacer}";
             display += $"Red*Health: {stats.hp}/{stats.hpCap}{spacer}";
             display += $"Light_Gray*Armor: {stats.ac}{spacer}";
             display += $"Yellow*Celerity: {stats.maxAction}{spacer}";
             display += $"Brown*Might: {stats.strength}{spacer}";
-            display += $"Blue*Acuity: {stats.acuity}{spacer}";
+            display += $"Cyan*Acuity: {stats.acuity}{spacer}";
             display += $"Sight: {stats.sight}{spacer}";
 
             display += "Equipment: " + spacer;

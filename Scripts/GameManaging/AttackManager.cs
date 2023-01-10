@@ -32,58 +32,16 @@ namespace TheRuinsOfIpsus
                     InventoryManager.UnequipItem(attacker, weapon);
                 }
                 InventoryManager.PlaceItem(target, weapon);
-                {
-                    List<Coordinate> coordinates = RangeModels.ReturnLine(attacker.GetComponent<Coordinate>(), weapon.GetComponent<Coordinate>());
-                    int current = 0;
-                    Draw itemFrame = weapon.GetComponent<Draw>();
-                    Draw baseFrame = new Draw("Gray", "Black", '.');
-                    Draw finalFrame = new Draw("Yellow", "Black", 'X');
-                    List<Entity> sfx = new List<Entity>();
-                    foreach (Coordinate coordinate in coordinates)
-                    {
-                        Draw[] frames = new Draw[coordinates.Count()];
-                        if (current != coordinates.Count - 1)
+
+                Entity particle = new Entity(new List<Component>
                         {
-                            for (int i = 0; i < coordinates.Count(); i++)
-                            {
-                                if (i == current)
-                                {
-                                    frames[i] = itemFrame;
-                                }
-                                else
-                                {
-                                    frames[i] = baseFrame;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (int i = 0; i < coordinates.Count(); i++)
-                            {
-                                frames[i] = finalFrame;
-                            }
-                        }
-                        Entity sFX;
-                        if (current == 0)
-                        {
-                            sFX = new Entity(new List<Component>()
-                    {
-                        new Coordinate(coordinate.vector2), new Draw(itemFrame)
-                    });
-                        }
-                        else
-                        {
-                            sFX = new Entity(new List<Component>()
-                    {
-                        new Coordinate(coordinate.vector2), new Draw("Gray", "Black", '.')
-                    });
-                        }
-                        sFX.AddComponent(new AnimationFunction(frames));
-                        sfx.Add(sFX);
-                        current++;
-                    }
-                    Renderer.StartAnimationThread(sfx, coordinates.Count(), 250 / coordinates.Count());
-                }
+                            new Coordinate(0, 0),
+                            weapon.GetComponent<Draw>(),
+                            new ParticleComponent(1, 1, "Target", 1, new Draw[] { weapon.GetComponent<Draw>() }, target.vector2, true ),
+                        });
+                Vector2 vector2 = attacker.GetComponent<Coordinate>().vector2;
+                Renderer.AddParticle(vector2.x, vector2.y, particle);
+
                 if (weapon.GetComponent<Throwable>() != null)
                 {
                     weapon.GetComponent<Throwable>().Throw(attacker, target);
@@ -113,7 +71,7 @@ namespace TheRuinsOfIpsus
         }
         public static void Attack(Entity attacker, Entity target, Entity weapon, bool endTurn = true)
         {
-            if (attacker != null && target != null && weapon != null && weapon.CheckComponent<AttackFunction>())
+            if (attacker != null && target != null && weapon != null && weapon.GetComponent<AttackFunction>() != null)
             {
                 AttackFunction attackFunction = weapon.GetComponent<AttackFunction>();
                 string[] parts = attackFunction.details.Split('-');

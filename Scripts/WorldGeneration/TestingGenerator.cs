@@ -10,63 +10,77 @@ namespace TheRuinsOfIpsus
 {
     public class TestingGenerator: AGenerator
     {
+        private int roomsToGenerate = 15;
+        private int minRoomSize = 5;
+        private int maxRoomSize = 12;
         private int wallsNeeded = 4;
-        private int randomFill = 100;
-        private int smooth = 5;
         public void CreateMap(int _mapWidth, int _mapHeight, int strength)
         {
             mapWidth = _mapWidth; mapHeight = _mapHeight;
             SetAllWalls();
 
-            for (int x = 3; x < mapWidth - 3; x++)
+            //for (int x = 0; x < mapWidth; x++)
+            //{
+            //    for (int y = 0; y < mapHeight; y++)
+            //    {
+            //        if (CMath.CheckBounds(x, y))
+            //        {
+            //            SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Gray_Blue", "Black", false, 1);
+            //        }
+            //    }
+            //}
+            //for (int z = 0; z < smooth; z++) { SmoothMap(); }
+
+            for (int i = 0; i < roomsToGenerate; i++)
             {
-                for (int y = 3; y < mapHeight - 3; y++)
-                {
-                    if (CMath.CheckBounds(x, y))
-                    {
-                        if (World.seed.Next(0, 100) < randomFill) 
-                        { 
-                            if (World.seed.Next(0, 100) < 50) 
-                            { 
-                                SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Gray_Blue", "Black", false, 1); 
-                            } 
-                            else 
-                            {
-                                SetTile(x, y, '`', "Stone Floor", "A simple stone floor.", "Light_Gray_Blue", "Black", false, 1); 
-                            } 
-                        }
-                    }
-                }
+                int xSP = World.seed.Next(0, mapWidth);
+                int ySP = World.seed.Next(0, mapHeight);
+                int rW = World.seed.Next(minRoomSize, maxRoomSize);
+                int rH = World.seed.Next(minRoomSize, maxRoomSize);
+                if (!CheckIfHasSpace(xSP, ySP, xSP + rW - 1, ySP + rH - 1)) { i--; continue; }
+                CreateRoom(xSP, ySP, rW, rH);
             }
-            for (int z = 0; z < smooth; z++) { SmoothMap(); }
+
+            CreateConnections(1, 0);
             CreateSurroundingWalls();
             CreateStairs();
+            CreatePatrolLocations();
 
-            foreach (Entity tile in World.tiles)
+            int current = 0;
+            foreach (Traversable tile in World.tiles)
             {
-                if (tile.GetComponent<Traversable>().terrainType == 1)
+                if (tile.terrainType == 1)
                 {
-                    if (World.seed.Next(0, 100) == 99)
+                    if (World.seed.Next(0, 100) > 98)
                     {
                         TurnFunction function = new TurnFunction();
-                        EntityManager.CreateEntity(tile.GetComponent<Coordinate>().vector2, new Entity(new List<Component>()
+                        EntityManager.CreateEntity(tile.entity.GetComponent<Coordinate>().vector2, new Entity(new List<Component>()
                             {
                                 new ID(1),
-                                tile.GetComponent<Coordinate>(),
-                                new Draw("Red", "Black", 'E'),
+                                tile.entity.GetComponent<Coordinate>(),
+                                new Draw("Red", "Black", (char)(current + 48)),
                                 new Description("Test Entity", "Testing."),
                                 PronounReferences.pronounSets["Nueter"],
                                 new Stats(5, 10, .8f, 5, 0, 0),
                                 function,
-                                new TestAI(new List<string>(), new List<string>() { "Player" }, 50),
+                                new GuardAI(new List<string>() { "Beast" }, new List<string>(), 50),
+                                new PatrolFunction(),
                                 new Movement(new List<int> { 1, 2 }),
                                 new Inventory(),
                                 new BodyPlot(),
                                 new OnHit(),
-                                new Faction("Beast"),
-                                new Interactable(new List<string>() { "Attack" })
+                                new Faction($"Beast"),
+                                new Interactable(new HashSet<string>() { "Attack" })
                         }), false, false);
                         TurnManager.AddActor(function);
+                        current++;
+                        if (current == 9)
+                        {
+                            current = 0;
+                        }
+                    } else if (World.seed.Next(0, 100) > 95)
+                    {
+                        //EntityManager.CreateEntity(tile.entity.GetComponent<Coordinate>().vector2, JsonDataManager.ReturnEntity(2001), false, false);
                     }
                 }
             }
@@ -112,6 +126,19 @@ namespace TheRuinsOfIpsus
             }
 
             return walls;
+        }
+        public void CreateRoom(int _x, int _y, int roomWidth, int roomHeight)
+        {
+            for (int y = 0; y < roomHeight; y++)
+            {
+                for (int x = 0; x < roomWidth; x++)
+                {
+                    int _X = _x + x;
+                    int _Y = _y + y;
+
+                    SetTile(_X, _Y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
+                }
+            }
         }
         public override void CreateDiagonalPassage(int r1x, int r1y, int r2x, int r2y)
         {
@@ -174,15 +201,24 @@ namespace TheRuinsOfIpsus
         }
         public override void CreateStraightPassage(int r1x, int r1y, int r2x, int r2y)
         {
+            List<Vector2> doorSpots = new List<Vector2>();
             if (World.seed.Next(0, 1) == 0)
             {
                 for (int x = Math.Min(r1x, r2x); x <= Math.Max(r1x, r2x); x++)
                 {
                     SetTile(x, r1y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
+                    if (World.tiles[x, r1y + 1].terrainType == 0 && World.tiles[x, r1y - 1].terrainType == 0)
+                    {
+                        doorSpots.Add(new Vector2(x, r1y));
+                    }
                 }
                 for (int y = Math.Min(r1y, r2y); y <= Math.Max(r1y, r2y); y++)
                 {
                     SetTile(r2x, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
+                    if (World.tiles[r2x + 1, y].terrainType == 0 && World.tiles[r2x - 1, y].terrainType == 0)
+                    {
+                        doorSpots.Add(new Vector2(r2x, y));
+                    }
                 }
             }
             else
@@ -190,11 +226,24 @@ namespace TheRuinsOfIpsus
                 for (int y = Math.Min(r1y, r2y); y <= Math.Max(r1y, r2y); y++)
                 {
                     SetTile(r1x, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
+                    if (World.tiles[r1x + 1, y].terrainType == 0 && World.tiles[r1x - 1, y].terrainType == 0)
+                    {
+                        doorSpots.Add(new Vector2(r1x, y));
+                    }
                 }
                 for (int x = Math.Min(r1x, r2x); x <= Math.Max(r1x, r2x); x++)
                 {
                     SetTile(x, r2y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
+                    if (World.tiles[x, r2y + 1].terrainType == 0 && World.tiles[x, r2y - 1].terrainType == 0)
+                    {
+                        doorSpots.Add(new Vector2(x, r2y));
+                    }
                 }
+            }
+            if (doorSpots.Count != 0)
+            {
+                EntityManager.CreateEntity(doorSpots[0], JsonDataManager.ReturnEntity(2001), false, false);
+                EntityManager.CreateEntity(doorSpots[doorSpots.Count - 1], JsonDataManager.ReturnEntity(2001), false, false);
             }
         }
     }

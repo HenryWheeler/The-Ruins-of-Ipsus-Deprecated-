@@ -16,31 +16,25 @@ namespace TheRuinsOfIpsus
             Draw frame3 = new Draw("Red_Orange", "Red_Orange", (char)176);
             Draw[] frames = new Draw[3] { frame1, frame2, frame3 };
             List<Coordinate> coordinates = RangeModels.SphereRangeModel(origin, strength, true);
-            List<Entity> sfx = new List<Entity>();
             foreach (Coordinate coordinate in coordinates)
             {
                 Vector2 vector3 = coordinate.vector2;
                 if (World.GetTraversable(coordinate.vector2).actorLayer != null)
-                { 
-                    AttackManager.Attack(originator, World.tiles[vector3.x, vector3.y].GetComponent<Traversable>().actorLayer, 
-                    new AttackFunction($"1-{strength}-{strength}-{strength}-{strength}", "Explosive"), "Explosion"); 
-                }
-
-                Entity sFX = new Entity(new List<Component>() { new Coordinate(vector3), new Draw(frame1) });
-                if (World.random.Next(1, 100) > 50) 
                 {
-                    sFX.AddComponent(new AnimationFunction(frames)); 
+                    AttackManager.Attack(originator, World.tiles[vector3.x, vector3.y].actorLayer,
+                    new AttackFunction($"1-{strength}-{strength}-{strength}-{strength}", "Explosive"), "Explosion");
                 }
                 else
                 {
-                    sFX.AddComponent(new AnimationFunction(new Draw[3]
-                    {
-                    frame3, frame2, frame1
-                    }));
+                    Entity particle = new Entity(new List<Component>
+                        {
+                            new Coordinate(0, 0),
+                            frame1,
+                            new ParticleComponent(World.random.Next(11, 14), World.random.Next(3, 5), "None", 1, frames)
+                        });
+                    Renderer.AddParticle(vector3.x, vector3.y, particle);
                 }
-                sfx.Add(sFX);
             }
-            Renderer.StartAnimationThread(sfx, 25, 25);
         }
         public static void Beam(Entity originator, Coordinate origin, Coordinate target, int strength, int range, string type)
         {

@@ -9,8 +9,8 @@ namespace TheRuinsOfIpsus
     [Serializable]
     class Interactable: Component
     {
-        public List<string> interactions = new List<string>();
-        public Interactable(List<string> _interactions) { interactions = _interactions; }
+        public HashSet<string> interactions = new HashSet<string>();
+        public Interactable(HashSet<string> _interactions) { interactions = _interactions; }
         public Interactable() { }
     }
 }

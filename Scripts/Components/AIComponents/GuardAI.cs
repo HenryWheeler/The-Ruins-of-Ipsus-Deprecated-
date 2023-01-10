@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    class TestAI: AI
+    class GuardAI: AI
     {
         public override void ExecuteAction()
         {
@@ -18,19 +18,14 @@ namespace TheRuinsOfIpsus
                         AIActions.TestSleep(entity);
                         break;
                     }
-                case State.Awake:
+                case State.Patrolling:
                     {
-                        AIActions.TestAwake(entity);
+                        AIActions.TestPatrol(entity);
                         break;
                     }
                 case State.Angry:
                     {
                         AIActions.TestHuntAction(entity);
-                        break;
-                    }
-                case State.Bored:
-                    {
-                        entity.GetComponent<TurnFunction>().EndTurn();
                         break;
                     }
             }
@@ -39,26 +34,26 @@ namespace TheRuinsOfIpsus
         {
             transitions = new Dictionary<StateMachine, State>
             {
-                { new StateMachine(State.Asleep, Input.Noise), State.Awake },
+                { new StateMachine(State.Asleep, Input.Noise), State.Patrolling },
                 { new StateMachine(State.Asleep, Input.Hurt), State.Angry },
                 { new StateMachine(State.Angry, Input.Tired), State.Asleep },
-                { new StateMachine(State.Awake, Input.Hatred), State.Angry },
-                { new StateMachine(State.Awake, Input.Bored), State.Bored },
-                { new StateMachine(State.Angry, Input.Bored), State.Bored },
-                { new StateMachine(State.Bored, Input.Tired), State.Asleep },
+                { new StateMachine(State.Patrolling, Input.Hatred), State.Angry },
+                { new StateMachine(State.Patrolling, Input.Hurt), State.Angry },
+                { new StateMachine(State.Angry, Input.Bored), State.Patrolling },
+                { new StateMachine(State.Patrolling, Input.Tired), State.Asleep },
                 { new StateMachine(State.Bored, Input.Hatred), State.Angry }
             };
         }
-        public TestAI(List<string> favored, List<string> hated, int _baseInterest)
+        public GuardAI(List<string> favored, List<string> hated, int _baseInterest)
         {
             favoredEntities = favored;
             hatedEntities = hated;
-            currentState = State.Asleep;
+            currentState = State.Patrolling;
             interest = _baseInterest;
             baseInterest = _baseInterest;
             SetTransitions();
         }
-        public TestAI()
+        public GuardAI()
         {
             SetTransitions();
         }

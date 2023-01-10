@@ -42,26 +42,6 @@ namespace TheRuinsOfIpsus
                     bool inRange = rangeLimit < 0 || CMath.Distance(oX, oY, tx, ty) <= rangeLimit;
                     if (inRange && (y != topY || top.Y*x >= top.X*y) && (y != bottomY || bottom.Y*x <= bottom.X*y))
                     {
-                        //if (aiUse) 
-                        //{
-                        //    Traversable traversable = World.GetTraversable(new Vector2(tx, ty));
-                        //    if (CMath.CheckBounds(tx, ty) && traversable.actorLayer != null && traversable.actorLayer != ai.entity)
-                        //    {
-                        //        if (ai.ReturnHatred(traversable.actorLayer) > 0)
-                        //        { ai.referenceTarget = traversable.actorLayer; ai.mood = "Red*Angry"; return; }
-                        //        else
-                        //        {
-                        //            if (ai.entity.GetComponent<Stats>().acuity <= 10)
-                        //            {
-                        //                foreach (string status in traversable.actorLayer.GetComponent<OnHit>().statusEffects)
-                        //                {
-                        //                    if (ai.hatedEntities.Contains(status)) 
-                        //                    { ai.referenceTarget = traversable.actorLayer; ai.mood = "Red*Angry"; return; }
-                        //                }
-                        //            }
-                        //        }
-                        //    }
-                        //}
                         SetVisible(new Vector2(tx, ty), true);
                     }
 
@@ -100,12 +80,12 @@ namespace TheRuinsOfIpsus
             {
                 if (visible)
                 {
-                    World.tiles[vector2.x, vector2.y].GetComponent<Visibility>().SetVisible(true);
+                    World.tiles[vector2.x, vector2.y].entity.GetComponent<Visibility>().SetVisible(true);
                     if (!all) { visibleTiles.Add(new Coordinate(vector2)); }
                 }
                 else
                 {
-                    World.tiles[vector2.x, vector2.y].GetComponent<Visibility>().SetVisible(false);
+                    World.tiles[vector2.x, vector2.y].entity.GetComponent<Visibility>().SetVisible(false);
                 }
             }
         }
@@ -113,7 +93,15 @@ namespace TheRuinsOfIpsus
         {
             if (CMath.CheckBounds(vector2.x, vector2.y))
             {
-                if (World.tiles[vector2.x, vector2.y].GetComponent<Visibility>().opaque) { return true; }
+                Traversable traversable = World.tiles[vector2.x, vector2.y];
+                if (traversable.entity.GetComponent<Visibility>().opaque) 
+                { 
+                    return true; 
+                }
+                else if (traversable.obstacleLayer != null && traversable.obstacleLayer.GetComponent<Visibility>().opaque)
+                {
+                    return true;
+                }
                 return false;
             }
             return true;

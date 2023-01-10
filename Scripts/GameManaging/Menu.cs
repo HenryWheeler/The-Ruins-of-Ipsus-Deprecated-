@@ -24,7 +24,7 @@ namespace TheRuinsOfIpsus
         {
             if (selection == 0) { Program.NewGame(); rootConsole.Update -= Update; }
             else if (selection == 1 && SaveDataManager.savePresent) { SaveDataManager.LoadSave(); rootConsole.Update -= Update; }
-            else if (selection == 2) { rootConsole.Close(); }
+            else if (selection == 2) { Program.gameActive = false; Renderer.running = false; Program.rootConsole.Close(); }
         }
     }
 }

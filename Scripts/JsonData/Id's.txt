@@ -13,5 +13,7 @@ Entity Listing:
 3: Boring Beetle
 1001: Broken Blade
 1100: Explosive Concoction
+2001: Door
+2002: Chest
 2300: Web
 2500: Variable Statue (These are statues created from creatures turning to stone, this ID is used to represent them as a whole.)

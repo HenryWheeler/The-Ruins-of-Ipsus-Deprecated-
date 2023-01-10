@@ -38,27 +38,26 @@ namespace TheRuinsOfIpsus
             List<Entity> actors = new List<Entity>();
             List<Entity> items = new List<Entity>();
             List<Entity> terrain = new List<Entity>();
-            foreach(Entity tile in World.tiles)
+            foreach(Traversable tile in World.tiles)
             {
-                if (tile != null && tile.GetComponent<Traversable>() != null)
+                if (tile != null && tile.entity != null)
                 {
-                    Vector2 vector2 = tile.GetComponent<Coordinate>().vector2;
-                    Visibility visibility1 = tile.GetComponent<Visibility>();
+                    Vector2 vector2 = tile.entity.GetComponent<Coordinate>().vector2;
+                    Visibility visibility1 = tile.entity.GetComponent<Visibility>();
                     visibility1.entity = null;
                     visibility[vector2.x, vector2.y] = visibility1;
-                    Traversable traversable = tile.GetComponent<Traversable>();
-                    if (traversable.actorLayer != null) 
+                    if (tile.actorLayer != null) 
                     { 
-                        if (traversable.actorLayer.GetComponent<ID>().id != 0) 
+                        if (tile.actorLayer.GetComponent<ID>().id != 0) 
                         {
-                            AI AI = CMath.ReturnAI(traversable.actorLayer);
+                            AI AI = CMath.ReturnAI(tile.actorLayer);
                             AI.transitions.Clear();
                             AI.target = null;
-                            actors.Add(traversable.actorLayer); 
+                            actors.Add(tile.actorLayer); 
                         } 
                     }
-                    if (traversable.itemLayer != null) { items.Add(traversable.itemLayer); }
-                    if (traversable.obstacleLayer != null) { terrain.Add(traversable.obstacleLayer); }
+                    if (tile.itemLayer != null) { items.Add(tile.itemLayer); }
+                    if (tile.obstacleLayer != null) { terrain.Add(tile.obstacleLayer); }
                 }
             }
             

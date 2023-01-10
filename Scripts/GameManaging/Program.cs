@@ -30,8 +30,8 @@ namespace TheRuinsOfIpsus
         public static Entity player;
         public static bool gameActive = false;
 
-        public static int gameMapWidth = 50;
-        public static int gameMapHeight = 50;
+        public static int gameMapWidth = 100;
+        public static int gameMapHeight = 100;
         public static void Main()
         {
             RLSettings settings = new RLSettings();
@@ -67,6 +67,7 @@ namespace TheRuinsOfIpsus
             JsonDataManager jsonDataManager = new JsonDataManager();
             PronounReferences pronounReferences = new PronounReferences();
             SpawnTableManager spawnTableManager = new SpawnTableManager();
+            DijkstraMaps dijkstraMaps = new DijkstraMaps(gameMapWidth, gameMapHeight);
             EntityManager.LoadAllEntities();
         }
         public static void LoadPlayerFunctions(Entity player)
@@ -77,7 +78,7 @@ namespace TheRuinsOfIpsus
         }
         public static void ReloadPlayer(List<Component> components)
         {
-            player = new Entity(components, 0, true);
+            player = new Entity(components, true);
             rootConsole.Update += player.GetComponent<PlayerComponent>().Update;
             player.display = true;
 
@@ -89,7 +90,7 @@ namespace TheRuinsOfIpsus
             foreach (EquipmentSlot entity in player.GetComponent<BodyPlot>().bodyPlot) { if (entity != null && entity.item != null) { entities.Add(entity.item); } }
             foreach (Entity id in entities) { new Entity(id).GetComponent<Equippable>().Equip(player); } 
             Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
-            World.GetTraversable(vector2).actorLayer = player;
+            World.tiles[vector2.x, vector2.y].actorLayer = player;
             StatManager.UpdateStats(player);
             TurnManager.AddActor(player.GetComponent<TurnFunction>());
             Action.PlayerAction(player);
@@ -129,7 +130,7 @@ namespace TheRuinsOfIpsus
                 new Usable(),
                 new Throwable(),
                 new ExplodeOnUse(3),
-                new ExplodeOnThrow(3)
+                //new ExplodeOnThrow(3)
             });
             InventoryManager.AddToInventory(player, startingWeapon);
 
@@ -159,7 +160,7 @@ namespace TheRuinsOfIpsus
             foreach (Entity actor in saveData.actors) { if (actor != null) { Entity entity = EntityManager.ReloadEntity(actor); World.GetTraversable(entity.GetComponent<Coordinate>().vector2).actorLayer = entity; } }
             foreach (Entity item in saveData.items) { if (item != null) { Entity entity = EntityManager.ReloadEntity(item); World.GetTraversable(entity.GetComponent<Coordinate>().vector2).actorLayer = entity; } }
             foreach (Entity terrain in saveData.terrain) { if (terrain != null) { Entity entity = EntityManager.ReloadEntity(terrain); World.GetTraversable(entity.GetComponent<Coordinate>().vector2).actorLayer = entity; } }
-            foreach (Entity tile in World.tiles) { if (tile != null) { Vector2 vector2 = tile.GetComponent<Coordinate>().vector2; if (saveData.visibility[vector2.x, vector2.y] != null) { tile.RemoveComponent(tile.GetComponent<Visibility>()); tile.AddComponent(saveData.visibility[vector2.x, vector2.y]); } } }
+            foreach (Traversable tile in World.tiles) { if (tile != null && tile.entity != null) { Vector2 vector2 = tile.entity.GetComponent<Coordinate>().vector2; if (saveData.visibility[vector2.x, vector2.y] != null) { tile.entity.RemoveComponent(tile.entity.GetComponent<Visibility>()); tile.entity.AddComponent(saveData.visibility[vector2.x, vector2.y]); } } }
 
             ReloadPlayer(saveData.player.components);
             LoadPlayerFunctions(player);

@@ -59,6 +59,21 @@ namespace TheRuinsOfIpsus
                         entity.GetComponent<TurnFunction>().EndTurn();
                         EntityManager.UpdateMap(entity);
                     }
+                    else if (CMath.ReturnAI(newTraversable.actorLayer) != null && !CMath.ReturnAI(newTraversable.actorLayer).hatedEntities.Contains(entity.GetComponent<Faction>().faction))
+                    {
+                        World.GetTraversable(originalPosition).actorLayer = newTraversable.actorLayer;
+                        newTraversable.actorLayer.GetComponent<Coordinate>().vector2 = entity.GetComponent<Coordinate>().vector2;
+                        EntityManager.UpdateMap(newTraversable.actorLayer);
+                        entity.GetComponent<Coordinate>().vector2 = newPosition;
+                        newTraversable.actorLayer = entity;
+                        SpecialComponentManager.TriggerOnMove(entity, originalPosition, newPosition);
+                        if (newTraversable.obstacleLayer != null)
+                        {
+                            SpecialComponentManager.TriggerOnMove(newTraversable.obstacleLayer, originalPosition, newPosition);
+                        }
+                        entity.GetComponent<TurnFunction>().EndTurn();
+                        EntityManager.UpdateMap(entity);
+                    }
                     else if (entity.display) 
                     { 
                         AttackManager.MeleeAllStrike(entity, newTraversable.actorLayer); 

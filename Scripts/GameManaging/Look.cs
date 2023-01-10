@@ -40,7 +40,7 @@ namespace TheRuinsOfIpsus
                 x += _x; y += _y;
                 Traversable traversable = World.GetTraversable(new Vector2(x, y));
                 Description description = null;
-                if (!World.tiles[x, y].GetComponent<Visibility>().visible) 
+                if (!World.tiles[x, y].entity.GetComponent<Visibility>().visible) 
                 {
                     CMath.DisplayToConsole(Log.console, "You cannot look at what you cannot see.", 1, 1); 
                 }
@@ -58,7 +58,7 @@ namespace TheRuinsOfIpsus
                 }
                 else 
                 { 
-                    description = World.tiles[x, y].GetComponent<Description>();
+                    description = World.tiles[x, y].entity.GetComponent<Description>();
                 }
                 if (description != null)
                 {

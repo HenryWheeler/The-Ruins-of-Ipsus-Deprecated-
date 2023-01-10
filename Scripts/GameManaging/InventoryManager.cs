@@ -37,7 +37,7 @@ namespace TheRuinsOfIpsus
             { 
                 if (entity.display)
                 {
-                    Log.Add("There is nothing there to pick up.");
+                    Log.Add("There is nothing to pick up.");
                 }
             }
         }
@@ -302,7 +302,7 @@ namespace TheRuinsOfIpsus
                     addition += $"{spacer}Yellow*Can be equipped in Yellow*{slot[0]} Yellow*{slot[1]}."; 
                 }
 
-                if (inventoryDisplay[currentPage][selection].CheckComponent<AttackFunction>())
+                if (inventoryDisplay[currentPage][selection].GetComponent<AttackFunction>() != null)
                 {
                     string[] function = inventoryDisplay[currentPage][selection].GetComponent<AttackFunction>().details.Split('-');
                     addition += $"{spacer} Does Yellow*{function[1]}d{function[2]} damage with a damage modifier of Yellow*{function[3]} and a bonus to hit of Yellow*{function[4]}.";

@@ -36,17 +36,6 @@ namespace TheRuinsOfIpsus
             }
             return null;
         }
-        public bool CheckComponent<T>() where T : Component 
-        { 
-            if (GetComponent<T>() != null) 
-            { 
-                return true; 
-            } 
-            else 
-            { 
-                return false; 
-            }  
-        }
         public void ClearCollections() 
         { 
             if (collectionsToRemove.Count != 0) 
@@ -88,9 +77,10 @@ namespace TheRuinsOfIpsus
                 }
             }
         }
-        public Entity(List<Component> _components, int id = -1, bool _display = false) 
+        public Entity(List<Component> _components, bool _display = false) 
         { 
             display = _display;
+
             foreach (Component component in _components)
             {
                 if (component != null)
@@ -105,10 +95,6 @@ namespace TheRuinsOfIpsus
                         AddComponent(component); 
                     }
                 }
-            }
-            if (id != -1) 
-            { 
-                AddComponent(new ID(id)); 
             }
         }
         public Entity() { }

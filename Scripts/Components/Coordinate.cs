@@ -40,6 +40,15 @@ namespace TheRuinsOfIpsus
             x = _1.x + _2.x;
             y = _1.y + _2.y;
         }
+        public override int GetHashCode()
+        {
+            return 17 + 31 * x.GetHashCode() + 31 * y.GetHashCode();
+        }
+        public override bool Equals(object obj)
+        {
+            Vector2 other = obj as Vector2;
+            return other != null && x == other.x && y == other.y;
+        }
         public Vector2() { }
     }
 }

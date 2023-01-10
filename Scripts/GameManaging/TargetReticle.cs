@@ -28,7 +28,7 @@ namespace TheRuinsOfIpsus
         }
         private static void ClearSFXPositions()
         {
-            foreach (Vector2 position in sfxPositions) { World.tiles[position.x, position.y].GetComponent<Traversable>().sfxLayer = null; }
+            foreach (Vector2 position in sfxPositions) { World.tiles[position.x, position.y].sfxLayer = null; }
             sfxPositions.Clear();
         }
         public static void StopTargeting()
@@ -75,17 +75,17 @@ namespace TheRuinsOfIpsus
                         { 
                             if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, 'X', "Yellow");
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Yellow");
                             }
                             else
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, 'X', "Gray");
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
                                 CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
                             }
                         }
                         else 
                         { 
-                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, 'X', "Gray");
+                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
                             CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1); 
                         } 
                     }
@@ -95,17 +95,17 @@ namespace TheRuinsOfIpsus
                         {
                             if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, '.', "Yellow");
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Yellow");
                             }
                             else
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, '.', "Gray");
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
                                 CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
                             }
                         }
                         else
                         {
-                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, '.', "Gray");
+                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
                             CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1);
                         }
                     }
@@ -127,17 +127,17 @@ namespace TheRuinsOfIpsus
                         {
                             if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, 'X', "Yellow");
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Yellow");
                             }
                             else
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, 'X', "Gray");
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
                                 CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
                             }
                         }
                         else
                         {
-                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, 'X', "Gray");
+                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
                             CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1);
                         }
                     }
@@ -147,17 +147,17 @@ namespace TheRuinsOfIpsus
                         {
                             if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, '.', "Yellow");
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Yellow");
                             }
                             else
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, '.', "Gray");
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
                                 CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
                             }
                         }
                         else
                         {
-                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].GetComponent<Traversable>().sfxLayer = Reticle(x, y, '.', "Gray");
+                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
                             CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1);
                         }
                     }

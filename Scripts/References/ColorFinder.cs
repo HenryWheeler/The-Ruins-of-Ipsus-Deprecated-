@@ -28,6 +28,7 @@ namespace TheRuinsOfIpsus
                 case "Green": return RLColor.Green;
                 case "Light_Green": return RLColor.LightGreen;
                 case "Dark_Green": return RLColor.Blend(RLColor.Black, RLColor.Green, 50);
+                case "Cyan": return RLColor.Cyan;
                 case "Gray": return RLColor.Gray;
                 case "Light_Gray": return RLColor.LightGray;
                 case "Dark_Gray": return RLColor.Blend(RLColor.Black, RLColor.Gray, 50);
@@ -40,6 +41,7 @@ namespace TheRuinsOfIpsus
                 case "White": return RLColor.White;
                 case "Black": return RLColor.Black;
                 case "Brown": return RLColor.Brown;
+                case "Pale": return RLColor.Blend(RLColor.White, RLColor.LightRed, 0.75f);
             }
             return RLColor.Black;
         }
