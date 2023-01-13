@@ -9,7 +9,7 @@ namespace TheRuinsOfIpsus
     class ExplodeOnUse: OnUseProperty
     {
         public int strength { get; set; }
-        public override void OnUse(Entity entity) { SpecialEffectManager.Explosion(entity, entity.GetComponent<Coordinate>(), strength); }
+        public override void OnUse(Entity entity, Vector2 target = null) { SpecialEffectManager.Explosion(entity, entity.GetComponent<Coordinate>(), strength); }
         public ExplodeOnUse(int _strength) { strength = _strength; }
         public ExplodeOnUse() { }
     }

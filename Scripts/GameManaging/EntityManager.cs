@@ -246,8 +246,9 @@ namespace TheRuinsOfIpsus
                         foreach (EquipmentSlot entity in entityToUse.GetComponent<BodyPlot>().bodyPlot) { if (entity != null && entity.item != null) { entities.Add(entity.item); } }
                         foreach (Entity id in entities) { new Entity(id).GetComponent<Equippable>().Equip(entityToUse); }
                     }
-                    if (CMath.ReturnAI(entityToUse) != null) { CMath.ReturnAI(entityToUse).target = null; }
                 }
+                if (CMath.ReturnAI(entityToUse) != null) { CMath.ReturnAI(entityToUse).SetTransitions(); }
+
                 AddEntity(entityToUse);
                 return entityToUse;
             }

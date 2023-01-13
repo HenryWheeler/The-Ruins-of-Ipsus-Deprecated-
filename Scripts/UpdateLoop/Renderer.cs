@@ -22,7 +22,6 @@ namespace TheRuinsOfIpsus
         public static int actionWidth;
         private static int actionHeight;
         public static bool inventoryOpen = false;
-        public static bool threadRunning = false;
         public static List<ParticleComponent> particles = new List<ParticleComponent>();
         public static int current = 1;
         public static bool running = false;
@@ -69,11 +68,27 @@ namespace TheRuinsOfIpsus
             else { RenderMenu(); }
             rootConsole.Draw();
         }
+        public static async Task WaitWhile(bool condition, Thread thread, int frequency = 25, int timeout = -1)
+        {
+            var waitTask = Task.Run(async () =>
+            {
+                while (!condition) await Task.Delay(frequency);
+            });
+
+            if (waitTask != await Task.WhenAny(waitTask,
+                    Task.Delay(timeout)))
+                throw new TimeoutException();
+        }
         public static void AddParticle(int x, int y, Entity particle)
         {
             particle.GetComponent<Coordinate>().vector2 = new Vector2(x, y);
             World.tiles[x, y].sfxLayer = particle;
-            particles.Add(particle.GetComponent<ParticleComponent>());
+            ParticleComponent particleComponent = particle.GetComponent<ParticleComponent>();
+            particles.Add(particleComponent);
+            if (particleComponent.animation) 
+            {
+                playingAnimation = true;
+            }
         }
         public static void RenderParticles()
         {
@@ -112,77 +127,14 @@ namespace TheRuinsOfIpsus
         {
             CreateConsoleBorder(rootConsole);
             rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 14, " ______  _             ____         __                   ___   __                          ", RLColor.White);
-            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 13, "|__  __|| |__   ____  |__  | __ __ |__| ___  ____   ___ | __| |  | ____  ____  __ __  ____ ", RLColor.White);
-            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 12, "  |  |  | |  | | __ | |   _||  |  ||  ||   ||  __| | _ ||  _| |  || __ ||  __||  |  ||  __|", RLColor.White);
-            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 11, "  |  |  |  _  || ___| | | | |  |  ||  || | ||___ | ||_||| |   |  ||  __||___ ||  |  ||___ |", RLColor.White);
+            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 13, "|__/ __||/|__   ____  |__  | __ __ |__| ___  ____   ___ |/__| |/ | ____  ____  __ __  ____ ", RLColor.White);
+            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 12, "  |/ |  |/|  | |/__ | |/  _||/ |  ||/ ||/  ||/ __| |/_ ||/ _| |/ ||/__ ||/ __||/ |  ||/ __|", RLColor.White);
+            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 11, "  |/ |  |/ _  ||/___| |/| | |/ |  ||/ ||/| ||___ | ||_|||/|   |/ ||/ __||___ ||/ |  ||___ |", RLColor.White);
             rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 10, "  |__|  |_| |_||____| |_|_| |_____||__||_|_||____| |___||_|   |__||_|   |____||_____||____|", RLColor.White);
             rootConsole.Print((rootConsole.Width / 2) - 7, (rootConsole.Height / 2) - 6, "New Game: [N]", RLColor.White);
             if (SaveDataManager.savePresent) { rootConsole.Print((rootConsole.Width / 2) - 10, (rootConsole.Height / 2) - 3, "Load Save Game: [L]", RLColor.White); }
             else { rootConsole.Print((rootConsole.Width / 2) - 10, (rootConsole.Height / 2) - 3, "Load Save Game: [L]", RLColor.Gray); }
             rootConsole.Print((rootConsole.Width / 2) - 5, rootConsole.Height / 2, "Quit: [Q]", RLColor.White);
-        }
-        public static void StartAnimationThread(List<Entity> sfx, int repeatCount, int delay)
-        {
-            if (!threadRunning)
-            {
-                Thread thread = new Thread(() => PlayAnimation(sfx, repeatCount, delay));
-                thread.Start();
-            }
-            else
-            {
-                Thread thread = new Thread(() => WaitList(sfx, repeatCount, delay));
-                thread.Start();
-            }
-        }
-        public static void WaitList(List<Entity> sfx, int repeatCount, int delay)
-        {
-            try
-            {
-                while (threadRunning)
-                {
-                    Thread.Sleep(10);
-                }
-                Thread thread = new Thread(() => PlayAnimation(sfx, repeatCount, delay));
-                thread.Start();
-                Thread thisThread = Thread.CurrentThread;
-                thisThread.Abort();
-            }
-            catch (Exception ex) { ex = null; return; }
-        }
-        public static void PlayAnimation(List<Entity> sfx, int repeatCount, int delay)
-        {
-            try
-            {
-                threadRunning = true;
-                TurnManager.threadRunning = true;
-                int current = 0;
-                do
-                {
-                    foreach (Entity frame in sfx)
-                    {
-                        if (frame != null)
-                        {
-                            World.GetTraversable(frame.GetComponent<Coordinate>().vector2).sfxLayer = frame;
-                            frame.GetComponent<AnimationFunction>().ProgressFrame();
-                        }
-                    }
-                    //RenderMap();
-                    Thread.Sleep(delay);
-                    current++;
-                } while (current != repeatCount);
-                foreach (Entity frame in sfx)
-                {
-                    if (frame != null)
-                    {
-                        World.GetTraversable(frame.GetComponent<Coordinate>().vector2).sfxLayer = null;
-                    }
-                }
-                threadRunning = false;
-                TurnManager.threadRunning = false;
-                Thread thread = Thread.CurrentThread;
-                thread.Abort();
-            }
-            catch (Exception ex) { ex = null; return; }
         }
         public static void MoveCamera(Vector2 vector3)
         {
@@ -290,12 +242,8 @@ namespace TheRuinsOfIpsus
                 case "Target":
                     {
                         Vector2 newPosition = DijkstraMaps.PathFromMap(position, "ParticlePath");
-                        if (position == newPosition)
-                        {
-                            KillParticle();
-                            return;
-                        }
-                        position = newPosition;
+                        entity.GetComponent<Coordinate>().vector2.x = newPosition.x;
+                        entity.GetComponent<Coordinate>().vector2.y = newPosition.y;
                         break;
                     }
                 case "None": { break; }
@@ -355,13 +303,13 @@ namespace TheRuinsOfIpsus
             if (currentThreshold <= 0)
             {
                 currentThreshold = threshold;
-                if (currentParticle == particles.Length - 1)
+                if (currentParticle != particles.Length - 1)
                 {
-                    currentParticle = 0;
+                    currentParticle++;
                 }
                 else
                 {
-                    currentParticle++;
+                    currentParticle = 0;
                 }
 
                 Draw draw = entity.GetComponent<Draw>();
@@ -371,7 +319,7 @@ namespace TheRuinsOfIpsus
             }
 
             life--;
-            if (life <= 0 && direction != "Target")
+            if (life <= 0)
             {
                 KillParticle();
                 return;
@@ -390,7 +338,7 @@ namespace TheRuinsOfIpsus
                 Renderer.playingAnimation = false;
             }
         }
-        public ParticleComponent(int _life, int _speed, string _direction, int _threshHold, Draw[] _particles, Vector2 target = null, bool animation = false)
+        public ParticleComponent(int _life, int _speed, string _direction, int _threshHold, Draw[] _particles, Vector2 target = null, bool _animation = false)
         {
             life = _life;
             speed = _speed;
@@ -401,13 +349,11 @@ namespace TheRuinsOfIpsus
             if (target != null)
             {
                 DijkstraMaps.CreateMap(target, "ParticlePath");
-                direction = "Target";
             }
 
-            if (animation)
+            if (_animation)
             {
                 animation = true;
-                Renderer.playingAnimation = true;
             }
         }
     }

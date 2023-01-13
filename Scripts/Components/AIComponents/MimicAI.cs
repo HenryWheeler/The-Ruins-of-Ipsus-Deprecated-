@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    class GuardAI: AI
+    class MimicAI : AI
     {
         public override void ExecuteAction()
         {
@@ -18,9 +18,9 @@ namespace TheRuinsOfIpsus
                         AIActions.TestSleep(entity);
                         break;
                     }
-                case State.Patrolling:
+                case State.Awake:
                     {
-                        AIActions.TestPatrol(entity);
+                        AIActions.TestMimicWait(entity);
                         break;
                     }
                 case State.Angry:
@@ -34,26 +34,25 @@ namespace TheRuinsOfIpsus
         {
             transitions = new Dictionary<StateMachine, State>
             {
-                { new StateMachine(State.Asleep, Input.Noise), State.Patrolling },
+                { new StateMachine(State.Asleep, Input.Noise), State.Awake },
                 { new StateMachine(State.Asleep, Input.Hurt), State.Angry },
                 { new StateMachine(State.Angry, Input.Tired), State.Asleep },
-                { new StateMachine(State.Patrolling, Input.Hatred), State.Angry },
-                { new StateMachine(State.Patrolling, Input.Hurt), State.Angry },
-                { new StateMachine(State.Angry, Input.Bored), State.Patrolling },
-                { new StateMachine(State.Patrolling, Input.Tired), State.Asleep },
-                { new StateMachine(State.Bored, Input.Hatred), State.Angry }
+                { new StateMachine(State.Awake, Input.Hatred), State.Angry },
+                { new StateMachine(State.Awake, Input.Hurt), State.Angry },
+                { new StateMachine(State.Angry, Input.Bored), State.Awake },
+                { new StateMachine(State.Awake, Input.Tired), State.Asleep },
             };
         }
-        public GuardAI(List<string> favored, List<string> hated, int _baseInterest)
+        public MimicAI(List<string> favored, List<string> hated, int _baseInterest)
         {
             favoredEntities = favored;
             hatedEntities = hated;
-            currentState = State.Patrolling;
+            currentState = State.Awake;
             interest = _baseInterest;
             baseInterest = _baseInterest;
             SetTransitions();
         }
-        public GuardAI()
+        public MimicAI()
         {
 
         }

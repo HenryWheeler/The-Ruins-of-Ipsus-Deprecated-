@@ -9,11 +9,11 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class Usable: Component
     {
-        public void Use(Entity user) 
+        public void Use(Entity user, Vector2 target) 
         { 
             if (user.GetComponent<PronounSet>().present) { Log.AddToStoredLog(user.GetComponent<Description>().name + " has used the " + entity.GetComponent<Description>().name + "!"); }
             { Log.AddToStoredLog(user.GetComponent<Description>().name + " have used the " + entity.GetComponent<Description>().name + "!"); }
-            SpecialComponentManager.TriggerOnUse(user, entity); 
+            SpecialComponentManager.TriggerOnUse(user, entity, target); 
         }
         public Usable() { }
     }

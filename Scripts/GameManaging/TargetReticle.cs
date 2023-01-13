@@ -16,7 +16,7 @@ namespace TheRuinsOfIpsus
         private static Entity player;
         private static List<Vector2> sfxPositions = new List<Vector2>();
         public TargetReticle(Entity _player) { player = _player; }
-        public static void StartTargeting(bool _inInventory)
+        public static void StartTargeting(bool _inInventory, bool throwing)
         {
             inInventory = _inInventory;
             if (inInventory) { InventoryManager.CloseInventory(); }
@@ -24,6 +24,8 @@ namespace TheRuinsOfIpsus
             x = vector3.x; y = vector3.y;
             targeting = true; player.GetComponent<TurnFunction>().turnActive = false;
             Move(0, 0);
+            if (throwing) { Action.throwing = true; }
+            else { Action.throwing = false; }
             RLKey key = RLKey.Unknown; Action.TargetAction(player, key);
         }
         private static void ClearSFXPositions()
@@ -46,7 +48,14 @@ namespace TheRuinsOfIpsus
             {
                 ClearSFXPositions();
                 x += _x; y += _y;
-                CreateLine(player.GetComponent<Stats>().strength + 10);
+                if (Action.throwing)
+                {
+                    CreateLine(player.GetComponent<Stats>().strength + 10);
+                }
+                else
+                {
+                    CreateLine(1000);
+                }
             }
             Renderer.MoveCamera(new Vector2(x, y));
         }
@@ -165,9 +174,14 @@ namespace TheRuinsOfIpsus
                 while (!hasConnected);
             }
         }
-        public static void ThrowWeapon(Entity weaponUsed)
+        public static Vector2 ReturnCoords(bool magic)
         {
-            int range = player.GetComponent<Stats>().strength + 10;
+            int range;
+            if (magic) { range = 1000; }
+            else
+            {
+                range = player.GetComponent<Stats>().strength + 10;
+            }
             Vector2 refVector3 = player.GetComponent<Coordinate>().vector2;
             if (CMath.Distance(refVector3.x, refVector3.y, x, y) < range)
             {
@@ -175,11 +189,19 @@ namespace TheRuinsOfIpsus
                 {
                     ClearSFXPositions();
                     StopTargeting();
-                    AttackManager.ThrowWeapon(player, new Coordinate(x, y), weaponUsed);
+                    return new Vector2(x, y);
                 }
-                else { CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1); return; }
+                else { CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1); return null; }
             }
-            else { CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1); return; }
+            else { CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1); return null; }
+        }
+        public static void ThrowWeapon(Entity weaponUsed)
+        {
+            Vector2 vector2 = ReturnCoords(false);
+            if (vector2 != null)
+            {
+                AttackManager.ThrowWeapon(player, new Coordinate(vector2.x, vector2.y), weaponUsed);
+            }
         }
         public static Entity Reticle(int x, int y, char character, string fColor)
         {

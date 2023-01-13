@@ -78,9 +78,33 @@ namespace TheRuinsOfIpsus
                         {
                             current = 0;
                         }
-                    } else if (World.seed.Next(0, 100) > 95)
+                    } else if (World.seed.Next(0, 500) == 95)
                     {
-                        //EntityManager.CreateEntity(tile.entity.GetComponent<Coordinate>().vector2, JsonDataManager.ReturnEntity(2001), false, false);
+                        Description description = new Description("Mimic", "Upon closer observation you see it, an elusive shape-changing leathery horror hides as the shape of another.");
+                        Draw draw = new Draw("Brown", "Black", 'm');
+                        TurnFunction function = new TurnFunction();
+                        Entity mimic = new Entity(new List<Component>()
+                            {
+                                new ID(50),
+                                tile.entity.GetComponent<Coordinate>(),
+                                draw,
+                                description,
+                                PronounReferences.pronounSets["Nueter"],
+                                new Stats(2, 10, 1.2f, 20, 0, 2, new List<string>() { "Polymorph" }),
+                                function,
+                                new MimicAI(new List<string>() { "Horror" }, new List<string>() { "Player" }, 200),
+                                new Mimicry(),
+                                new Movement(new List<int> { 1, 2 }),
+                                new Inventory(),
+                                new BodyPlot(),
+                                new OnHit(),
+                                new Faction($"Horror"),
+                                new Interactable(new HashSet<string>() { "Attack" })
+                        });
+                        //CMath.ReturnAI(mimic).transitions.Clear();
+                        EntityManager.CreateEntity(tile.entity.GetComponent<Coordinate>().vector2, mimic, false, false);
+                        TurnManager.AddActor(function);
+                        //JsonDataManager.SaveEntity(mimic);
                     }
                 }
             }

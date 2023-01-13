@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace TheRuinsOfIpsus
 {
     [Serializable]
     public abstract class AI : Component
     {
+        //[Serializable]
+        //[JsonConverter(typeof(StringEnumConverter))]
         public enum State
         {
             Asleep,
@@ -20,7 +24,8 @@ namespace TheRuinsOfIpsus
             Patrolling,
 
         }
-
+        //[Serializable]
+        //[JsonConverter(typeof(StringEnumConverter))]
         public enum Input
         {
             Noise,
@@ -225,44 +230,52 @@ namespace TheRuinsOfIpsus
         }
         public int ReturnFeelings(Entity entity)
         {
-            string faction = entity.GetComponent<Faction>().faction;
-            Stats stats = entity.GetComponent<Stats>();
-            Stats AIStats = this.entity.GetComponent<Stats>();
-            if (!favoredEntities.Contains(faction) && hatedEntities.Contains(faction))
+            try
             {
-                if (AIStats.acuity < 0)
+                string faction = entity.GetComponent<Faction>().faction;
+                Stats stats = entity.GetComponent<Stats>();
+                Stats AIStats = this.entity.GetComponent<Stats>();
+                if (!favoredEntities.Contains(faction) && hatedEntities.Contains(faction))
                 {
-                    return baseInterest - stats.hp;
-                }
-                else if (AIStats.acuity < 3)
-                {
-                    int baseInterest = this.baseInterest;
-                    baseInterest -= stats.hp + (stats.strength * 5) + (stats.acuity * 5);
-                    baseInterest -= AIStats.hp + (AIStats.strength * 5) + (AIStats.acuity * 5);
-                    return baseInterest;
+                    if (AIStats.acuity < 0)
+                    {
+                        return baseInterest - stats.hp;
+                    }
+                    else if (AIStats.acuity < 3)
+                    {
+                        int baseInterest = this.baseInterest;
+                        baseInterest -= stats.hp + (stats.strength * 5) + (stats.acuity * 5);
+                        baseInterest -= AIStats.hp + (AIStats.strength * 5) + (AIStats.acuity * 5);
+                        return baseInterest;
+                    }
+                    else
+                    {
+
+                        int baseInterest = this.baseInterest;
+                        baseInterest -= stats.hp + (stats.strength * 3) + (stats.acuity * 3) + (stats.ac * 3);
+                        baseInterest -= AIStats.hp + (AIStats.strength * 3) + (AIStats.acuity * 3) + (AIStats.ac * 3);
+                        foreach (string status in entity.GetComponent<OnHit>().statusEffects)
+                        {
+                            if (hatedEntities.Contains(status))
+                            {
+                                baseInterest += 25;
+                            }
+                            else
+                            {
+                                baseInterest += 5;
+                            }
+                        }
+                        return baseInterest;
+                    }
                 }
                 else
                 {
-                    
-                    int baseInterest = this.baseInterest;
-                    baseInterest -= stats.hp + (stats.strength * 3) + (stats.acuity * 3) + (stats.ac * 3);
-                    baseInterest -= AIStats.hp + (AIStats.strength * 3) + (AIStats.acuity * 3) + (AIStats.ac * 3);
-                    foreach (string status in entity.GetComponent<OnHit>().statusEffects)
-                    {
-                        if (hatedEntities.Contains(status))
-                        {
-                            baseInterest += 25;
-                        }
-                        else
-                        {
-                            baseInterest += 5;
-                        }
-                    }
-                    return baseInterest;
+                    return 0;
                 }
             }
-            else
+            catch(Exception ex)
             {
+                Log.Add($"{ex.Message}");
                 return 0;
             }
         }

@@ -11,21 +11,28 @@ namespace TheRuinsOfIpsus
         public static void TestHuntAction(Entity AI)
         {
             AI detail = CMath.ReturnAI(AI);
-            Vector2 positionToMove = DijkstraMaps.PathFromMap(AI, detail.target.GetComponent<Faction>().faction);
-            Traversable traversable = World.tiles[positionToMove.x, positionToMove.y];
-            if (traversable.actorLayer != null && detail.hatedEntities.Contains(traversable.actorLayer.GetComponent<Faction>().faction))
+            if (detail.target != null)
             {
-                AttackManager.MeleeAllStrike(AI, traversable.actorLayer);
+                Vector2 positionToMove = DijkstraMaps.PathFromMap(AI, detail.target.GetComponent<Faction>().faction);
+                Traversable traversable = World.tiles[positionToMove.x, positionToMove.y];
+                if (traversable.actorLayer != null && detail.hatedEntities.Contains(traversable.actorLayer.GetComponent<Faction>().faction))
+                {
+                    AttackManager.MeleeAllStrike(AI, traversable.actorLayer);
+                }
+                else
+                {
+                    AI.GetComponent<Movement>().Move(new Vector2(positionToMove.x, positionToMove.y));
+                    detail.interest--;
+                    //Log.Add($"{AI.GetComponent<Description>().name}'s current interest is {detail.interest}");
+                    //if (detail.interest <= 0)
+                    //{
+                    //    CMath.ReturnAI(AI).currentInput = TheRuinsOfIpsus.AI.Input.Tired;
+                    //}
+                }
             }
             else
             {
-                AI.GetComponent<Movement>().Move(new Vector2(positionToMove.x, positionToMove.y));
-                detail.interest--;
-                //Log.Add($"{AI.GetComponent<Description>().name}'s current interest is {detail.interest}");
-                //if (detail.interest <= 0)
-                //{
-                //    CMath.ReturnAI(AI).currentInput = TheRuinsOfIpsus.AI.Input.Tired;
-                //}
+                AI.GetComponent<TurnFunction>().EndTurn();
             }
         }
         public static void TestPatrol(Entity AI)
@@ -61,6 +68,44 @@ namespace TheRuinsOfIpsus
                 detail.interest = detail.baseInterest;
                 detail.currentInput = TheRuinsOfIpsus.AI.Input.Noise;
             }
+            AI.GetComponent<TurnFunction>().EndTurn();
+        }
+        public static void TestMimicWait(Entity AI)
+        {
+            AI detail = CMath.ReturnAI(AI);
+
+            if (!AI.GetComponent<Mimicry>().disguised)
+            {
+                if (!AI.GetComponent<Mimicry>().CaptureGuise())
+                {
+                    if (DijkstraMaps.maps.ContainsKey("Obstacles"))
+                    {
+                        Vector2 vector2 = DijkstraMaps.PathFromMap(AI, "Obstacles");
+                        AI.GetComponent<Movement>().Move(vector2);
+                    }
+                    else if (DijkstraMaps.maps.ContainsKey("Items"))
+                    {
+                        Vector2 vector2 = DijkstraMaps.PathFromMap(AI, "Items");
+                        AI.GetComponent<Movement>().Move(vector2);
+                    }
+                    else
+                    {
+                        AI.GetComponent<TurnFunction>().EndTurn();
+                    }
+                }
+            }
+            else
+            {
+                detail.interest--;
+                if (detail.interest <= 0)
+                {
+                    Vector2 vector2 = AI.GetComponent<Coordinate>().vector2;
+                    AI.GetComponent<Movement>().Move(new Vector2(vector2.x + World.random.Next(-1, 2), vector2.y + World.random.Next(-1, 2)));
+                    AI.GetComponent<Mimicry>().disguised = false;
+                    detail.interest = detail.baseInterest;
+                }
+            }
+
             AI.GetComponent<TurnFunction>().EndTurn();
         }
         public static void TestAwake(Entity AI)

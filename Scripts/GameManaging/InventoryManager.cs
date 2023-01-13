@@ -176,8 +176,11 @@ namespace TheRuinsOfIpsus
                 item.GetComponent<Equippable>().Unequip(entity);
             }
             if (entity.display) { CloseInventory(); }
-            item.GetComponent<Usable>().Use(entity);
-            entity.GetComponent<TurnFunction>().EndTurn();
+            item.GetComponent<Usable>().Use(entity, null);
+            if (!TargetReticle.targeting)
+            {
+                entity.GetComponent<TurnFunction>().EndTurn();
+            }
         }
         public static void PlaceItem(Coordinate targetCoordinate, Entity item)
         {

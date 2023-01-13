@@ -36,66 +36,63 @@ namespace TheRuinsOfIpsus
                 }
             }
         }
-        public static void Beam(Entity originator, Coordinate origin, Coordinate target, int strength, int range, string type)
+        public static void Lightning(Entity originator, Coordinate target, int strength)
         {
-            List<Coordinate> coordinates = RangeModels.BeamRangeModel(origin, target, range, true);
-            List<Entity> sfx = new List<Entity>();
-            int current = 0;
-            Draw frame1 = new Draw("White", "Black", (char)176);
-            Draw baseFrame = new Draw("Gray", "Black", '.');
-            Draw finalFrame = new Draw("Yellow", "Black", 'X');
+            Draw frame1 = new Draw("Yellow", "Black", 'x');
+            Draw frame2 = new Draw("Yellow", "Black", '+');
+            Draw frame3 = new Draw("Yellow", "Black", (char)176);
+            Draw[] frames = new Draw[3] { frame1, frame2, frame3 };
+            List<Coordinate> coordinates = RangeModels.BeamRangeModel(originator.GetComponent<Coordinate>(), target, 1000, false);
             foreach (Coordinate coordinate in coordinates)
             {
-                Draw[] frames = new Draw[coordinates.Count()];
-                if (current != coordinates.Count - 1)
+                Vector2 vector3 = coordinate.vector2;
+                if (World.GetTraversable(coordinate.vector2).actorLayer != null)
                 {
-                    for (int i = 0; i < coordinates.Count(); i++)
-                    {
-                        if (i == current)
-                        {
-                            frames[i] = frame1; 
-                        }
-                        else 
-                        {
-                            frames[i] = baseFrame;
-                        }
-                    }
-                }
-                else { for (int i = 0; i < coordinates.Count(); i++) { frames[i] = finalFrame; } }
-                Entity sFX;
-                if (current == 0)
-                { 
-                    sFX = new Entity(new List<Component>() 
-                    { 
-                        new Coordinate(coordinate.vector2), new Draw(frame1) 
-                    }); 
+                    AttackManager.Attack(originator, World.tiles[vector3.x, vector3.y].actorLayer,
+                    new AttackFunction($"1-{strength}-{8}-{2}-{strength}", "Lightning"), "Lightning");
                 }
                 else
                 {
-                    sFX = new Entity(new List<Component>() 
-                    { 
-                        new Coordinate(coordinate.vector2), new Draw("Gray", "Black", '.')
-                    });
-                }
-                sFX.AddComponent(new AnimationFunction(frames));
-                sfx.Add(sFX);
-                current++;
-            }
-            Renderer.StartAnimationThread(sfx, coordinates.Count(), 250 / coordinates.Count());
-            switch (type)
-            {
-                case "Steam":
-                    {
-                        foreach (Coordinate coordinate in coordinates)
+                    Entity particle = new Entity(new List<Component>
                         {
-                            if (World.GetTraversable(coordinate.vector2).actorLayer != null)
-                            {
-                                AttackManager.Attack(originator, World.GetTraversable(coordinate.vector2).actorLayer,
-                                  new AttackFunction($"1-{strength}-8-0-4", "Fire"), "Steam");
-                            }
-                        }
-                        break;
+                            new Coordinate(0, 0),
+                            frame1,
+                            new ParticleComponent(World.random.Next(22, 26), 5, "None", 1, frames)
+                        });
+                    Renderer.AddParticle(vector3.x, vector3.y, particle);
+                    if (World.random.Next(0, 2) == 1)
+                    {
+                        Entity particle2 = new Entity(new List<Component>
+                        {
+                            new Coordinate(0, 0),
+                            frame1,
+                            new ParticleComponent(World.random.Next(22, 26), 5, "None", 1, frames)
+                        });
+                        Renderer.AddParticle(vector3.x + World.random.Next(-1, 2), vector3.y + World.random.Next(-1, 2), particle2);
                     }
+                }
+            }
+        }
+        public static void MagicMap(Entity entity)
+        {
+            Vector2 origin = entity.GetComponent<Coordinate>().vector2;
+            Draw frame1 = new Draw("Light_Yellow", "Light_Yellow", (char)0);
+            Draw frame2 = new Draw("Yellow", "Yellow", (char)0);
+            Draw[] frames = new Draw[2] { frame1, frame2 };
+            foreach (Traversable tile in World.tiles)
+            {
+                if (tile.terrainType != 0)
+                {
+                    Coordinate coordinate = tile.entity.GetComponent<Coordinate>();
+                    tile.entity.GetComponent<Visibility>().explored = true;
+                    Entity particle = new Entity(new List<Component>
+                        {
+                            new Coordinate(0, 0),
+                            frame1,
+                            new ParticleComponent((int)CMath.Distance(origin.x, origin.y, coordinate.vector2.x, coordinate.vector2.y), 4, "None", 0, frames)
+                        });
+                    Renderer.AddParticle(coordinate.vector2.x, coordinate.vector2.y, particle);
+                }
             }
         }
     }

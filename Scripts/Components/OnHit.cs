@@ -82,10 +82,10 @@ namespace TheRuinsOfIpsus
                             new Draw("Red", "Black", 'X'),
                             new ParticleComponent(2, 1, "None", 1, new Draw[] { new Draw("Red", "Black", 'X') })
                         });
-            Vector2 vector2 = entity.GetComponent<Coordinate>().vector2;
-            Renderer.AddParticle(vector2.x, vector2.y, hitParticle);
+            Coordinate vector2 = entity.GetComponent<Coordinate>();
+            Renderer.AddParticle(vector2.vector2.x, vector2.vector2.y, hitParticle);
             Log.Add($"{entity.GetComponent<Description>().name} has died.");
-            entity.GetComponent<TurnFunction>().turnActive = false; 
+            entity.GetComponent<TurnFunction>().turnActive = false;
 
             World.GetTraversable(entity.GetComponent<Coordinate>().vector2).actorLayer = null; 
             TurnManager.RemoveActor(entity.GetComponent<TurnFunction>());

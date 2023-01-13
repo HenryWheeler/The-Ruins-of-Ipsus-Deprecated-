@@ -149,12 +149,12 @@ namespace TheRuinsOfIpsus
                         }
                         else
                         {
-                            if (entity.GetComponent<Movement>().moveTypes.Contains(World.tiles[x, y].terrainType) && map[x, y] < v) 
+                            if (entity.GetComponent<Movement>().moveTypes.Contains(World.tiles[x, y].terrainType) && map[x, y] < v)
                             {
                                 target = new Vector2(x, y);
                                 v = map[x, y];
                             }
-                            else continue;
+                            else { continue; }
                         }
                     }
                 }
@@ -170,7 +170,7 @@ namespace TheRuinsOfIpsus
             }
             else { return null; }
 
-            Vector2 target = start;
+            Vector2 target = new Vector2(start.x, start.y);
             float v = map[start.x, start.y];
 
             for (int y = start.y - 1; y <= start.y + 1; y++)
@@ -191,24 +191,12 @@ namespace TheRuinsOfIpsus
                                 target = new Vector2(x, y);
                                 v = map[x, y];
                             }
-                            else continue;
+                            else { continue; }
                         }
                     }
                 }
             }
             return target;
         }
-    }
-    public class Node
-    {
-        public Node(int _x, int _y, float _v = 0)
-        {
-            x = _x;
-            y = _y;
-            v = _v;
-        }
-        public int x { get; set; }
-        public int y { get; set; }
-        public float v { get; set; }
     }
 }

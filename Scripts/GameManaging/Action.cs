@@ -18,11 +18,12 @@ namespace TheRuinsOfIpsus
         public static bool choosingDirection = false;
         public static bool choosingTarget = false;
         public static bool interacting = false;
+        public static bool throwing = false;
         private static Entity chosenEntity { get; set; }
         private static Vector2 chosenLocation { get; set; }
         private static RLConsole console { get; set; }
         public Action(RLConsole _console) { console = _console; }
-        private static Entity targetWeapon { get; set; }
+        public static Entity targetWeapon { get; set; }
         public static void MenuAction(RLKey key, RLRootConsole console)
         {
             switch (key)
@@ -95,6 +96,8 @@ namespace TheRuinsOfIpsus
                     case RLKey.Space:
                         {
                             player.GetComponent<TurnFunction>().turnActive = false;
+                            InventoryManager.inventoryOpen = false;
+                            TargetReticle.targeting = false;
                             interacting = true;
                             choosingDirection = true;
                             Interaction(player);
@@ -261,7 +264,7 @@ namespace TheRuinsOfIpsus
                                 int first = InventoryManager.currentPage;
                                 int second = InventoryManager.selection;
                                 targetWeapon = InventoryManager.inventoryDisplay[first][second];
-                                TargetReticle.StartTargeting(true);
+                                TargetReticle.StartTargeting(true, true);
                             }
                             break;
                         }
@@ -270,7 +273,7 @@ namespace TheRuinsOfIpsus
         }
         public static void TargetAction(Entity player, RLKey key = RLKey.Unknown)
         {
-            DisplayActions("Stop Targeting:[S/Escape]" + " Move:[NumPad]" + " Fire & Throw:[F/T/Enter]");
+            DisplayActions("Stop Targeting:[S/Escape]" + " Move:[NumPad]" + " Use/Throw:[U/T/Enter]");
 
             if (key != RLKey.Unknown)
             {
@@ -290,9 +293,24 @@ namespace TheRuinsOfIpsus
                     case RLKey.Keypad7: TargetReticle.Move(-1, -1); break;
                     case RLKey.Escape: TargetReticle.StopTargeting(); break;
                     case RLKey.S: TargetReticle.StopTargeting(); break;
-                    case RLKey.T: TargetReticle.ThrowWeapon(targetWeapon); break;
-                    case RLKey.F: TargetReticle.ThrowWeapon(targetWeapon); break;
-                    case RLKey.Enter: TargetReticle.ThrowWeapon(targetWeapon); break;
+                    case RLKey.U: Throw(player); break;
+                    case RLKey.T: Throw(player); break;
+                    case RLKey.Enter: Throw(player); break;
+                }
+            }
+        }
+        public static void Throw(Entity player)
+        {
+            if (throwing)
+            {
+                TargetReticle.ThrowWeapon(targetWeapon);
+            }
+            else
+            {
+                Vector2 vector2 = TargetReticle.ReturnCoords(true);
+                if (vector2 != null)
+                {
+                    SpecialComponentManager.TriggerOnUse(player, targetWeapon, vector2);
                 }
             }
         }
@@ -364,45 +382,52 @@ namespace TheRuinsOfIpsus
             Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
             chosenLocation = new Vector2(vector2.x + x, vector2.y + y);
             Traversable traversable = World.GetTraversable(chosenLocation);
-            interactionText = "There is";
             interactionKeyText = "";
+            int interactions = 0;
             if (x != 0 || y != 0)
             {
                 if (traversable.actorLayer != null) 
                 { 
                     actorPresent = true;
-                    if (!traversable.actorLayer.GetComponent<PronounSet>().present) { interactionText += " the " + traversable.actorLayer.GetComponent<Description>().name + ","; }
-                    else { interactionText += " a " + traversable.actorLayer.GetComponent<Description>().name + ","; }
                     interactionKeyText += traversable.actorLayer.GetComponent<Description>().name + ":[E] ";
+                    interactions++;
                 }
                 else { actorPresent = false; }
             } else { actorPresent = false; }
             if (traversable.itemLayer != null) 
             { 
                 itemPresent = true;
-                interactionText += " a " + traversable.itemLayer.GetComponent<Description>().name + ",";
                 interactionKeyText += traversable.itemLayer.GetComponent<Description>().name + ":[I] ";
+                interactions++;
             }
             else { itemPresent = false; }
             if (traversable.obstacleLayer != null) 
             { 
                 obstaclePresent = true;
-                interactionText += " a " + traversable.obstacleLayer.GetComponent<Description>().name + ",";
                 interactionKeyText += traversable.obstacleLayer.GetComponent<Description>().name + ":[O] ";
+                interactions++;
             }
             else { obstaclePresent = false; }
             if (traversable.entity.GetComponent<Interactable>() != null) 
             {
                 terrainPresent = true;
-                interactionText += " a " + traversable.entity.GetComponent<Description>().name + ",";
                 interactionKeyText += traversable.entity.GetComponent<Description>().name + ":[T] ";
+                interactions++;
             }
             else { terrainPresent = false; }
             if (!actorPresent && !itemPresent && !obstaclePresent && !terrainPresent)
-            { interactionText += " nothing there."; CMath.DisplayToConsole(Log.console, interactionText, 1, 1); }
-            else 
+            { interactionText = "There is nothing there."; CMath.DisplayToConsole(Log.console, interactionText, 1, 1); }
+            else if (interactions == 1)
             {
-                interactionText += " what do you interact with?";
+                choosingDirection = false;
+                if (actorPresent) { ChooseEntity(player, 0); }
+                else if (itemPresent) { ChooseEntity(player, 1); }
+                else if (obstaclePresent) { ChooseEntity(player, 2); }
+                else if (terrainPresent) { ChooseEntity(player, 3); }
+            }
+            else
+            {
+                interactionText = "What do you interact with?";
                 interactionKeyText += " + End Interaction: + [Escape]";
                 choosingDirection = false;
                 choosingTarget = true;

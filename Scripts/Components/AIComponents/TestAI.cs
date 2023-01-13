@@ -60,7 +60,7 @@ namespace TheRuinsOfIpsus
         }
         public TestAI()
         {
-            SetTransitions();
+
         }
     }
 }

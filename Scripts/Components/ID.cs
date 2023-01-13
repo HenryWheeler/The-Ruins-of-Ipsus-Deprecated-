@@ -10,7 +10,10 @@ namespace TheRuinsOfIpsus
     class ID: Component
     {
         public int id { get; set; }
-        public ID(int _id) { id = _id; }
+        public ID(int _id)
+        {
+            id = _id; 
+        }
         public ID() { }
     }
 }

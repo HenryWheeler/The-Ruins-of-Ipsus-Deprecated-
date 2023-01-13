@@ -120,6 +120,7 @@
     <Compile Include="Scripts\Components\AIComponents\BaseAI\AI.cs" />
     <Compile Include="Scripts\Components\AIComponents\BaseAI\AIActions.cs" />
     <Compile Include="Scripts\Components\AIComponents\GuardAI.cs" />
+    <Compile Include="Scripts\Components\AIComponents\MimicAI.cs" />
     <Compile Include="Scripts\Components\AIComponents\PatrolFunction.cs" />
     <Compile Include="Scripts\Components\AIComponents\TestAI.cs" />
     <Compile Include="Scripts\Components\AnimationFunction.cs" />
@@ -133,6 +134,7 @@
     <Compile Include="Scripts\Components\Faction.cs" />
     <Compile Include="Scripts\Components\ID.cs" />
     <Compile Include="Scripts\Components\Interactable.cs" />
+    <Compile Include="Scripts\Components\Mimicry.cs" />
     <Compile Include="Scripts\Components\Movement.cs" />
     <Compile Include="Scripts\Components\OnHit.cs" />
     <Compile Include="Scripts\Components\Draw.cs" />
@@ -149,6 +151,8 @@
     <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnMoveProperty.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnTurnProperty.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\InflictStoningOnHit.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\LightningOnUse.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\MagicMapOnUse.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\Stoning.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\Poison.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\RestrainOnMove.cs" />

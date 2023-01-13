@@ -9,7 +9,7 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public abstract class OnUseProperty: Component
     {
-        public abstract void OnUse(Entity entity);
+        public abstract void OnUse(Entity entity, Vector2 target = null);
         public OnUseProperty() { }
     }
 }

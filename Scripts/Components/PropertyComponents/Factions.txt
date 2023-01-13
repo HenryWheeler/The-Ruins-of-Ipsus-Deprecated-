@@ -1,5 +1,7 @@
 ﻿List of factions in game:
 
 1. Human,
-2. Sea_Beast,
+2. Beast,
 3. Insect,
+4. Player,
+5. Horror,

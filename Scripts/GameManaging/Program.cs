@@ -109,7 +109,7 @@ namespace TheRuinsOfIpsus
             player.AddComponent(new Draw("White", "Black", '@'));
             player.AddComponent(new Description("You", "It's you."));
             player.AddComponent(PronounReferences.pronounSets["Player"]);
-            player.AddComponent(new Stats(7, 10, 1f, 20, 1, 1));
+            player.AddComponent(new Stats(7, 10, 1f, 50, 1, 1));
             player.AddComponent(new TurnFunction());
             player.AddComponent(new Movement(new List<int> { 1, 2 }));
             player.AddComponent(new Inventory());
@@ -122,17 +122,44 @@ namespace TheRuinsOfIpsus
             Entity startingWeapon = new Entity(new List<Component>() 
             {
                 new Coordinate(0, 0),
-                new ID(1001),
-                new Draw("White", "Black", '/'),
-                new Description("Testing Weapon", "Testing"),
-                new Equippable("Weapon", true),
-                new AttackFunction("1-1-4-0-0", "Slashing"),
+                new ID(1100),
+                new Draw("Orange", "Black", '!'),
+                new Description("Potion of Orange*Explosion", "The label reads: 'Do Not Drink'."),
                 new Usable(),
                 new Throwable(),
                 new ExplodeOnUse(3),
-                //new ExplodeOnThrow(3)
+                new ExplodeOnThrow(3)
             });
             InventoryManager.AddToInventory(player, startingWeapon);
+
+            Entity testScrollOfLightning = new Entity(new List<Component>()
+            {
+                new Coordinate(0, 0),
+                new ID(1300),
+                new Draw("Yellow", "Black", '?'),
+                new Description("Scroll of Yellow*Lightning", "This scroll is carved with Yellow*yellow Yellow*runes onto a vellum of human skin"),
+                new Usable(),
+                new LightningOnUse(5),
+            });
+            InventoryManager.AddToInventory(player, new Entity(testScrollOfLightning));
+            InventoryManager.AddToInventory(player, new Entity(testScrollOfLightning));
+            InventoryManager.AddToInventory(player, new Entity(testScrollOfLightning));
+            InventoryManager.AddToInventory(player, new Entity(testScrollOfLightning));
+            InventoryManager.AddToInventory(player, new Entity(testScrollOfLightning));
+
+            Entity testMagicMappingScroll = new Entity(new List<Component>()
+            {
+                new Coordinate(0, 0),
+                new ID(1301),
+                new Draw("Cyan", "Black", '?'),
+                new Description("Scroll of Cyan*Mapping", "This scroll seems as if lighter than air and feels charged with unearthly knowledge."),
+                new Usable(),
+                new MagicMapOnUse(),
+            });
+            InventoryManager.AddToInventory(player, new Entity(testMagicMappingScroll));
+            InventoryManager.AddToInventory(player, new Entity(testMagicMappingScroll));
+            InventoryManager.AddToInventory(player, new Entity(testMagicMappingScroll));
+            InventoryManager.AddToInventory(player, new Entity(testMagicMappingScroll));
 
             Action.PlayerAction(player);
             EntityManager.AddEntity(player);
@@ -158,8 +185,8 @@ namespace TheRuinsOfIpsus
             World world = new World(gameMapWidth, gameMapHeight, saveData.depth, saveData.seed);
 
             foreach (Entity actor in saveData.actors) { if (actor != null) { Entity entity = EntityManager.ReloadEntity(actor); World.GetTraversable(entity.GetComponent<Coordinate>().vector2).actorLayer = entity; } }
-            foreach (Entity item in saveData.items) { if (item != null) { Entity entity = EntityManager.ReloadEntity(item); World.GetTraversable(entity.GetComponent<Coordinate>().vector2).actorLayer = entity; } }
-            foreach (Entity terrain in saveData.terrain) { if (terrain != null) { Entity entity = EntityManager.ReloadEntity(terrain); World.GetTraversable(entity.GetComponent<Coordinate>().vector2).actorLayer = entity; } }
+            foreach (Entity item in saveData.items) { if (item != null) { Entity entity = EntityManager.ReloadEntity(item); World.GetTraversable(entity.GetComponent<Coordinate>().vector2).itemLayer = entity; } }
+            foreach (Entity terrain in saveData.terrain) { if (terrain != null) { Entity entity = EntityManager.ReloadEntity(terrain); World.GetTraversable(entity.GetComponent<Coordinate>().vector2).obstacleLayer = entity; } }
             foreach (Traversable tile in World.tiles) { if (tile != null && tile.entity != null) { Vector2 vector2 = tile.entity.GetComponent<Coordinate>().vector2; if (saveData.visibility[vector2.x, vector2.y] != null) { tile.entity.RemoveComponent(tile.entity.GetComponent<Visibility>()); tile.entity.AddComponent(saveData.visibility[vector2.x, vector2.y]); } } }
 
             ReloadPlayer(saveData.player.components);

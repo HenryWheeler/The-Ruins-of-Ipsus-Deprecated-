@@ -19,6 +19,7 @@ namespace TheRuinsOfIpsus
         }
         public static bool PathBlocked(Vector2 coordinate, Vector2 coordinate2, int range)
         {
+            bool passing = true;
             int oX = coordinate.x; int oY = coordinate.y;
             int eX = coordinate2.x; int eY = coordinate2.y;
             int t;
@@ -33,27 +34,49 @@ namespace TheRuinsOfIpsus
             if (abs_delta_x > abs_delta_y)
             {
                 t = abs_delta_y * 2 - abs_delta_x;
+                Traversable traversable;
                 do
                 {
                     if (t >= 0) { y += sign_y; t -= abs_delta_x * 2; }
                     x += sign_x;
                     t += abs_delta_y * 2;
                     if (x == eX && y == eY) { return true; }
+                    traversable = World.tiles[x, y];
+
+                    if (!Action.throwing && !traversable.entity.GetComponent<Visibility>().explored)
+                    {
+                        passing = false;
+                    }
+                    else if (traversable.terrainType != 0 && traversable.obstacleLayer != null && traversable.obstacleLayer.GetComponent<Visibility>() != null && traversable.obstacleLayer.GetComponent<Visibility>().opaque)
+                    {
+                        passing = false;
+                    }
                 }
-                while (World.GetTraversable(new Vector2(x, y)).actorLayer == null && World.GetTraversable(new Vector2(x, y)).terrainType != 0);
+                while (passing);
                 return false;
             }
             else
             {
                 t = abs_delta_x * 2 - abs_delta_y;
+                Traversable traversable;
                 do
                 {
                     if (t >= 0) { x += sign_x; t -= abs_delta_y * 2; }
                     y += sign_y;
                     t += abs_delta_x * 2;
                     if (x == eX && y == eY) { return true; }
+                    traversable = World.tiles[x, y];
+
+                    if (!Action.throwing && !traversable.entity.GetComponent<Visibility>().explored)
+                    {
+                        passing = false;
+                    }
+                    else if (traversable.terrainType != 0 && traversable.obstacleLayer != null && traversable.obstacleLayer.GetComponent<Visibility>() != null && traversable.obstacleLayer.GetComponent<Visibility>().opaque)
+                    {
+                        passing = false;
+                    }
                 }
-                while (World.GetTraversable(new Vector2(x, y)).actorLayer == null && World.GetTraversable(new Vector2(x, y)).terrainType != 0);
+                while (passing);
                 return false;
             }
         }

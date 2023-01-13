@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TheRuinsOfIpsus
@@ -27,20 +28,34 @@ namespace TheRuinsOfIpsus
         {
             try
             {
-                if (weapon.GetComponent<Equippable>() != null && weapon.GetComponent<Equippable>().equipped)
-                {
-                    InventoryManager.UnequipItem(attacker, weapon);
-                }
-                InventoryManager.PlaceItem(target, weapon);
+                int time = CMath.Distance(attacker.GetComponent<Coordinate>(), target);
+                Entity particle2 = new Entity(new List<Component>
+                        {
+                            new Coordinate(0, 0),
+                            new Draw("Yellow", "Black", 'X'),
+                            new ParticleComponent(time, 2, "None", 0, new Draw[] { new Draw("Yellow", "Black", 'X'), new Draw("Black", "Black", 'X') }),
+                        });
+                Renderer.AddParticle(target.vector2.x, target.vector2.y, particle2);
 
                 Entity particle = new Entity(new List<Component>
                         {
                             new Coordinate(0, 0),
                             weapon.GetComponent<Draw>(),
-                            new ParticleComponent(1, 1, "Target", 1, new Draw[] { weapon.GetComponent<Draw>() }, target.vector2, true ),
+                            new ParticleComponent(time, 2, "Target", 0, new Draw[] { weapon.GetComponent<Draw>() }, target.vector2, true),
                         });
                 Vector2 vector2 = attacker.GetComponent<Coordinate>().vector2;
                 Renderer.AddParticle(vector2.x, vector2.y, particle);
+
+                //while (Renderer.playingAnimation)
+                {
+                    
+                }
+
+                if (weapon.GetComponent<Equippable>() != null && weapon.GetComponent<Equippable>().equipped)
+                {
+                    InventoryManager.UnequipItem(attacker, weapon);
+                }
+                InventoryManager.PlaceItem(target, weapon);
 
                 if (weapon.GetComponent<Throwable>() != null)
                 {
@@ -101,6 +116,10 @@ namespace TheRuinsOfIpsus
                     attacker.GetComponent<TurnFunction>().EndTurn(); 
                 }
             }
+            else
+            {
+                                    attacker.GetComponent<TurnFunction>().EndTurn(); 
+            }
         }
         public static void Attack(Entity attacker, Entity target, AttackFunction attackFunction, string attackName)
         {
@@ -113,20 +132,13 @@ namespace TheRuinsOfIpsus
 
                     for (int i = 0; i < numberOfAttacks; i++)
                     {
-                        if (World.random.Next(0, 20) + int.Parse(parts[4]) >= target.GetComponent<Stats>().ac)
+                        int dmg = 0;
+                        for (int d = 0; d < int.Parse(parts[1]); d++)
                         {
-                            int dmg = 0;
-                            for (int d = 0; d < int.Parse(parts[1]); d++)
-                            {
-                                dmg += World.random.Next(1, int.Parse(parts[2]));
-                            }
-                            dmg += int.Parse(parts[3]);
-                            target.GetComponent<OnHit>().Hit(dmg, attackFunction.dmgType, attackName, attacker);
+                            dmg += World.random.Next(1, int.Parse(parts[2]));
                         }
-                        else
-                        {
-                            Log.Add($"The {attackName} missed its target.");
-                        }
+                        dmg += int.Parse(parts[3]);
+                        target.GetComponent<OnHit>().Hit(dmg, attackFunction.dmgType, attackName, attacker);
                     }
                 }
                 else
