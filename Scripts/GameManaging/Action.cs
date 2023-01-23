@@ -35,9 +35,6 @@ namespace TheRuinsOfIpsus
         }
         public static void PlayerAction(Entity player, RLKey key = RLKey.Unknown)
         {
-            DisplayActions("Move:[NumPad]" + " End Turn:[.]" + " Save & Quit:[J]" 
-                + " Look:[L]" + " Open Inventory:[I]" + " Get Item:[G]" + " Interact:[Space]");
-
             if (key != RLKey.Unknown)
             {
                 switch (key)
@@ -80,7 +77,7 @@ namespace TheRuinsOfIpsus
                         }
                     case RLKey.Period: player.GetComponent<TurnFunction>().EndTurn(); break;
                     case RLKey.L: Look.StartLooking(player.GetComponent<Coordinate>()); break;
-                    case RLKey.I: InventoryManager.OpenInventory(); Log.DisplayLog(); break;
+                    case RLKey.I: InventoryManager.OpenInventory(); break;
                     case RLKey.G: InventoryManager.GetItem(player); Log.DisplayLog(); break;
                     case RLKey.J: SaveDataManager.CreateSave(); Program.gameActive = false; Renderer.running = false; Program.rootConsole.Close(); break;
                     case RLKey.V:
@@ -89,7 +86,7 @@ namespace TheRuinsOfIpsus
                             if (tile != null)
                             {
                                 Vector2 vector2 = tile.entity.GetComponent<Coordinate>().vector2;
-                                ShadowcastFOV.SetVisible(vector2, true, true);
+                                ShadowcastFOV.SetVisible(vector2, true, 1000, vector2.x, vector2.y, true);
                             }
                         }
                         break;
@@ -210,12 +207,11 @@ namespace TheRuinsOfIpsus
             choosingDirection = false; 
             choosingTarget = false; 
             PlayerAction(player);
+            StatManager.UpdateStats(player);
             Log.DisplayLog(); 
         }
         public static void InventoryAction(Entity player, RLKey key = RLKey.Unknown)
         {
-            DisplayActions("Close Inventory:[I/Escape]" + " Use Item:[U]" + " Change Selection:[NumPad]" + " Throw Item:[T]" + " Drop Item:[D]" + " Equip/Unequip:[E]");
-
             if (key != RLKey.Unknown)
             {
                 CMath.DisplayToConsole(Log.console, "", 0, 0);
@@ -242,7 +238,7 @@ namespace TheRuinsOfIpsus
                                 {
                                     if (InventoryManager.inventoryDisplay[first][second].GetComponent<Equippable>().equipped) { InventoryManager.UnequipItem(player, InventoryManager.inventoryDisplay[first][second], true); }
                                     else { InventoryManager.EquipItem(player, InventoryManager.inventoryDisplay[first][second]); }
-                                } else { CMath.DisplayToConsole(Log.console, "You cannot equip the " + InventoryManager.inventoryDisplay[first][second].GetComponent<Description>().name + ".", 1, 1, 0, 0); }
+                                } else { CMath.DisplayToConsole(Log.console, "You cannot equip the " + InventoryManager.inventoryDisplay[first][second].GetComponent<Description>().name + ".", 1, 1); }
                             }
                             break;
                         }
@@ -252,8 +248,12 @@ namespace TheRuinsOfIpsus
                             {
                                 int first = InventoryManager.currentPage;
                                 int second = InventoryManager.selection;
-                                if (InventoryManager.inventoryDisplay[first][second].GetComponent<Usable>() != null) { InventoryManager.UseItem(player, InventoryManager.inventoryDisplay[first][second]); }
-                                else { CMath.DisplayToConsole(Log.console, "You cannot use the " + InventoryManager.inventoryDisplay[first][second].GetComponent<Description>().name + ".", 1, 1, 0, 0); }
+                                if (InventoryManager.inventoryDisplay[first][second].GetComponent<Usable>() != null) 
+                                {
+                                    targetWeapon = InventoryManager.inventoryDisplay[first][second];
+                                    InventoryManager.UseItem(player, InventoryManager.inventoryDisplay[first][second]);
+                                }
+                                else { CMath.DisplayToConsole(Log.console, "You cannot use the " + InventoryManager.inventoryDisplay[first][second].GetComponent<Description>().name + ".", 1, 1); }
                             }
                             break;
                         }
@@ -268,13 +268,17 @@ namespace TheRuinsOfIpsus
                             }
                             break;
                         }
+                    default:
+                        {
+                            InventoryManager.DisplayItem();
+                            InventoryManager.DisplayInventory();
+                            break;
+                        }
                 }
             }
         }
         public static void TargetAction(Entity player, RLKey key = RLKey.Unknown)
         {
-            DisplayActions("Stop Targeting:[S/Escape]" + " Move:[NumPad]" + " Use/Throw:[U/T/Enter]");
-
             if (key != RLKey.Unknown)
             {
                 switch (key)
@@ -316,8 +320,6 @@ namespace TheRuinsOfIpsus
         }
         public static void LookAction(RLKey key = RLKey.Unknown)
         {
-            DisplayActions("Stop Looking:[L/Escape]" + " Move Reticle:[NumPad]");
-
             if (key != RLKey.Unknown)
             {
                 switch (key)
@@ -356,7 +358,7 @@ namespace TheRuinsOfIpsus
             if (chosenEntity.GetComponent<Interactable>().interactions.Count == 0)
             {
                 interactionText = "There is no way to interact with the " + chosenEntity.GetComponent<Description>().name;
-                interactionKeyText = "End Interaction: + [Escape]";
+                interactionKeyText = "End Interaction:[Escape] + ";
                 Interaction(player);
             }
             else
@@ -366,14 +368,14 @@ namespace TheRuinsOfIpsus
                 {
                     if (interaction == "Openable")
                     {
-                        interactionKeyText += $"Open/Close:[{interaction.ToArray()[0]}], ";
+                        interactionKeyText += $"Open/Close:[{interaction.ToArray()[0]}] +";
                     }
                     else
                     {
-                        interactionKeyText += $"{interaction}:[{interaction.ToArray()[0]}]";
+                        interactionKeyText += $"{interaction}:[{interaction.ToArray()[0]}] +";
                     }
                 }
-                interactionKeyText += " + End Interaction: + [Escape]";
+                interactionKeyText += "End Interaction:[Escape]";
                 Interaction(player);
             }
         }
@@ -389,7 +391,7 @@ namespace TheRuinsOfIpsus
                 if (traversable.actorLayer != null) 
                 { 
                     actorPresent = true;
-                    interactionKeyText += traversable.actorLayer.GetComponent<Description>().name + ":[E] ";
+                    interactionKeyText += traversable.actorLayer.GetComponent<Description>().name + ":[E] + ";
                     interactions++;
                 }
                 else { actorPresent = false; }
@@ -397,21 +399,21 @@ namespace TheRuinsOfIpsus
             if (traversable.itemLayer != null) 
             { 
                 itemPresent = true;
-                interactionKeyText += traversable.itemLayer.GetComponent<Description>().name + ":[I] ";
+                interactionKeyText += traversable.itemLayer.GetComponent<Description>().name + ":[I] + ";
                 interactions++;
             }
             else { itemPresent = false; }
             if (traversable.obstacleLayer != null) 
             { 
                 obstaclePresent = true;
-                interactionKeyText += traversable.obstacleLayer.GetComponent<Description>().name + ":[O] ";
+                interactionKeyText += traversable.obstacleLayer.GetComponent<Description>().name + ":[O] + ";
                 interactions++;
             }
             else { obstaclePresent = false; }
             if (traversable.entity.GetComponent<Interactable>() != null) 
             {
                 terrainPresent = true;
-                interactionKeyText += traversable.entity.GetComponent<Description>().name + ":[T] ";
+                interactionKeyText += traversable.entity.GetComponent<Description>().name + ":[T] + ";
                 interactions++;
             }
             else { terrainPresent = false; }
@@ -428,7 +430,7 @@ namespace TheRuinsOfIpsus
             else
             {
                 interactionText = "What do you interact with?";
-                interactionKeyText += " + End Interaction: + [Escape]";
+                interactionKeyText += "End Interaction:[Escape]";
                 choosingDirection = false;
                 choosingTarget = true;
                 Interaction(player);

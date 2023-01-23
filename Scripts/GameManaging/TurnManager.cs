@@ -8,17 +8,20 @@ namespace TheRuinsOfIpsus
 {
     public class TurnManager
     {
-        private static List<TurnFunction> entities = new List<TurnFunction>();
+        public static List<TurnFunction> entities = new List<TurnFunction>();
         private static int turn = 0;
         private static int entityTurn = 0;
         public static bool threadRunning = false;
         public static void ProgressTurnOrder()
         {
-            turn++;
-            if (entityTurn >= entities.Count - 1) entityTurn = 0;
-            else entityTurn++;
-            if (entities[entityTurn].actionLeft <= 0) ProgressActorTurn(entities[entityTurn]);
-            else entities[entityTurn].StartTurn();
+            if (entities.Count != 0)
+            {
+                turn++;
+                if (entityTurn >= entities.Count - 1) entityTurn = 0;
+                else entityTurn++;
+                if (entities[entityTurn].actionLeft <= 0) ProgressActorTurn(entities[entityTurn]);
+                else entities[entityTurn].StartTurn();
+            }
         }
         public static void ProgressActorTurn(TurnFunction entity)
         {

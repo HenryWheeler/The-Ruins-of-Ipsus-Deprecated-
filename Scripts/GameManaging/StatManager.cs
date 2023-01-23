@@ -50,7 +50,7 @@ namespace TheRuinsOfIpsus
             display += $"Sight: {stats.sight}{spacer}";
 
             display += "Equipment: " + spacer;
-            foreach (EquipmentSlot slot in entity.GetComponent<BodyPlot>().bodyPlot)
+            foreach (EquipmentSlot slot in entity.GetComponent<Inventory>().equipment)
             {
                 if (slot != null)
                 {
@@ -66,20 +66,20 @@ namespace TheRuinsOfIpsus
             }
 
             display += $"Status:{spacer}";
-            for (int i = 0; i < entity.GetComponent<OnHit>().statusEffects.Count; i++)
+            for (int i = 0; i < entity.GetComponent<Harmable>().statusEffects.Count; i++)
             {
-                if (i == entity.GetComponent<OnHit>().statusEffects.Count - 1)
+                if (i == entity.GetComponent<Harmable>().statusEffects.Count - 1)
                 { 
-                    display += $"{entity.GetComponent<OnHit>().statusEffects[i]}."; 
+                    display += $"{entity.GetComponent<Harmable>().statusEffects[i]}."; 
                 } 
                 else 
                 { 
-                    display += $"{entity.GetComponent<OnHit>().statusEffects[i]}, "; 
+                    display += $"{entity.GetComponent<Harmable>().statusEffects[i]}, "; 
                 }
             }
 
             CMath.DisplayToConsole(console, display, 0, 2, 1);
-            console.Print(6, 0, " The Rogue @ ", RLColor.White);
+            console.Print(11, 0, " The Rogue @ ", RLColor.White);
         }
         public static void ClearStats()
         {

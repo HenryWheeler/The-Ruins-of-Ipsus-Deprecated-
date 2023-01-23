@@ -14,20 +14,23 @@ namespace TheRuinsOfIpsus
         private static Entity player;
         public static int selection = 0;
         public static int currentPage = 0;
-        private static int maxItemPerPage = 25;
+        private static int maxItemPerPage = 6;
         private static string spacer = " + + ";
         public static List<List<Entity>> inventoryDisplay = new List<List<Entity>>();
         public InventoryManager(RLConsole _console, Entity _player) { console = _console; player = _player; }
-        public InventoryManager(Entity _player) { player = _player; }
         public static void GetItem(Entity entity)
         {
-            Traversable traversable = World.GetTraversable(entity.GetComponent<Coordinate>().vector2);
+            Vector2 vector2 = entity.GetComponent<Coordinate>().vector2;
+            Traversable traversable = World.GetTraversable(vector2);
             if (traversable.itemLayer != null)
             {
                 Entity itemRef = traversable.itemLayer;
                 if (entity.display)
                 {
                     Log.Add($"You picked up the {traversable.itemLayer.GetComponent<Description>().name}.");
+
+                    Log.OutputParticleLog(itemRef.GetComponent<Description>().name, itemRef.GetComponent<Draw>().fColor, vector2);
+
                 }
                 AddToInventory(entity, traversable.itemLayer); traversable.itemLayer = null;
                 entity.GetComponent<TurnFunction>().EndTurn();
@@ -73,22 +76,23 @@ namespace TheRuinsOfIpsus
         public static void OpenInventory()
         {
             CMath.ClearConsole(console);
-            CMath.DisplayToConsole(console, "", 0, 0);
             inventoryOpen = true; 
             player.GetComponent<TurnFunction>().turnActive = false; 
             selection = 0; currentPage = 0;
             StatManager.ClearStats();
-            console.Print((Renderer.rogueWidth / 2) - 5, 0, " Inventory ", RLColor.White);
-            Action.InventoryAction(player);
 
             if (player.GetComponent<Inventory>().inventory.Count == 0) 
             {
-                console.Print(2, 2, "Inventory is Empty.", RLColor.White); 
+                console.Print(2, 2, "Inventory is Empty.", RLColor.White);
+                //Action.InventoryAction(player);
             }
             else  
-            { 
-                Refresh(); 
-                MovePage(0); 
+            {
+                Refresh();
+                DisplayItem();
+                DisplayInventory();
+                //Action.InventoryAction(player, RLKey.Unknown);
+                //CMath.DisplayToConsole(Log.console, "Welcome to your inventory!", 1, 1);
             }
         }
         public static void CloseInventory()
@@ -117,11 +121,11 @@ namespace TheRuinsOfIpsus
         {
             if (item.GetComponent<Equippable>() != null)
             {
-                if (entity.GetComponent<BodyPlot>().ReturnSlot(item.GetComponent<Equippable>().slot).item != null)
+                if (entity.GetComponent<Inventory>().ReturnSlot(item.GetComponent<Equippable>().slot).item != null)
                 {
-                    if (entity.GetComponent<BodyPlot>().ReturnSlot(item.GetComponent<Equippable>().slot).item.GetComponent<Equippable>().unequipable)
+                    if (entity.GetComponent<Inventory>().ReturnSlot(item.GetComponent<Equippable>().slot).item.GetComponent<Equippable>().unequipable)
                     {
-                        UnequipItem(entity, entity.GetComponent<BodyPlot>().ReturnSlot(item.GetComponent<Equippable>().slot).item);
+                        UnequipItem(entity, entity.GetComponent<Inventory>().ReturnSlot(item.GetComponent<Equippable>().slot).item);
                         item.GetComponent<Equippable>().Equip(entity);
                         if (entity.display)
                         {
@@ -132,7 +136,7 @@ namespace TheRuinsOfIpsus
                     }
                     else if (entity.display)
                     {
-                        Log.Add($"You cannot equip the {item.GetComponent<Description>().name} because the {entity.GetComponent<BodyPlot>().ReturnSlot(item.GetComponent<Equippable>().slot).item.GetComponent<Description>().name} cannot be unequipped.");
+                        Log.Add($"You cannot equip the {item.GetComponent<Description>().name} because the {entity.GetComponent<Inventory>().ReturnSlot(item.GetComponent<Equippable>().slot).item.GetComponent<Description>().name} cannot be unequipped.");
                     }
                 }
                 else
@@ -184,43 +188,11 @@ namespace TheRuinsOfIpsus
         }
         public static void PlaceItem(Coordinate targetCoordinate, Entity item)
         {
-            Vector2 finalLanding = targetCoordinate.vector2;
-            Vector2 targetVector3 = targetCoordinate.vector2;
-            int itemMoveCount = 0;
-            if (World.GetTraversable(targetVector3).itemLayer == null)
-            {
-                item.GetComponent<Coordinate>().vector2 = targetVector3;
-                World.GetTraversable(targetVector3).itemLayer = item;
-                EntityManager.UpdateMap(item); return;
-            }
-            do
-            {
-                Vector2 start = finalLanding;
-                for (int y = start.y - 1; y <= start.y + 1; y++)
-                {
-                    for (int x = start.x - 1; x <= start.x + 1; x++)
-                    {
-                        Traversable traversable = World.GetTraversable(new Vector2(x, y));
-                        if (CMath.CheckBounds(x, y) && traversable.terrainType != 0 && traversable.itemLayer == null)
-                        {
-                            item.GetComponent<Coordinate>().vector2 = new Vector2(x, y);
-                            traversable.itemLayer = item;
-                            EntityManager.UpdateMap(item);
-                            return;
-                        }
-                        else 
-                        { 
-                            finalLanding = new Vector2(x, y); 
-                            continue; 
-                        }
-                    }
-                }
-                itemMoveCount++;
-                if (itemMoveCount >= 25) 
-                { 
-                    break;
-                }
-            } while (World.GetTraversable(new Vector2(finalLanding.x, finalLanding.y)).itemLayer != null);
+            Vector2 placement = CMath.ReturnNearestValidCoordinate("Item", targetCoordinate.vector2);
+            item.GetComponent<Coordinate>().vector2 = placement;
+            World.tiles[placement.x, placement.y].itemLayer = item;
+            EntityManager.UpdateMap(item);
+
         }
         public static void DisplayInventory()
         {
@@ -245,7 +217,8 @@ namespace TheRuinsOfIpsus
                 x++;
             }
             CMath.DisplayToConsole(console, output, 2, 0, 0, 2);
-            console.Print(7, 49, " Page:" + (currentPage + 1) + "/" + inventoryDisplay.Count + " ", RLColor.White);
+            console.Print(12, 13, " Page:" + (currentPage + 1) + "/" + inventoryDisplay.Count + " ", RLColor.White);
+            console.Print((Renderer.messageWidth / 2) - 5, 0, " Inventory ", RLColor.White);
         }
         public static void MoveSelection(int move)
         {
@@ -298,11 +271,11 @@ namespace TheRuinsOfIpsus
                 string[] slot = inventoryDisplay[currentPage][selection].GetComponent<Equippable>().slot.Split();
                 if (slot.Count() == 1) 
                 {
-                    addition += $"{spacer}Yellow*Can be equipped in Yellow*{slot[0]}."; 
+                    addition += $"{spacer}Yellow*Can be equipped/unequipped in Yellow*{slot[0]} with Yellow*[E]."; 
                 }
                 else 
                 { 
-                    addition += $"{spacer}Yellow*Can be equipped in Yellow*{slot[0]} Yellow*{slot[1]}."; 
+                    addition += $"{spacer}Yellow*Can be equipped/unequipped in Yellow*{slot[0]} Yellow*{slot[1]} with Yellow*[E]."; 
                 }
 
                 if (inventoryDisplay[currentPage][selection].GetComponent<AttackFunction>() != null)
@@ -317,13 +290,50 @@ namespace TheRuinsOfIpsus
             }
             if (inventoryDisplay[currentPage][selection].GetComponent<Usable>() != null) 
             { 
-                addition += $"{spacer}Yellow*Can be used.";
+                addition += $"{spacer}Yellow*Can be used with Yellow*[U].";
             }
             else
             { 
                 addition += $"{spacer}Yellow*Cannot be used.";
             }
-            CMath.DisplayToConsole(Log.console, inventoryDisplay[currentPage][selection].GetComponent<Description>().Describe() + addition, 1, 1);
+            addition += $"{spacer}Yellow*Can be thrown with Yellow*[T].";
+
+            Description description = inventoryDisplay[currentPage][selection].GetComponent<Description>();
+            CMath.DisplayToConsole(Program.rogueConsole, description.description + addition, 1, 1);
+            string[] nameParts = description.name.Split(' ');
+            string name = "";
+            foreach (string part in nameParts)
+            {
+                string[] temp = part.Split('*');
+                if (temp.Length == 1)
+                {
+                    name += temp[0] + " ";
+                }
+                else
+                {
+                    name += temp[1] + " ";
+                }
+            }
+            int start = 17 - (int)Math.Ceiling((double)name.Length / 2);
+
+            Program.rogueConsole.Print(start, 0, " ", RLColor.White, RLColor.Black);
+
+            start++;
+
+            foreach (string part in nameParts)
+            {
+                string[] temp = part.Split('*');
+                if (temp.Length == 1)
+                {
+                    Program.rogueConsole.Print(start, 0, temp[0] + " ", RLColor.White, RLColor.Black);
+                    start += temp[0].Length + 1;
+                }
+                else
+                {
+                    Program.rogueConsole.Print(start, 0, temp[1] + " ", ColorFinder.ColorPicker(temp[0]), RLColor.Black);
+                    start += temp[1].Length + 1;
+                }
+            }
         }
     }
 }

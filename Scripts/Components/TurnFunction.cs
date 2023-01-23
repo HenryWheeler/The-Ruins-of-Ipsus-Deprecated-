@@ -13,22 +13,23 @@ namespace TheRuinsOfIpsus
         public float actionLeft { get; set; }
         public void StartTurn()
         { 
-            turnActive = true;
-            SpecialComponentManager.TriggerTurn(entity, true);
             if (entity != null)
             {
+                turnActive = true;
+                SpecialComponentManager.TriggerTurn(entity, true);
+
                 if (CMath.ReturnAI(entity) != null) 
                 {
                     CMath.ReturnAI(entity).Process();
                 }
-                else if (!entity.display) 
-                {
-                    EndTurn();
-                }
-                if (entity.display) 
+                else if (entity.display)
                 {
                     Log.DisplayLog();
-                    StatManager.UpdateStats(entity); 
+                    StatManager.UpdateStats(entity);
+                }
+                else
+                {
+                    EndTurn();
                 }
             }
             else 

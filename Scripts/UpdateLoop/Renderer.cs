@@ -18,11 +18,9 @@ namespace TheRuinsOfIpsus
         private static RLConsole rogueConsole;
         public static int rogueWidth;
         private static int rogueHeight;
-        private static RLConsole actionConsole;
-        public static int actionWidth;
-        private static int actionHeight;
         public static bool inventoryOpen = false;
         public static List<ParticleComponent> particles = new List<ParticleComponent>();
+        public static List<Entity> clearList = new List<Entity>();
         public static int current = 1;
         public static bool running = false;
         public static bool playingAnimation = false;
@@ -30,7 +28,7 @@ namespace TheRuinsOfIpsus
         public static int maxX { get; set; }
         public static int minY { get; set; }
         public static int maxY { get; set; }
-        public Renderer(RLRootConsole _rootConsole, RLConsole _mapConsole, int _mapWidth, int _mapHeight, RLConsole _messageConsole, int _messageWidth, int _messageHeight, RLConsole _rogueConsole, int _rogueWidth, int _rogueHeight, RLConsole _actionConsole, int _actionWidth, int _actionHeight)
+        public Renderer(RLRootConsole _rootConsole, RLConsole _mapConsole, int _mapWidth, int _mapHeight, RLConsole _messageConsole, int _messageWidth, int _messageHeight, RLConsole _rogueConsole, int _rogueWidth, int _rogueHeight)
         {
             rootConsole = _rootConsole;
             mapConsole = _mapConsole;
@@ -45,9 +43,6 @@ namespace TheRuinsOfIpsus
             rogueWidth = _rogueWidth;
             rogueHeight = _rogueHeight;
 
-            actionConsole = _actionConsole;
-            actionWidth = _actionWidth;
-            actionHeight = _actionHeight;
             rootConsole.Render += Render;
 
             running = true;
@@ -125,16 +120,70 @@ namespace TheRuinsOfIpsus
         }  
         public void RenderMenu()
         {
+            if (Menu.openingScreen)
+            {
+                rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 14, " ______  _             ____         __                   ___   __                          ", RLColor.White);
+                rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 13, "|__/ __||/|__   ____  |__  | __ __ |__| ___  ____   ___ |/__| |/ | ____  ____  __ __  ____ ", RLColor.White);
+                rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 12, "  |/ |  |/|  | |/__ | |/  _||/ |  ||/ ||/  ||/ __| |/_ ||/ _| |/ ||/__ ||/ __||/ |  ||/ __|", RLColor.White);
+                rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 11, "  |/ |  |/ _  ||/___| |/| | |/ |  ||/ ||/| ||___ | ||_|||/|   |/ ||/ __||___ ||/ |  ||___ |", RLColor.White);
+                rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 10, "  |__|  |_| |_||____| |_|_| |_____||__||_|_||____| |___||_|   |__||_|   |____||_____||____|", RLColor.White);
+                rootConsole.Print((rootConsole.Width / 2) - 7, (rootConsole.Height / 2) - 6, "New Game: [N]", RLColor.White);
+                if (SaveDataManager.savePresent) { rootConsole.Print((rootConsole.Width / 2) - 10, (rootConsole.Height / 2) - 3, "Load Save Game: [L]", RLColor.White); }
+                else { rootConsole.Print((rootConsole.Width / 2) - 10, (rootConsole.Height / 2) - 3, "Load Save Game: [L]", RLColor.Gray); }
+                rootConsole.Print((rootConsole.Width / 2) - 5, rootConsole.Height / 2, "Quit: [Q]", RLColor.White);
+            }
+            else
+            {
+                for (int x = 0; x < 100; x++)
+                {
+                    for (int y = 48; y > 40; y--)
+                    {
+                        rootConsole.Set(x, y, ColorFinder.ColorPicker("Dark_Brown"), ColorFinder.ColorPicker("Black"), (char)177);
+                    }
+                }
+                for (int x = 0; x < 100; x++)
+                {
+                    for (int y = 40; y > 32; y--)
+                    {
+                        rootConsole.Set(x, y, ColorFinder.ColorPicker("Dark_Brown"), ColorFinder.ColorPicker("Dark_Gray"), (char)177);
+                    }
+                }
+                for (int x = 0; x < 100; x++)
+                {
+                    rootConsole.Set(x, 32, ColorFinder.ColorPicker("Dark_Brown"), ColorFinder.ColorPicker("Dark_Gray"), ',');
+                }
+                for (int x = 0; x < 100; x++)
+                {
+                    rootConsole.Set(x, 31, ColorFinder.ColorPicker("Green"), ColorFinder.ColorPicker("Dark_Green"), 'x');
+                }
+                for (int x = 20; x < 80; x++)
+                {
+                    for (int y = 30; y > 5; y--)
+                    {
+                        rootConsole.Set(x, y, ColorFinder.ColorPicker("Gray"), ColorFinder.ColorPicker("Dark_Gray"), (char)177);
+                    }
+                }
+
+                string[] nameParts = Menu.causeOfDeath.Split(' ');
+                string name = "";
+                foreach (string part in nameParts)
+                {
+                    string[] temp = part.Split('*');
+                    if (temp.Length == 1)
+                    {
+                        name += temp[0] + " ";
+                    }
+                    else
+                    {
+                        name += temp[1] + " ";
+                    }
+                }
+
+                Program.rootConsole.Print(50 - (int)Math.Ceiling((double)name.Length/ 2 + 1), (rootConsole.Height / 3) - 2, " " + name.Trim() + ". ", ColorFinder.ColorPicker("Light_Gray"), RLColor.Black);
+
+                rootConsole.Print((rootConsole.Width / 2) - 13, (rootConsole.Height / 2) + 16, "New Game: [N] - Quit: [Q]", RLColor.Brown, RLColor.Black);
+            }
             CreateConsoleBorder(rootConsole);
-            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 14, " ______  _             ____         __                   ___   __                          ", RLColor.White);
-            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 13, "|__/ __||/|__   ____  |__  | __ __ |__| ___  ____   ___ |/__| |/ | ____  ____  __ __  ____ ", RLColor.White);
-            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 12, "  |/ |  |/|  | |/__ | |/  _||/ |  ||/ ||/  ||/ __| |/_ ||/ _| |/ ||/__ ||/ __||/ |  ||/ __|", RLColor.White);
-            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 11, "  |/ |  |/ _  ||/___| |/| | |/ |  ||/ ||/| ||___ | ||_|||/|   |/ ||/ __||___ ||/ |  ||___ |", RLColor.White);
-            rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 10, "  |__|  |_| |_||____| |_|_| |_____||__||_|_||____| |___||_|   |__||_|   |____||_____||____|", RLColor.White);
-            rootConsole.Print((rootConsole.Width / 2) - 7, (rootConsole.Height / 2) - 6, "New Game: [N]", RLColor.White);
-            if (SaveDataManager.savePresent) { rootConsole.Print((rootConsole.Width / 2) - 10, (rootConsole.Height / 2) - 3, "Load Save Game: [L]", RLColor.White); }
-            else { rootConsole.Print((rootConsole.Width / 2) - 10, (rootConsole.Height / 2) - 3, "Load Save Game: [L]", RLColor.Gray); }
-            rootConsole.Print((rootConsole.Width / 2) - 5, rootConsole.Height / 2, "Quit: [Q]", RLColor.White);
         }
         public static void MoveCamera(Vector2 vector3)
         {
@@ -146,7 +195,7 @@ namespace TheRuinsOfIpsus
         public static void RenderMap()
         {
             //mapConsole.Clear();
-            RLConsole.Blit(mapConsole, 0, 0, mapWidth, mapHeight, rootConsole, messageWidth, 0);
+            RLConsole.Blit(mapConsole, 0, 0, mapWidth, mapHeight, rootConsole, 0, 0);
 
             int y = 0;
             for (int ty = minY; ty < maxY; ty++)
@@ -159,7 +208,10 @@ namespace TheRuinsOfIpsus
                         Entity tile = World.tiles[tx, ty].entity;
                         Visibility visibility = tile.GetComponent<Visibility>();
                         Traversable traversable = tile.GetComponent<Traversable>();
-                        if (traversable.sfxLayer != null) { traversable.sfxLayer.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
+                        if (traversable.sfxLayer != null) 
+                        {
+                            traversable.sfxLayer.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); 
+                        }
                         else if (!visibility.visible && !visibility.explored) { mapConsole.Set(x, y, RLColor.Black, RLColor.Black, '?'); }
                         else if (!visibility.visible && visibility.explored)
                         {
@@ -184,20 +236,39 @@ namespace TheRuinsOfIpsus
                 }
                 y++;
             }
+
+            if (clearList.Count != 0)
+            {
+                Entity[] newArray = new Entity[10000];
+                clearList.CopyTo(newArray);
+                foreach(Entity particle in newArray)
+                {
+                    if (particle != null)
+                    {
+                        Vector2 position = particle.GetComponent<Coordinate>().vector2;
+                        if (CMath.CheckBounds(position.x, position.y))
+                        {
+                            World.tiles[position.x, position.y].sfxLayer = null;
+                            clearList.Remove(particle);
+                        }
+                    }
+                }
+            }
+
             CreateConsoleBorder(mapConsole);
-            mapConsole.Print((mapWidth / 2) - 3, 0, " Map ", RLColor.White);
+            mapConsole.Print((mapWidth / 2) - 2, 0, " Map ", RLColor.White);
         }
         public static void RenderLog()
         {
-            RLConsole.Blit(messageConsole, 0, 0, messageWidth, messageHeight, rootConsole, 0, 0);
+            RLConsole.Blit(messageConsole, 0, 0, messageWidth, messageHeight, rootConsole, mapWidth, rogueHeight);
         }
         public static void RenderRogue()
         {
-            RLConsole.Blit(rogueConsole, 0, 0, rogueWidth, rogueHeight, rootConsole, mapWidth + messageWidth, 0);
+            RLConsole.Blit(rogueConsole, 0, 0, rogueWidth, rogueHeight, rootConsole, mapWidth, 0);
         }
         public static void RenderAction()
         {
-            RLConsole.Blit(actionConsole, 0, 0, actionWidth, actionHeight, rootConsole, 0, messageHeight);
+            //RLConsole.Blit(actionConsole, 0, 0, actionWidth, actionHeight, rootConsole, 0, messageHeight);
         }
         public static void CreateConsoleBorder(RLConsole console)
         {
@@ -215,7 +286,6 @@ namespace TheRuinsOfIpsus
                     else if (x == 0 || x == w) { console.Set(x, y, RLColor.White, RLColor.Black, (char)179); }
                 }
             }
-            if (console == messageConsole) { console.Print(6, 0, " Message Log ", RLColor.White); }
         }
     }
     public class ParticleComponent: Component
@@ -244,6 +314,12 @@ namespace TheRuinsOfIpsus
                         Vector2 newPosition = DijkstraMaps.PathFromMap(position, "ParticlePath");
                         entity.GetComponent<Coordinate>().vector2.x = newPosition.x;
                         entity.GetComponent<Coordinate>().vector2.y = newPosition.y;
+                        break;
+                    }
+                case "Wander": 
+                    {
+                        position.x += World.random.Next(-1, 2);
+                        position.y += World.random.Next(-1, 2);
                         break;
                     }
                 case "None": { break; }
@@ -291,6 +367,54 @@ namespace TheRuinsOfIpsus
                         position.y--;
                         break; 
                     }
+                case "WanderNorth":
+                    {
+                        position.x += World.random.Next(-1, 2);
+                        position.y += World.random.Next(-1, 0);
+                        break;
+                    }
+                case "WanderNorthEast":
+                    {
+                        position.x += World.random.Next(-1, 0);
+                        position.y += World.random.Next(-1, 0);
+                        break;
+                    }
+                case "WanderEast":
+                    {
+                        position.x += World.random.Next(-1, 0);
+                        position.y += World.random.Next(-1, 2);
+                        break;
+                    }
+                case "WanderSouthEast":
+                    {
+                        position.x += World.random.Next(-1, 0);
+                        position.y += World.random.Next(0, 2);
+                        break;
+                    }
+                case "WanderSouth":
+                    {
+                        position.x += World.random.Next(-1, 2);
+                        position.y += World.random.Next(0, 2);
+                        break;
+                    }
+                case "WanderSouthWest":
+                    {
+                        position.x += World.random.Next(0, 2);
+                        position.y += World.random.Next(0, 2);
+                        break;
+                    }
+                case "WanderWest":
+                    {
+                        position.x += World.random.Next(0, 2);
+                        position.y += World.random.Next(-1, 2);
+                        break;
+                    }
+                case "WanderNorthWest":
+                    {
+                        position.x += World.random.Next(0, 2);
+                        position.y += World.random.Next(-1, 0);
+                        break;
+                    }
             }
 
             if (CMath.CheckBounds(position.x, position.y))
@@ -327,12 +451,8 @@ namespace TheRuinsOfIpsus
         }
         public void KillParticle()
         {
-            Vector2 position = entity.GetComponent<Coordinate>().vector2;
             Renderer.particles.Remove(this);
-            if (CMath.CheckBounds(position.x, position.y))
-            {
-                World.tiles[position.x, position.y].sfxLayer = null;
-            }
+            Renderer.clearList.Add(entity);
             if (animation)
             {
                 Renderer.playingAnimation = false;

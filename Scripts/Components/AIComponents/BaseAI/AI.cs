@@ -64,6 +64,11 @@ namespace TheRuinsOfIpsus
         public Entity target { get; set; }
         public int interest { get; set; }
         public int baseInterest { get; set; }
+        public int maxDistance { get; set; }
+        public int minDistance { get; set; } 
+        public int preferredDistance { get; set; }
+        public int abilityChance { get; set; }
+        //The chance for a creature to use an ability each round
         public void Process()
         {
             Observe();
@@ -117,7 +122,7 @@ namespace TheRuinsOfIpsus
 
             for (uint octant = 0; octant < 8; octant++)
             {
-                input = Compute(octant, startPos.x, startPos.y, rangeLimit, 1, new Slope(1, 1), new Slope(0, 1), 1, highLevel);
+                input = ComputeSight(octant, startPos.x, startPos.y, rangeLimit, 1, new Slope(1, 1), new Slope(0, 1), 1, highLevel);
                 if (input != Input.None && !highLevel)
                 {
                     break;
@@ -136,7 +141,7 @@ namespace TheRuinsOfIpsus
                 }
             }
         }
-        public Input Compute(uint octant, int oX, int oY, int rangeLimit, int x, Slope top, Slope bottom, int currentInterest, bool highLevel)
+        public Input ComputeSight(uint octant, int oX, int oY, int rangeLimit, int x, Slope top, Slope bottom, int currentInterest, bool highLevel)
         {
             Input greatestInput = Input.None;
             for (; (uint)x <= (uint)rangeLimit; x++)
@@ -192,7 +197,7 @@ namespace TheRuinsOfIpsus
                             {
                                 Slope newBottom = new Slope(y * 2 + 1, x * 2 - 1);
                                 if (!inRange || y == bottomY) { bottom = newBottom; break; }
-                                else { greatestInput = Compute(octant, oX, oY, rangeLimit, x + 1, top, newBottom, currentInterest, highLevel); }
+                                else { greatestInput = ComputeSight(octant, oX, oY, rangeLimit, x + 1, top, newBottom, currentInterest, highLevel); }
                             }
                             wasOpaque = 1;
                         }
@@ -254,7 +259,7 @@ namespace TheRuinsOfIpsus
                         int baseInterest = this.baseInterest;
                         baseInterest -= stats.hp + (stats.strength * 3) + (stats.acuity * 3) + (stats.ac * 3);
                         baseInterest -= AIStats.hp + (AIStats.strength * 3) + (AIStats.acuity * 3) + (AIStats.ac * 3);
-                        foreach (string status in entity.GetComponent<OnHit>().statusEffects)
+                        foreach (string status in entity.GetComponent<Harmable>().statusEffects)
                         {
                             if (hatedEntities.Contains(status))
                             {

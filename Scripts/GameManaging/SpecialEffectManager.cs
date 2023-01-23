@@ -21,8 +21,7 @@ namespace TheRuinsOfIpsus
                 Vector2 vector3 = coordinate.vector2;
                 if (World.GetTraversable(coordinate.vector2).actorLayer != null)
                 {
-                    AttackManager.Attack(originator, World.tiles[vector3.x, vector3.y].actorLayer,
-                    new AttackFunction($"1-{strength}-{strength}-{strength}-{strength}", "Explosive"), "Explosion");
+                    AttackManager.Attack(originator, World.tiles[vector3.x, vector3.y].actorLayer, new AttackFunction($"1-{strength}-{strength}-{strength}-{strength}", "Fire"), "Explosion");
                 }
                 else
                 {
@@ -36,13 +35,73 @@ namespace TheRuinsOfIpsus
                 }
             }
         }
-        public static void Lightning(Entity originator, Coordinate target, int strength)
+        public static void SummonActor(Entity user, Vector2 targetLocation, int[] actors, int amountToSummon)
+        {
+            for (int i = 0; i < amountToSummon; i++)
+            {
+                foreach (int id in actors)
+                {
+                    Vector2 target = CMath.ReturnNearestValidCoordinate("Actor", targetLocation);
+                    EntityManager.CreateEntity(target, id, false);
+
+                    Draw frame1 = new Draw("Blue", "Black", '(');
+                    Draw frame2 = new Draw("Blue", "Black", '-');
+                    Draw frame3 = new Draw("Blue", "Black", ')');
+                    Draw[] frames = new Draw[3] { frame1, frame2, frame3 };
+
+                    List<Coordinate> coordinates = RangeModels.SphereRangeModel(new Coordinate(targetLocation), 10, true);
+                    foreach (Coordinate coordinate in coordinates)
+                    {
+                        Entity particle = new Entity(new List<Component>
+                        {
+                            new Coordinate(0, 0),
+                            frame1,
+                            new ParticleComponent(World.random.Next(8, 10), 5, "Wander", 5, frames)
+                        });
+                        Renderer.AddParticle(coordinate.vector2.x, coordinate.vector2.y, new Entity(particle));
+                    }
+                }
+            }
+        }
+        public static void BreathWeapon(Entity originator, Coordinate target, int strength, int range, string type)
+        {
+            switch (type)
+            {
+                case "Fire":
+                    {
+                        Draw frame1 = new Draw("Red", "Black", 'x');
+                        Draw frame2 = new Draw("Orange", "Black", '+');
+                        Draw frame3 = new Draw("Red", "Black", (char)176);
+                        Draw[] frames = new Draw[3] { frame1, frame2, frame3 };
+                        List<Coordinate> coordinates = RangeModels.ConeRangeModel(originator.GetComponent<Coordinate>(), target, strength, range);
+                        foreach (Coordinate coordinate in coordinates)
+                        {
+                            if (World.tiles[coordinate.vector2.x, coordinate.vector2.y].actorLayer != null)
+                            {
+                                AttackManager.Attack(originator, World.tiles[coordinate.vector2.x, coordinate.vector2.y].actorLayer, new AttackFunction($"1-{strength}-{strength}-{strength}-{strength}", "Fire"), "Fire");
+                            }
+                            else
+                            {
+                                Entity particle = new Entity(new List<Component>
+                                {
+                                    new Coordinate(0, 0),
+                                    frame1,
+                                    new ParticleComponent(World.random.Next(22, 26), 5, "None", 1, frames)
+                                });
+                                Renderer.AddParticle(coordinate.vector2.x, coordinate.vector2.y, particle);
+                            }
+                        }
+                        break;
+                    }
+            }
+        }
+        public static void Lightning(Entity originator, Coordinate target, int strength, int range)
         {
             Draw frame1 = new Draw("Yellow", "Black", 'x');
             Draw frame2 = new Draw("Yellow", "Black", '+');
             Draw frame3 = new Draw("Yellow", "Black", (char)176);
             Draw[] frames = new Draw[3] { frame1, frame2, frame3 };
-            List<Coordinate> coordinates = RangeModels.BeamRangeModel(originator.GetComponent<Coordinate>(), target, 1000, false);
+            List<Coordinate> coordinates = RangeModels.BeamRangeModel(originator.GetComponent<Coordinate>(), target, range, false);
             foreach (Coordinate coordinate in coordinates)
             {
                 Vector2 vector3 = coordinate.vector2;

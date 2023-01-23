@@ -11,7 +11,7 @@ namespace TheRuinsOfIpsus
     {
         public static void MeleeAllStrike(Entity attacker, Entity target)
         {
-            if (attacker.GetComponent<BodyPlot>().ReturnSlot("Weapon").item == null) 
+            if (attacker.GetComponent<Inventory>().ReturnSlot("Weapon").item == null) 
             { 
                 Attack(attacker, target, new Entity(new List<Component>() 
                 { 
@@ -21,7 +21,7 @@ namespace TheRuinsOfIpsus
             }
             else 
             {
-                Attack(attacker, target, attacker.GetComponent<BodyPlot>().ReturnSlot("Weapon").item);
+                Attack(attacker, target, attacker.GetComponent<Inventory>().ReturnSlot("Weapon").item);
             }
         }
         public static void ThrowWeapon(Entity attacker, Coordinate target, Entity weapon)
@@ -46,20 +46,38 @@ namespace TheRuinsOfIpsus
                 Vector2 vector2 = attacker.GetComponent<Coordinate>().vector2;
                 Renderer.AddParticle(vector2.x, vector2.y, particle);
 
-                //while (Renderer.playingAnimation)
-                {
-                    
-                }
-
                 if (weapon.GetComponent<Equippable>() != null && weapon.GetComponent<Equippable>().equipped)
                 {
                     InventoryManager.UnequipItem(attacker, weapon);
                 }
-                InventoryManager.PlaceItem(target, weapon);
-
+                PronounSet pronounSet = attacker.GetComponent<PronounSet>();
                 if (weapon.GetComponent<Throwable>() != null)
                 {
                     weapon.GetComponent<Throwable>().Throw(attacker, target);
+                    if (!weapon.GetComponent<Throwable>().consumable)
+                    {
+                        InventoryManager.PlaceItem(target, weapon);
+                    }
+                    if (pronounSet.present)
+                    {
+                        Log.AddToStoredLog($"{attacker.GetComponent<Description>().name} has thrown {pronounSet.possesive} {weapon.GetComponent<Description>().name}! {weapon.GetComponent<Throwable>().throwMessage}");
+                    }
+                    else
+                    {
+                        Log.AddToStoredLog($"{attacker.GetComponent<Description>().name} have thrown {pronounSet.possesive} {weapon.GetComponent<Description>().name}! { weapon.GetComponent<Throwable>().throwMessage}");
+                    }
+                }
+                else
+                {
+                    InventoryManager.PlaceItem(target, weapon);
+                    if (pronounSet.present)
+                    {
+                        Log.AddToStoredLog($"{attacker.GetComponent<Description>().name} has thrown {pronounSet.possesive} {weapon.GetComponent<Description>().name}!");
+                    }
+                    else
+                    {
+                        Log.AddToStoredLog($"{attacker.GetComponent<Description>().name} have thrown {pronounSet.possesive} {weapon.GetComponent<Description>().name}!");
+                    }
                 }
                 if (World.GetTraversable(target.vector2).actorLayer != null)
                 {
@@ -67,15 +85,7 @@ namespace TheRuinsOfIpsus
                 }
 
                 InventoryManager.RemoveFromInventory(attacker, weapon);
-                PronounSet pronounSet = attacker.GetComponent<PronounSet>();
-                if (pronounSet.present)
-                {
-                    Log.AddToStoredLog(attacker.GetComponent<Description>().name + " has thrown " + pronounSet.possesive + " " + weapon.GetComponent<Description>().name + "!");
-                }
-                else
-                {
-                    Log.AddToStoredLog(attacker.GetComponent<Description>().name + " have thrown " + pronounSet.possesive + " " + weapon.GetComponent<Description>().name + "!");
-                }
+
                 attacker.GetComponent<TurnFunction>().EndTurn();
             }
             catch (ArgumentNullException e)
@@ -96,15 +106,37 @@ namespace TheRuinsOfIpsus
                 {
                     if (World.random.Next(0, 20) + int.Parse(parts[4]) + attacker.GetComponent<Stats>().strength >= target.GetComponent<Stats>().ac)
                     {
-                        int dmg = 0;
-                        for (int d = 0; d < int.Parse(parts[1]); d++)
+                        if (target.GetComponent<Stats>().immunities.Contains(attackFunction.dmgType))
                         {
-                            dmg += World.random.Next(1, int.Parse(parts[2]));
+                            if (attacker.display)
+                            {
+                                Log.Add($"Your {weapon.GetComponent<Description>().name} deals the {target.GetComponent<Description>().name} no harm. The {target.GetComponent<Description>().name} is immune to {attackFunction.dmgType}.");
+                            }
                         }
-                        dmg += int.Parse(parts[3]);
-                        SpecialComponentManager.TriggerOnHit(weapon, attacker, target, dmg, attackFunction.dmgType, true);
-                        SpecialComponentManager.TriggerOnHit(attacker, attacker, target, dmg, null, true);
-                        target.GetComponent<OnHit>().Hit(dmg, attackFunction.dmgType, weapon.GetComponent<Description>().name, attacker);
+                        else
+                        {
+                            int dmg = 0;
+                            for (int d = 0; d < int.Parse(parts[1]); d++)
+                            {
+                                dmg += World.random.Next(1, int.Parse(parts[2]));
+                            }
+                            dmg += int.Parse(parts[3]);
+                            SpecialComponentManager.TriggerOnHit(weapon, attacker, target, dmg, attackFunction.dmgType, true);
+                            SpecialComponentManager.TriggerOnHit(attacker, attacker, target, dmg, null, true);
+
+                            if (target.GetComponent<Stats>().weaknesses.Contains(attackFunction.dmgType))
+                            {
+                                if (attacker.display)
+                                {
+                                    Log.Add($"Your {weapon.GetComponent<Description>().name} deals the {target.GetComponent<Description>().name} major harm! The {target.GetComponent<Description>().name} is weak to {attackFunction.dmgType}!");
+                                }
+                                target.GetComponent<Harmable>().Hit(dmg * 2, attackFunction.dmgType, weapon.GetComponent<Description>().name, attacker);
+                            }
+                            else
+                            {
+                                target.GetComponent<Harmable>().Hit(dmg, attackFunction.dmgType, weapon.GetComponent<Description>().name, attacker);
+                            }
+                        }
                     }
                     else
                     {
@@ -118,7 +150,7 @@ namespace TheRuinsOfIpsus
             }
             else
             {
-                                    attacker.GetComponent<TurnFunction>().EndTurn(); 
+                attacker.GetComponent<TurnFunction>().EndTurn(); 
             }
         }
         public static void Attack(Entity attacker, Entity target, AttackFunction attackFunction, string attackName)
@@ -127,18 +159,40 @@ namespace TheRuinsOfIpsus
             {
                 if (attacker != null && target != null && attackFunction != null)
                 {
-                    string[] parts = attackFunction.details.Split('-');
-                    int numberOfAttacks = int.Parse(parts[0]);
-
-                    for (int i = 0; i < numberOfAttacks; i++)
+                    if (target.GetComponent<Stats>().immunities.Contains(attackFunction.dmgType))
                     {
-                        int dmg = 0;
-                        for (int d = 0; d < int.Parse(parts[1]); d++)
+                        if (attacker.display)
                         {
-                            dmg += World.random.Next(1, int.Parse(parts[2]));
+                            Log.Add($"Your {attackName} deals the {target.GetComponent<Description>().name} no harm. The {target.GetComponent<Description>().name} is immune to {attackFunction.dmgType}.");
                         }
-                        dmg += int.Parse(parts[3]);
-                        target.GetComponent<OnHit>().Hit(dmg, attackFunction.dmgType, attackName, attacker);
+                    }
+                    else
+                    {
+                        string[] parts = attackFunction.details.Split('-');
+                        int numberOfAttacks = int.Parse(parts[0]);
+
+                        for (int i = 0; i < numberOfAttacks; i++)
+                        {
+                            int dmg = 0;
+                            for (int d = 0; d < int.Parse(parts[1]); d++)
+                            {
+                                dmg += World.random.Next(1, int.Parse(parts[2]));
+                            }
+                            dmg += int.Parse(parts[3]);
+
+                            if (target.GetComponent<Stats>().weaknesses.Contains(attackFunction.dmgType))
+                            {
+                                if (attacker.display)
+                                {
+                                    Log.Add($"Your {attackName} deals the {target.GetComponent<Description>().name} major harm! The {target.GetComponent<Description>().name} is weak to {attackFunction.dmgType}!");
+                                }
+                                target.GetComponent<Harmable>().Hit(dmg * 2, attackFunction.dmgType, attackName, attacker);
+                            }
+                            else
+                            {
+                                target.GetComponent<Harmable>().Hit(dmg, attackFunction.dmgType, attackName, attacker);
+                            }
+                        }
                     }
                 }
                 else

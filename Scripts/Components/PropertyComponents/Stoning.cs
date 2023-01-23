@@ -41,7 +41,7 @@ namespace TheRuinsOfIpsus
                         else { statue.AddComponent(new Description("Statue of " + entity.GetComponent<Description>().name, "A highly realistic statue of " + entity.GetComponent<Description>().name)); }
                         statue.AddComponent(new ID(2500));
                         World.GetTraversable(vector2).obstacleLayer = statue;
-                        entity.GetComponent<OnHit>().Death();
+                        entity.GetComponent<Harmable>().Death("Stoning");
                         break;
                     }
             }

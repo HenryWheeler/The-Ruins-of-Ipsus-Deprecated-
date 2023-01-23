@@ -12,7 +12,7 @@ namespace TheRuinsOfIpsus
         public List<int> moveTypes = new List<int>();
         public void Move(Vector2 newPosition)
         {
-            if (entity.GetComponent<OnHit>().statusEffects.Contains("Restrained"))
+            if (entity.GetComponent<Harmable>().statusEffects.Contains("Restrained"))
             {
                 PronounSet pronouns = entity.GetComponent<PronounSet>();
                 if (World.random.Next(1, 21) + ((entity.GetComponent<Stats>().strength - 10) / 2) > 10)
@@ -25,7 +25,7 @@ namespace TheRuinsOfIpsus
                     { 
                         Log.Add($"{entity.GetComponent<Description>().name} have freed {pronouns.reflexive} from {pronouns.possesive} restraints."); 
                     }
-                    entity.GetComponent<OnHit>().statusEffects.Remove("Restrained");
+                    entity.GetComponent<Harmable>().statusEffects.Remove("Restrained");
                 }
                 else
                 {

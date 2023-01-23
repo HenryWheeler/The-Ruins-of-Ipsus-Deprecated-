@@ -16,8 +16,8 @@ namespace TheRuinsOfIpsus
             this.vector2.y += vector2.y; 
         }
         public Coordinate(int x, int y) 
-        { 
-            vector2 = new Vector2(x, y); 
+        {
+            vector2 = new Vector2(x, y);
         }
         public Coordinate(Vector2 _vector2) 
         { 
@@ -26,7 +26,7 @@ namespace TheRuinsOfIpsus
         public Coordinate() { }
     }
     [Serializable]
-    public class Vector2
+    public class Vector2 : Component
     {
         public int x { get; set; }
         public int y { get; set; }

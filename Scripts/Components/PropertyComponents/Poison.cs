@@ -13,14 +13,14 @@ namespace TheRuinsOfIpsus
         public int strength { get; set; }
         public override void OnTurn()
         {
-            timeLeft--; if (timeLeft == 0) { entity.collectionsToRemove.Add(this); entity.GetComponent<OnHit>().statusEffects.Remove("Green*Poisoned");
+            timeLeft--; if (timeLeft == 0) { entity.collectionsToRemove.Add(this); entity.GetComponent<Harmable>().statusEffects.Remove("Green*Poisoned");
                 if (entity.display)
                 { Log.AddToStoredLog("The Green*poison ailing " + entity.GetComponent<PronounSet>().subjective + " has subsided."); }
             } 
             else
             {
                 int dmg = World.random.Next(strength - 2, strength + 2);
-                entity.GetComponent<OnHit>().LowerHealth(dmg);
+                entity.GetComponent<Harmable>().LowerHealth(dmg, "Poison");
                 if (entity.GetComponent<Stats>() != null && entity.display) 
                 { Log.AddToStoredLog("The Green*poison drains " + dmg + " points of " + entity.GetComponent<PronounSet>().possesive + " health away."); }
             }

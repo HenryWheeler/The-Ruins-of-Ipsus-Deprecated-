@@ -9,11 +9,15 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class Throwable : Component
     {
-        public void Throw(Entity user, Coordinate landingSite) { SpecialComponentManager.TriggerOnThrow(user, entity, landingSite); }
-        public void ConsumeItem()
+        public bool consumable = true;
+        public string throwMessage { get; set; }
+        public void Throw(Entity user, Coordinate landingSite)
         {
-            Vector2 vector3 = entity.GetComponent<Coordinate>().vector2;
-            if (World.GetTraversable(vector3).itemLayer == entity) { World.GetTraversable(vector3).itemLayer = null; }
+            SpecialComponentManager.TriggerOnThrow(user, entity, landingSite);
+        }
+        public Throwable(string _throwMessage) 
+        {
+            throwMessage = _throwMessage;
         }
         public Throwable() { }
     }

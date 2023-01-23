@@ -43,11 +43,15 @@ namespace TheRuinsOfIpsus
                     if (x == eX && y == eY) { return true; }
                     traversable = World.tiles[x, y];
 
-                    if (!Action.throwing && !traversable.entity.GetComponent<Visibility>().explored)
+                    if (!Action.throwing && !traversable.entity.GetComponent<Visibility>().explored && traversable.terrainType != 0)
                     {
                         passing = false;
                     }
                     else if (traversable.terrainType != 0 && traversable.obstacleLayer != null && traversable.obstacleLayer.GetComponent<Visibility>() != null && traversable.obstacleLayer.GetComponent<Visibility>().opaque)
+                    {
+                        passing = false;
+                    }
+                    else if (traversable.entity.GetComponent<Visibility>().opaque)
                     {
                         passing = false;
                     }
@@ -67,11 +71,15 @@ namespace TheRuinsOfIpsus
                     if (x == eX && y == eY) { return true; }
                     traversable = World.tiles[x, y];
 
-                    if (!Action.throwing && !traversable.entity.GetComponent<Visibility>().explored)
+                    if (!Action.throwing && !traversable.entity.GetComponent<Visibility>().explored && traversable.terrainType != 0)
                     {
                         passing = false;
                     }
-                    else if (traversable.terrainType != 0 && traversable.obstacleLayer != null && traversable.obstacleLayer.GetComponent<Visibility>() != null && traversable.obstacleLayer.GetComponent<Visibility>().opaque)
+                    else if (traversable.terrainType != 0  && traversable.obstacleLayer != null && traversable.obstacleLayer.GetComponent<Visibility>() != null && traversable.obstacleLayer.GetComponent<Visibility>().opaque)
+                    {
+                        passing = false;
+                    }
+                    else if (traversable.entity.GetComponent<Visibility>().opaque)
                     {
                         passing = false;
                     }
@@ -79,6 +87,115 @@ namespace TheRuinsOfIpsus
                 while (passing);
                 return false;
             }
+        }
+        public static Vector2 ReturnNearestValidCoordinate(string type, Vector2 startingCoordinate)
+        {
+            Vector2 finalLanding = new Vector2(startingCoordinate.x, startingCoordinate.y);
+            int moveCount = 0;
+
+            switch (type)
+            {
+                case "Obstacle":
+                    {
+                        if (World.tiles[startingCoordinate.x, startingCoordinate.y].obstacleLayer == null)
+                        {
+                            return startingCoordinate;
+                        }
+                        do
+                        {
+                            Vector2 start = finalLanding;
+                            for (int y = start.y - 1; y <= start.y + 1; y++)
+                            {
+                                for (int x = start.x - 1; x <= start.x + 1; x++)
+                                {
+                                    Traversable traversable = World.tiles[x, y];
+                                    if (CheckBounds(x, y) && traversable.terrainType != 0 && traversable.obstacleLayer == null)
+                                    {
+                                        return new Vector2(x, y);
+                                    }
+                                    else
+                                    {
+                                        finalLanding = new Vector2(x, y);
+                                        continue;
+                                    }
+                                }
+                            }
+                            moveCount++;
+                            if (moveCount >= 25)
+                            {
+                                break;
+                            }
+                        } while (World.tiles[finalLanding.x, finalLanding.y].obstacleLayer != null);
+                        return startingCoordinate;
+                    }
+                case "Item":
+                    {
+                        if (World.tiles[startingCoordinate.x, startingCoordinate.y].itemLayer == null)
+                        {
+                            return startingCoordinate;
+                        }
+                        do
+                        {
+                            Vector2 start = finalLanding;
+                            for (int y = start.y - 1; y <= start.y + 1; y++)
+                            {
+                                for (int x = start.x - 1; x <= start.x + 1; x++)
+                                {
+                                    Traversable traversable = World.tiles[x, y];
+                                    if (CheckBounds(x, y) && traversable.terrainType != 0 && traversable.itemLayer == null)
+                                    {
+                                        return new Vector2(x, y);
+                                    }
+                                    else
+                                    {
+                                        finalLanding = new Vector2(x, y);
+                                        continue;
+                                    }
+                                }
+                            }
+                            moveCount++;
+                            if (moveCount >= 25)
+                            {
+                                break;
+                            }
+                        } while (World.tiles[finalLanding.x, finalLanding.y].itemLayer != null);
+                        return startingCoordinate;
+                    }
+                case "Actor":
+                    {
+                        if (World.tiles[startingCoordinate.x, startingCoordinate.y].actorLayer == null)
+                        {
+                            return startingCoordinate;
+                        }
+                        do
+                        {
+                            Vector2 start = finalLanding;
+                            for (int y = start.y - 1; y <= start.y + 1; y++)
+                            {
+                                for (int x = start.x - 1; x <= start.x + 1; x++)
+                                {
+                                    Traversable traversable = World.tiles[x, y];
+                                    if (CheckBounds(x, y) && traversable.terrainType != 0 && traversable.actorLayer == null)
+                                    {
+                                        return new Vector2(x, y);
+                                    }
+                                    else
+                                    {
+                                        finalLanding = new Vector2(x, y);
+                                        continue;
+                                    }
+                                }
+                            }
+                            moveCount++;
+                            if (moveCount >= 25)
+                            {
+                                break;
+                            }
+                        } while (World.tiles[finalLanding.x, finalLanding.y].actorLayer != null);
+                        return startingCoordinate;
+                    }
+            }
+            return startingCoordinate;
         }
         public static AI ReturnAI(Entity entityRef)
         {

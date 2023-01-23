@@ -8,12 +8,12 @@ Each number is the entity's UID.
 Entity Listing:
 
 0: Player Character
-1: Blacklog Spider
-2: Deepwater Eel
-3: Boring Beetle
-1001: Broken Blade
+50: Mimic
+75: Djinn
 1100: Potion of Explosion
 1300: Scroll of Lightning
+1301: Scroll of Mapping
+1900: Generic Monster Weapons
 2001: Door
 2002: Chest
 2300: Web

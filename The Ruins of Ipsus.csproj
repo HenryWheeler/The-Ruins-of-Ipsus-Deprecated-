@@ -113,19 +113,20 @@
     <Content Include="LICENSE.txt" />
     <Content Include="Scripts\Components\PropertyComponents\Factions.txt" />
     <Content Include="Scripts\GameManaging\DamageTypes.txt" />
+    <Content Include="Scripts\GameManaging\Range Models.txt" />
     <Content Include="Scripts\GameManaging\SpawnTables.txt" />
     <Content Include="Scripts\JsonData\Id%27s.txt" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Scripts\Components\AIComponents\BaseAI\AI.cs" />
     <Compile Include="Scripts\Components\AIComponents\BaseAI\AIActions.cs" />
+    <Compile Include="Scripts\Components\AIComponents\DragonAI.cs" />
+    <Compile Include="Scripts\Components\AIComponents\ElementalAI.cs" />
     <Compile Include="Scripts\Components\AIComponents\GuardAI.cs" />
     <Compile Include="Scripts\Components\AIComponents\MimicAI.cs" />
-    <Compile Include="Scripts\Components\AIComponents\PatrolFunction.cs" />
+    <Compile Include="Scripts\Components\PatrolFunction.cs" />
     <Compile Include="Scripts\Components\AIComponents\TestAI.cs" />
-    <Compile Include="Scripts\Components\AnimationFunction.cs" />
     <Compile Include="Scripts\Components\AttackFunction.cs" />
-    <Compile Include="Scripts\Components\BodyPlot.cs" />
     <Compile Include="Scripts\Components\Commerce.cs" />
     <Compile Include="Scripts\Components\Component.cs" />
     <Compile Include="Scripts\Components\Coordinate.cs" />
@@ -136,7 +137,7 @@
     <Compile Include="Scripts\Components\Interactable.cs" />
     <Compile Include="Scripts\Components\Mimicry.cs" />
     <Compile Include="Scripts\Components\Movement.cs" />
-    <Compile Include="Scripts\Components\OnHit.cs" />
+    <Compile Include="Scripts\Components\Harmable.cs" />
     <Compile Include="Scripts\Components\Draw.cs" />
     <Compile Include="Scripts\Components\Equippable.cs" />
     <Compile Include="Scripts\Components\Inventory.cs" />
@@ -144,18 +145,19 @@
     <Compile Include="Scripts\Components\PronounSet.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnThrowProperty.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnUseProperty.cs" />
-    <Compile Include="Scripts\Components\PropertyComponents\DijkstraProperty.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\ExplodeOnUse.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\InflictPoisonOnHit.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnHitProperty.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnMoveProperty.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnTurnProperty.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\InflictStoningOnHit.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BreathWeaponOnUse.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\LightningOnUse.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\MagicMapOnUse.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\Stoning.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\Poison.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\RestrainOnMove.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\SummonActorOnUse.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\UpdateCameraOnMove.cs" />
     <Compile Include="Scripts\Components\Throwable.cs" />
     <Compile Include="Scripts\Components\Traversable.cs" />
@@ -171,6 +173,7 @@
     <Compile Include="Scripts\GameManaging\SpawnTables.cs" />
     <Compile Include="Scripts\GameManaging\SpecialComponentManager.cs" />
     <Compile Include="Scripts\GameManaging\SpecialEffectManager.cs" />
+    <Compile Include="Scripts\WorldGeneration\VerdantCaveGenerator.cs" />
     <Compile Include="Scripts\WorldGeneration\TestingGenerator.cs" />
     <Compile Include="Scripts\WorldGeneration\IslandGenerator.cs" />
     <Compile Include="Scripts\GameManaging\Action.cs" />

@@ -134,9 +134,28 @@ namespace TheRuinsOfIpsus
             else if (id > 1000 && id <= 2000) { DijkstraMaps.CreateMap(items, "Items"); }
             else { DijkstraMaps.CreateMap(obstacles, "Obstacles"); }
         }
+        public static void ClearAIOfEntity(Entity entity)
+        {
+            foreach (List<Entity> entities in actors.Values)
+            {
+                foreach (Entity actor in entities)
+                {
+                    if (actor != null && CMath.ReturnAI(actor) != null && CMath.ReturnAI(actor).target == entity)
+                    {
+                        CMath.ReturnAI(actor).target = null;
+                    }
+                }
+            }
+        }
         public static Entity CreateEntity(Vector2 vector3, int uID, bool random, bool seeded = false)
         {
             Entity entity = JsonDataManager.ReturnEntity(uID);
+
+            if (CMath.ReturnAI(entity) != null)
+            {
+                CMath.ReturnAI(entity).SetTransitions();
+            }
+
             if (random)
             {
                 vector3.x = 0; vector3.y = 0;
@@ -187,6 +206,11 @@ namespace TheRuinsOfIpsus
         }
         public static Entity CreateEntity(Vector2 vector3, Entity entity, bool random, bool seeded = false)
         {
+            if (CMath.ReturnAI(entity) != null)
+            {
+                CMath.ReturnAI(entity).SetTransitions();
+            }
+
             if (random)
             {
                 vector3.x = 0; vector3.y = 0;
@@ -240,10 +264,10 @@ namespace TheRuinsOfIpsus
                         entityToUse.GetComponent<Inventory>().inventory.Clear();
                         foreach (Entity id in entities) { entityToUse.GetComponent<Inventory>().inventory.Add(new Entity(id)); }
                     }
-                    if (entityToUse.GetComponent<BodyPlot>() != null)
+                    if (entityToUse.GetComponent<Inventory>() != null)
                     {
                         entities.Clear();
-                        foreach (EquipmentSlot entity in entityToUse.GetComponent<BodyPlot>().bodyPlot) { if (entity != null && entity.item != null) { entities.Add(entity.item); } }
+                        foreach (EquipmentSlot entity in entityToUse.GetComponent<Inventory>().equipment) { if (entity != null && entity.item != null) { entities.Add(entity.item); } }
                         foreach (Entity id in entities) { new Entity(id).GetComponent<Equippable>().Equip(entityToUse); }
                     }
                 }
@@ -253,36 +277,6 @@ namespace TheRuinsOfIpsus
                 return entityToUse;
             }
             return null;
-        }
-        public static void CreateNewEntityTest()
-        {
-            Entity entity = new Entity();
-            entity.AddComponent(new ID(2));
-            entity.AddComponent(new Stats(7, 16, .25f, 20, 2, 2, new List<string>() { "Restraint", "Stoning" }));
-            entity.AddComponent(new Movement(new List<int> { 1 }));
-            entity.AddComponent(new Inventory());
-            entity.AddComponent(new BodyPlot());
-            entity.AddComponent(new Faction("Beast"));
-            entity.AddComponent(PronounReferences.pronounSets["Nueter"]);
-            entity.AddComponent(new TurnFunction());
-            entity.AddComponent(new OnHit());
-            entity.AddComponent(new Draw("White", "Black", 's'));
-            entity.AddComponent(new Description("Marmoreal Spider", "These spiders appear as if made of marble. They hold still for hours they lull prey into dropping their guard before unleashing their gray*stoning bite."));
-            entity.AddComponent(new Coordinate(0, 0));
-            entity.AddComponent(new Interactable(new HashSet<string>() { "Attack", "Pet" }));
-            //entity.AddComponent(new SpiderAI());
-            //CMath.ReturnAI(entity).hatedEntities.Add("Restrained");
-
-            Entity MightyClaw = new Entity();
-            MightyClaw.AddComponent(new Equippable("Weapon", true));
-            MightyClaw.AddComponent(new Draw("White", "Black", '/'));
-            MightyClaw.AddComponent(new Description("Marble Fangs", "A pair of stony marble teeth."));
-            MightyClaw.AddComponent(new AttackFunction("1-1-6-0-0", "Piercing"));
-            MightyClaw.AddComponent(new Coordinate());
-            MightyClaw.AddComponent(new InflictStoningOnHit(0));
-            MightyClaw.GetComponent<Equippable>().Equip(entity);
-
-            JsonDataManager.SaveEntity(entity);
         }
     }
 }

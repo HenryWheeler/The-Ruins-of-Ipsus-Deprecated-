@@ -19,7 +19,7 @@ namespace TheRuinsOfIpsus
                     target.AddComponent(new Stoning());
                     if (target.GetComponent<PronounSet>().present) { Log.AddToStoredLog(target.GetComponent<Description>().name + " has begun to turn to Gray*stone"); }
                     else { Log.AddToStoredLog(target.GetComponent<Description>().name + " have begun to turn to Gray*stone"); }
-                    target.GetComponent<OnHit>().statusEffects.Add("Gray*Stoned");
+                    target.GetComponent<Harmable>().statusEffects.Add("Gray*Stoned");
                 }
             }
         }

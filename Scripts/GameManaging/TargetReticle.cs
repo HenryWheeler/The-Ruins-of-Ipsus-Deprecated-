@@ -38,9 +38,8 @@ namespace TheRuinsOfIpsus
             targeting = false; player.GetComponent<TurnFunction>().turnActive = true;
             ClearSFXPositions();
             Renderer.MoveCamera(player.GetComponent<Coordinate>().vector2);
-            if (!inInventory) { Action.PlayerAction(player); }
+            if (!inInventory) { Action.PlayerAction(player); Log.DisplayLog(); }
             else { InventoryManager.OpenInventory(); }
-            Log.DisplayLog();
         }
         public static void Move(int _x, int _y)
         {
@@ -50,17 +49,149 @@ namespace TheRuinsOfIpsus
                 x += _x; y += _y;
                 if (Action.throwing)
                 {
-                    CreateLine(player.GetComponent<Stats>().strength + 10);
+                    bool check = CreateLine(player.GetComponent<Stats>().strength + 10, true);
+
+                    List<OnThrowProperty> properties = new List<OnThrowProperty>();
+                    foreach (Component property in Action.targetWeapon.components)
+                    { 
+                        if (property.GetType().BaseType.Equals(typeof(OnThrowProperty))) 
+                        { 
+                            properties.Add((OnThrowProperty)property); 
+                        } 
+                    }
+                    if (properties.Count != 0)
+                    {
+                        Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
+
+                        foreach (OnThrowProperty property in properties)
+                        {
+                            foreach (Coordinate coordinate in RangeModels.FindModel(new Coordinate(vector2.x, vector2.y), new Coordinate(x, y), property.strength, player.GetComponent<Stats>().strength + 10, true, property.rangeModel))
+                            {
+                                sfxPositions.Add(new Vector2(coordinate.vector2.x, coordinate.vector2.y));
+                                if (CMath.Distance(x, y, vector2.x, vector2.y) < player.GetComponent<Stats>().strength + 10 && World.tiles[x, y].terrainType != 0 && check)
+                                {
+                                    if (World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer != null && World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer.GetComponent<Draw>().fColor == "Gray")
+                                    {
+                                        if (coordinate.vector2.x == x && coordinate.vector2.y == y)
+                                        {
+                                            World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, 'X', "Gray");
+                                        }
+                                        else
+                                        {
+                                            World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, '*', "Gray");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (coordinate.vector2.x == x && coordinate.vector2.y == y)
+                                        {
+                                            World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, 'X', "Yellow");
+                                        }
+                                        else
+                                        {
+                                            World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, '*', "Yellow");
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if (coordinate.vector2.x == x && coordinate.vector2.y == y)
+                                    {
+                                        World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, 'X', "Gray");
+                                    }
+                                    else
+                                    {
+                                        World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, '*', "Gray");
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    CreateLine(1000);
+                    int maxRange = 1000;
+
+                    List<OnUseProperty> properties = new List<OnUseProperty>();
+                    foreach (Component property in Action.targetWeapon.components)
+                    {
+                        if (property.GetType().BaseType.Equals(typeof(OnUseProperty)))
+                        {
+                            properties.Add((OnUseProperty)property);
+                        }
+                    }
+
+                    if (properties.Count != 0)
+                    {
+                        foreach (OnUseProperty property in properties)
+                        {
+                            if (property.range < maxRange)
+                            {
+                                maxRange = property.range;
+                            }
+                        }
+                    }
+
+                    CreateLine(maxRange, true);
+
+                    if (properties.Count != 0)
+                    {
+                        Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
+                        foreach (OnUseProperty property in properties)
+                        {
+                            List<Coordinate> coordinates = RangeModels.FindModel(new Coordinate(vector2.x, vector2.y), new Coordinate(x, y), property.strength, property.range, true, property.rangeModel);
+                            if (coordinates != null && coordinates.Count != 0)
+                            {
+                                foreach (Coordinate coordinate in coordinates)
+                                {
+                                    sfxPositions.Add(new Vector2(coordinate.vector2.x, coordinate.vector2.y));
+                                    if (World.tiles[coordinate.vector2.x, coordinate.vector2.y].terrainType != 0)
+                                    {
+                                        if (World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer != null && World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer.GetComponent<Draw>().fColor == "Gray")
+                                        {
+                                            if (coordinate.vector2.x == x && coordinate.vector2.y == y)
+                                            {
+                                                World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, 'X', "Gray");
+                                            }
+                                            else
+                                            {
+                                                World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, '*', "Gray");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (coordinate.vector2.x == x && coordinate.vector2.y == y)
+                                            {
+                                                World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, 'X', "Yellow");
+                                            }
+                                            else
+                                            {
+                                                World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, '*', "Yellow");
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (coordinate.vector2.x == x && coordinate.vector2.y == y)
+                                        {
+                                            World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, 'X', "Gray");
+                                        }
+                                        else
+                                        {
+                                            World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, '*', "Gray");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             Renderer.MoveCamera(new Vector2(x, y));
         }
-        public static void CreateLine(int range)
+        public static bool CreateLine(int range, bool visual)
         {
+            bool check = true;
             Vector2 vector3 = player.GetComponent<Coordinate>().vector2;
             int t;
             int x = vector3.x; int y = vector3.y;
@@ -84,18 +215,33 @@ namespace TheRuinsOfIpsus
                         { 
                             if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Yellow");
+                                if (visual)
+                                {
+                                    sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Yellow");
+                                }
+                                CMath.DisplayToConsole(Log.console, "", 1, 1);
+                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
                             }
                             else
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
+                                if (visual)
+                                {
+                                    sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
+                                }
                                 CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
+                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                                check = false;
                             }
                         }
                         else 
-                        { 
-                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
-                            CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1); 
+                        {
+                            if (visual)
+                            {
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
+                            }
+                            CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1);
+                            Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                            check = false;
                         } 
                     }
                     else 
@@ -104,18 +250,33 @@ namespace TheRuinsOfIpsus
                         {
                             if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Yellow");
+                                if (visual)
+                                {
+                                    sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Yellow");
+                                }
+                                CMath.DisplayToConsole(Log.console, "", 1, 1);
+                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
                             }
                             else
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
+                                if (visual)
+                                {
+                                    sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
+                                }
                                 CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
+                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                                check = false;
                             }
                         }
                         else
                         {
-                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
+                            if (visual)
+                            {
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
+                            }
                             CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1);
+                            Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                            check = false;
                         }
                     }
                 }
@@ -136,18 +297,33 @@ namespace TheRuinsOfIpsus
                         {
                             if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Yellow");
+                                if (visual)
+                                {
+                                    sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Yellow");
+                                }
+                                CMath.DisplayToConsole(Log.console, "", 1, 1);
+                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
                             }
                             else
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
+                                if (visual)
+                                {
+                                    sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
+                                }
                                 CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
+                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                                check = false;
                             }
                         }
                         else
                         {
-                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
+                            if (visual)
+                            {
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
+                            }
                             CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1);
+                            Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                            check = false;
                         }
                     }
                     else
@@ -156,28 +332,67 @@ namespace TheRuinsOfIpsus
                         {
                             if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Yellow");
+                                if (visual)
+                                {
+                                    sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Yellow");
+                                }
+                                CMath.DisplayToConsole(Log.console, "", 1, 1);
+                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
                             }
                             else
                             {
-                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
+                                if (visual)
+                                {
+                                    sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
+                                }
                                 CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
+                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                                check = false;
                             }
                         }
                         else
                         {
-                            sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
+                            if (visual)
+                            {
+                                sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
+                            }
                             CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1);
+                            Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                            check = false;
                         }
                     }
                 }
                 while (!hasConnected);
             }
+            return check;
         }
         public static Vector2 ReturnCoords(bool magic)
         {
             int range;
-            if (magic) { range = 1000; }
+            if (magic) 
+            {
+                range = 1000;
+
+                List<OnUseProperty> properties = new List<OnUseProperty>();
+                foreach (Component property in Action.targetWeapon.components)
+                {
+                    if (property.GetType().BaseType.Equals(typeof(OnUseProperty)))
+                    {
+                        properties.Add((OnUseProperty)property);
+                    }
+                }
+
+                if (properties.Count != 0)
+                {
+                    foreach (OnUseProperty property in properties)
+                    {
+                        if (property.range < range)
+                        {
+                            range = property.range;
+                        }
+                    }
+                }
+            }
             else
             {
                 range = player.GetComponent<Stats>().strength + 10;
@@ -191,9 +406,9 @@ namespace TheRuinsOfIpsus
                     StopTargeting();
                     return new Vector2(x, y);
                 }
-                else { CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1); return null; }
+                else { CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1); Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White); return null; }
             }
-            else { CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1); return null; }
+            else { CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1); Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White); return null; }
         }
         public static void ThrowWeapon(Entity weaponUsed)
         {

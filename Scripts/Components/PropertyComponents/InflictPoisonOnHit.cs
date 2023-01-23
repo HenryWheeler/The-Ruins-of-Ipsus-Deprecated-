@@ -19,7 +19,7 @@ namespace TheRuinsOfIpsus
                     target.AddComponent(new Poison(strength * 3, strength));
                     if (attacker.GetComponent<PronounSet>().present) { Log.AddToStoredLog(attacker.GetComponent<Description>().name + " has inflicted " + target.GetComponent<Description>().name + " with a malignant Green*poison"); }
                     else { Log.AddToStoredLog(attacker.GetComponent<Description>().name + " have inflicted " + target.GetComponent<Description>().name + " with a malignant Green*poison"); }
-                    target.GetComponent<OnHit>().statusEffects.Add("Green*Poisoned");
+                    target.GetComponent<Harmable>().statusEffects.Add("Green*Poisoned");
                 }
             }
         }

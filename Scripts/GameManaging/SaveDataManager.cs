@@ -28,6 +28,13 @@ namespace TheRuinsOfIpsus
             string savePath = Path.Combine(path, directoryName);
             if (File.Exists(Path.Combine(savePath, "SaveFile.json"))) { savePresent = true; }
         }
+        public static void DeleteSave()
+        {
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            path = Path.Combine(path, directoryName);
+            if (!Directory.Exists(path)) { Directory.CreateDirectory(path); }
+            if (File.Exists("SaveFile.json")) { File.Delete("SaveFile.json"); }
+        }
         public static void CreateSave()
         {
             string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);

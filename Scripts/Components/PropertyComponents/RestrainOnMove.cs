@@ -20,7 +20,7 @@ namespace TheRuinsOfIpsus
                 {
                     if (!traversable.actorLayer.GetComponent<Stats>().immunities.Contains("Restraint")) 
                     {
-                        traversable.actorLayer.GetComponent<OnHit>().statusEffects.Add("Restrained");
+                        traversable.actorLayer.GetComponent<Harmable>().statusEffects.Add("Restrained");
                         if (traversable.actorLayer.GetComponent<PronounSet>().present) { Log.AddToStoredLog(traversable.actorLayer.GetComponent<Description>().name + " has been restrained in the " + entity.GetComponent<Description>().name + "."); }
                         else { Log.AddToStoredLog(traversable.actorLayer.GetComponent<Description>().name + " have been restrained in the " + entity.GetComponent<Description>().name + "."); }
                         traversable.obstacleLayer = null;

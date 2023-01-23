@@ -72,7 +72,7 @@ namespace TheRuinsOfIpsus
             Renderer.MoveCamera(vector2);
             ShadowcastFOV.Compute(vector2, Program.player.GetComponent<Stats>().sight);
 
-            PopulateFloor(testing);
+            //PopulateFloor(testing);
         }
         public static void FloorSwitchCase(bool testing)
         {
@@ -84,11 +84,9 @@ namespace TheRuinsOfIpsus
             {
                 switch (depth)
                 {
-                    case -3: { new IslandGenerator().CreateMap(mapWidth, mapHeight, 1); break; }
-                    case -2: { new FieldGenerator().CreateMap(mapWidth, mapHeight, 1); break; }
                     case -1: { new CaveGenerator().CreateMap(mapWidth, mapHeight, 1); break; }
-                    case 0: { new DungeonGenerator().CreateMap(mapWidth, mapHeight, 1); break; }
-                    case 1: { new IslandGenerator().CreateMap(mapWidth, mapHeight, 1); break; }
+                    case 0: { new VerdantCaveGenerator().CreateMap(mapWidth, mapHeight, 1); break; }
+                    case 1: { new DungeonGenerator().CreateMap(mapWidth, mapHeight, 1); break; }
                 }
             }
         }
@@ -126,6 +124,6 @@ namespace TheRuinsOfIpsus
         public static int mapWidth { get; set; }
         public static int mapHeight { get; set; }
         public static int depth { get; set; }
-        public static bool testing = true;
+        public static bool testing = false;
     }
 }

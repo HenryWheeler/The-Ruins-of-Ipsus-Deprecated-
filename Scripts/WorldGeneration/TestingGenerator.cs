@@ -19,29 +19,28 @@ namespace TheRuinsOfIpsus
             mapWidth = _mapWidth; mapHeight = _mapHeight;
             SetAllWalls();
 
-            //for (int x = 0; x < mapWidth; x++)
-            //{
-            //    for (int y = 0; y < mapHeight; y++)
-            //    {
-            //        if (CMath.CheckBounds(x, y))
-            //        {
-            //            SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Gray_Blue", "Black", false, 1);
-            //        }
-            //    }
-            //}
-            //for (int z = 0; z < smooth; z++) { SmoothMap(); }
-
-            for (int i = 0; i < roomsToGenerate; i++)
+            for (int x = 0; x < mapWidth; x++)
             {
-                int xSP = World.seed.Next(0, mapWidth);
-                int ySP = World.seed.Next(0, mapHeight);
-                int rW = World.seed.Next(minRoomSize, maxRoomSize);
-                int rH = World.seed.Next(minRoomSize, maxRoomSize);
-                if (!CheckIfHasSpace(xSP, ySP, xSP + rW - 1, ySP + rH - 1)) { i--; continue; }
-                CreateRoom(xSP, ySP, rW, rH);
+                for (int y = 0; y < mapHeight; y++)
+                {
+                    if (CMath.CheckBounds(x, y))
+                    {
+                        SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Gray_Blue", "Black", false, 1);
+                    }
+                }
             }
 
-            CreateConnections(1, 0);
+            //for (int i = 0; i < roomsToGenerate; i++)
+            //{
+            //    int xSP = World.seed.Next(0, mapWidth);
+            //    int ySP = World.seed.Next(0, mapHeight);
+            //    int rW = World.seed.Next(minRoomSize, maxRoomSize);
+            //    int rH = World.seed.Next(minRoomSize, maxRoomSize);
+            //    if (!CheckIfHasSpace(xSP, ySP, xSP + rW - 1, ySP + rH - 1)) { i--; continue; }
+            //    CreateRoom(xSP, ySP, rW, rH);
+            //}
+
+            //CreateConnections(1, 0);
             CreateSurroundingWalls();
             CreateStairs();
             CreatePatrolLocations();
@@ -51,7 +50,7 @@ namespace TheRuinsOfIpsus
             {
                 if (tile.terrainType == 1)
                 {
-                    if (World.seed.Next(0, 100) > 98)
+                    if (World.seed.Next(0, 10000) > 19995)
                     {
                         TurnFunction function = new TurnFunction();
                         EntityManager.CreateEntity(tile.entity.GetComponent<Coordinate>().vector2, new Entity(new List<Component>()
@@ -67,8 +66,6 @@ namespace TheRuinsOfIpsus
                                 new PatrolFunction(),
                                 new Movement(new List<int> { 1, 2 }),
                                 new Inventory(),
-                                new BodyPlot(),
-                                new OnHit(),
                                 new Faction($"Beast"),
                                 new Interactable(new HashSet<string>() { "Attack" })
                         }), false, false);
@@ -78,33 +75,29 @@ namespace TheRuinsOfIpsus
                         {
                             current = 0;
                         }
-                    } else if (World.seed.Next(0, 500) == 95)
+                    } else if (World.seed.Next(0, 15000) > 14997)
                     {
-                        Description description = new Description("Mimic", "Upon closer observation you see it, an elusive shape-changing leathery horror hides as the shape of another.");
-                        Draw draw = new Draw("Brown", "Black", 'm');
                         TurnFunction function = new TurnFunction();
-                        Entity mimic = new Entity(new List<Component>()
+                        EntityManager.CreateEntity(tile.entity.GetComponent<Coordinate>().vector2, new Entity(new List<Component>()
                             {
-                                new ID(50),
+                                new ID(1),
                                 tile.entity.GetComponent<Coordinate>(),
-                                draw,
-                                description,
+                                new Draw("Red", "Black", 'D'),
+                                new Description("Red*Red Red*Dragon", "A terrifying sight, the hulking form of one of the ancient tyrant drakes stands before you. Smoke billowing out of every nostril the ancient Red*Red Red*Dragon is a fearsome foe indeed."),
                                 PronounReferences.pronounSets["Nueter"],
-                                new Stats(2, 10, 1.2f, 20, 0, 2, new List<string>() { "Polymorph" }),
+                                new Stats(10, 18, .8f, 50, 4, 4),
                                 function,
-                                new MimicAI(new List<string>() { "Horror" }, new List<string>() { "Player" }, 200),
-                                new Mimicry(),
+                                new DragonAI(new List<string>() { "Beast" }, new List<string>() { "Player" }, 150, 0, 0, 8, 10),
+                                new PatrolFunction(),
                                 new Movement(new List<int> { 1, 2 }),
+                                new BreathWeaponOnUse(3, "Fire", 12, false),
+                                new Usable(),
+                                new Harmable(),
                                 new Inventory(),
-                                new BodyPlot(),
-                                new OnHit(),
-                                new Faction($"Horror"),
+                                new Faction($"Beast"),
                                 new Interactable(new HashSet<string>() { "Attack" })
-                        });
-                        //CMath.ReturnAI(mimic).transitions.Clear();
-                        EntityManager.CreateEntity(tile.entity.GetComponent<Coordinate>().vector2, mimic, false, false);
+                        }), false, false);
                         TurnManager.AddActor(function);
-                        //JsonDataManager.SaveEntity(mimic);
                     }
                 }
             }

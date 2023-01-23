@@ -11,21 +11,17 @@ namespace TheRuinsOfIpsus
         public static RLRootConsole rootConsole;
  
         // The map console takes up most of the screen and is where the map will be drawn
-        private static readonly int mapWidth = 50;
+        private static readonly int mapWidth = 65;
         private static readonly int mapHeight = 50;
         private static RLConsole mapConsole;
         // Below the map console is the message console which displays attack rolls and other information
-        private static readonly int messageWidth = 25;
-        private static readonly int messageHeight = 35;
-        private static RLConsole messageConsole;
+        private static readonly int messageWidth = 35;
+        private static readonly int messageHeight = 15;
+        public static RLConsole messageConsole;
         // The stat console is to the right of the map and display player and monster stats
-        private static readonly int rogueWidth = 25;
-        private static readonly int rogueHeight = 50;
-        private static RLConsole rogueConsole;
-
-        private static readonly int actionWidth = 25;
-        private static readonly int actionHeight = 15;
-        private static RLConsole actionConsole;
+        private static readonly int rogueWidth = 35;
+        private static readonly int rogueHeight = 35;
+        public static RLConsole rogueConsole;
 
         public static Entity player;
         public static bool gameActive = false;
@@ -50,7 +46,6 @@ namespace TheRuinsOfIpsus
             mapConsole = new RLConsole(mapWidth, mapHeight);
             messageConsole = new RLConsole(messageWidth, messageHeight);
             rogueConsole = new RLConsole(rogueWidth, rogueHeight);
-            actionConsole = new RLConsole(actionWidth, actionHeight);
 
             LoadFunctions();
 
@@ -58,9 +53,9 @@ namespace TheRuinsOfIpsus
         }
         public static void LoadFunctions()
         {
-            Renderer renderer = new Renderer(rootConsole, mapConsole, mapWidth, mapHeight, messageConsole, messageWidth, messageHeight, rogueConsole, rogueWidth, rogueHeight, actionConsole, actionWidth, actionHeight);
+            Renderer renderer = new Renderer(rootConsole, mapConsole, mapWidth, mapHeight, messageConsole, messageWidth, messageHeight, rogueConsole, rogueWidth, rogueHeight);
             Log log = new Log(messageConsole);
-            Action action = new Action(actionConsole);
+            Action action = new Action(rogueConsole);
             Menu update = new Menu(rootConsole);
             StatManager stats = new StatManager(rogueConsole);
             SaveDataManager saveDataManager = new SaveDataManager();
@@ -72,7 +67,7 @@ namespace TheRuinsOfIpsus
         }
         public static void LoadPlayerFunctions(Entity player)
         {
-            InventoryManager inventory = new InventoryManager(rogueConsole, player);
+            InventoryManager inventory = new InventoryManager(messageConsole, player);
             Look look = new Look(player);
             TargetReticle reticle = new TargetReticle(player);
         }
@@ -87,7 +82,7 @@ namespace TheRuinsOfIpsus
             player.GetComponent<Inventory>().inventory.Clear();
             foreach (Entity id in entities) { player.GetComponent<Inventory>().inventory.Add(new Entity(id)); }
             entities.Clear();
-            foreach (EquipmentSlot entity in player.GetComponent<BodyPlot>().bodyPlot) { if (entity != null && entity.item != null) { entities.Add(entity.item); } }
+            foreach (EquipmentSlot entity in player.GetComponent<Inventory>().equipment) { if (entity != null && entity.item != null) { entities.Add(entity.item); } }
             foreach (Entity id in entities) { new Entity(id).GetComponent<Equippable>().Equip(player); } 
             Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
             World.tiles[vector2.x, vector2.y].actorLayer = player;
@@ -109,14 +104,12 @@ namespace TheRuinsOfIpsus
             player.AddComponent(new Draw("White", "Black", '@'));
             player.AddComponent(new Description("You", "It's you."));
             player.AddComponent(PronounReferences.pronounSets["Player"]);
-            player.AddComponent(new Stats(7, 10, 1f, 50, 1, 1));
+            player.AddComponent(new Stats(10, 10, 1f, 50, 1, 1));
             player.AddComponent(new TurnFunction());
             player.AddComponent(new Movement(new List<int> { 1, 2 }));
             player.AddComponent(new Inventory());
-            player.AddComponent(new BodyPlot());
-            player.AddComponent(new OnHit());
+            player.AddComponent(new Harmable());
             player.AddComponent(new Faction("Player"));
-            player.AddComponent(new DijkstraProperty());
             player.AddComponent(new UpdateCameraOnMove());
             player.AddComponent(new PlayerComponent(rootConsole));
             Entity startingWeapon = new Entity(new List<Component>() 
@@ -125,10 +118,10 @@ namespace TheRuinsOfIpsus
                 new ID(1100),
                 new Draw("Orange", "Black", '!'),
                 new Description("Potion of Orange*Explosion", "The label reads: 'Do Not Drink'."),
-                new Usable(),
-                new Throwable(),
-                new ExplodeOnUse(3),
-                new ExplodeOnThrow(3)
+                new Usable("The potion explodes in a Red*fiery burst!"),
+                new Throwable("The potion explodes in a Red*fiery burst!"),
+                new ExplodeOnUse(8, 0),
+                new ExplodeOnThrow(8),
             });
             InventoryManager.AddToInventory(player, startingWeapon);
 
@@ -137,9 +130,9 @@ namespace TheRuinsOfIpsus
                 new Coordinate(0, 0),
                 new ID(1300),
                 new Draw("Yellow", "Black", '?'),
-                new Description("Scroll of Yellow*Lightning", "This scroll is carved with Yellow*yellow Yellow*runes onto a vellum of human skin"),
-                new Usable(),
-                new LightningOnUse(5),
+                new Description("Scroll of Yellow*Lightning", "This scroll is carved with Yellow*yellow Yellow*runes onto a vellum of human skin."),
+                new Usable("A bolt of Yellow*lightning crackles and fries the air in front of the scroll!", false),
+                new LightningOnUse(5, 15),
             });
             InventoryManager.AddToInventory(player, new Entity(testScrollOfLightning));
             InventoryManager.AddToInventory(player, new Entity(testScrollOfLightning));
@@ -153,13 +146,44 @@ namespace TheRuinsOfIpsus
                 new ID(1301),
                 new Draw("Cyan", "Black", '?'),
                 new Description("Scroll of Cyan*Mapping", "This scroll seems as if lighter than air and feels charged with unearthly knowledge."),
-                new Usable(),
+                new Usable("The world around you becomes Cyan*clearer."),
                 new MagicMapOnUse(),
             });
             InventoryManager.AddToInventory(player, new Entity(testMagicMappingScroll));
             InventoryManager.AddToInventory(player, new Entity(testMagicMappingScroll));
             InventoryManager.AddToInventory(player, new Entity(testMagicMappingScroll));
             InventoryManager.AddToInventory(player, new Entity(testMagicMappingScroll));
+
+            Entity djinnInABottle = new Entity(new List<Component>()
+            {
+                new Coordinate(0, 0),
+                new ID(1101),
+                new Draw("Cyan", "Black", '!'),
+                new Description("Cyan*Djinn in a Bottle", "This glass bottle is filled with a furious Cyan*Djinn."),
+                new Usable("The bottle cracks open and a furious Cyan*Djinn emerges!"),
+                new Throwable("The bottle cracks open and a furious Cyan*Djinn emerges!"),
+                new SummonActorOnUse(new int[] { 75 }, 1, 0),
+                new SummonActorOnThrow(new int[] { 75 }, 1),
+            });
+            InventoryManager.AddToInventory(player, new Entity(djinnInABottle));
+            InventoryManager.AddToInventory(player, new Entity(djinnInABottle));
+            InventoryManager.AddToInventory(player, new Entity(djinnInABottle));
+            InventoryManager.AddToInventory(player, new Entity(djinnInABottle));
+
+            Entity testPotionOfDragonsFire = new Entity(new List<Component>()
+            {
+                new Coordinate(0, 0),
+                new ID(1102),
+                new Draw("Red", "Black", '!'),
+                new Description("Potion of Red*Dragon's Red*Fire", "The label reads: 'Breathe with the fire of Red*Dragons!'"),
+                new Usable($"A cone of Red*flame emits from your mouth!", false),
+                new BreathWeaponOnUse(5, "Fire", 10),
+            });
+            InventoryManager.AddToInventory(player, new Entity(testPotionOfDragonsFire));
+            InventoryManager.AddToInventory(player, new Entity(testPotionOfDragonsFire));
+            InventoryManager.AddToInventory(player, new Entity(testPotionOfDragonsFire));
+            InventoryManager.AddToInventory(player, new Entity(testPotionOfDragonsFire));
+            InventoryManager.AddToInventory(player, new Entity(testPotionOfDragonsFire));
 
             Action.PlayerAction(player);
             EntityManager.AddEntity(player);

@@ -14,7 +14,7 @@ namespace TheRuinsOfIpsus
         public static List<Coordinate> visibleTiles = new List<Coordinate>();
         public static void Compute(Vector2 vector2, int rangeLimit)
         {
-            SetVisible(vector2, true);
+            SetVisible(vector2, true, rangeLimit, vector2.x, vector2.y);
             for (uint octant = 0; octant < 8; octant++) 
             {
                 Compute(octant, vector2.x, vector2.y, rangeLimit, 1, new Slope(1, 1), new Slope(0, 1)); 
@@ -42,7 +42,7 @@ namespace TheRuinsOfIpsus
                     bool inRange = rangeLimit < 0 || CMath.Distance(oX, oY, tx, ty) <= rangeLimit;
                     if (inRange && (y != topY || top.Y*x >= top.X*y) && (y != bottomY || bottom.Y*x <= bottom.X*y))
                     {
-                        SetVisible(new Vector2(tx, ty), true);
+                        SetVisible(new Vector2(tx, ty), true, rangeLimit - 3, oX, oY);
                     }
 
                     bool isOpaque = !inRange || BlocksLight(new Vector2(tx, ty));
@@ -70,18 +70,25 @@ namespace TheRuinsOfIpsus
         }
         public static void ClearSight()
         {
-            foreach (Coordinate coordinate in visibleTiles) { SetVisible(coordinate.vector2, false); }
+            foreach (Coordinate coordinate in visibleTiles) { SetVisible(coordinate.vector2, false, 0, 0, 0); }
             ClearList();
         }
         public static void ClearList() { visibleTiles.Clear(); }
-        public static void SetVisible(Vector2 vector2, bool visible, bool all = false)
+        public static void SetVisible(Vector2 vector2, bool visible, int sight, int oX, int oY, bool all = false)
         {
             if (CMath.CheckBounds(vector2.x, vector2.y))
             {
                 if (visible)
                 {
-                    World.tiles[vector2.x, vector2.y].entity.GetComponent<Visibility>().SetVisible(true);
-                    if (!all) { visibleTiles.Add(new Coordinate(vector2)); }
+                    if (CMath.Distance(vector2.x, vector2.y, oX, oY) < sight)
+                    {
+                        World.tiles[vector2.x, vector2.y].entity.GetComponent<Visibility>().SetVisible(true);
+                        if (!all) { visibleTiles.Add(new Coordinate(vector2)); }
+                    }
+                    else
+                    {
+                        World.tiles[vector2.x, vector2.y].entity.GetComponent<Visibility>().explored = true;
+                    }
                 }
                 else
                 {

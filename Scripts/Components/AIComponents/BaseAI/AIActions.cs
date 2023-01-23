@@ -23,16 +23,24 @@ namespace TheRuinsOfIpsus
                 {
                     AI.GetComponent<Movement>().Move(new Vector2(positionToMove.x, positionToMove.y));
                     detail.interest--;
-                    //Log.Add($"{AI.GetComponent<Description>().name}'s current interest is {detail.interest}");
-                    //if (detail.interest <= 0)
-                    //{
-                    //    CMath.ReturnAI(AI).currentInput = TheRuinsOfIpsus.AI.Input.Tired;
-                    //}
+
+                    //List<OnUseProperty> abilities = detail.GrabAbilities(AI);
+                    //if (abilities.Count == 0) { }
                 }
             }
             else
             {
-                AI.GetComponent<TurnFunction>().EndTurn();
+                Vector2 current = AI.GetComponent<Coordinate>().vector2;
+                Vector2 newPosition = new Vector2(World.random.Next(-1, 2) + current.x, World.random.Next(-1, 2) + current.y);
+                if (CMath.CheckBounds(newPosition.x, newPosition.y))
+                {
+                    AI.GetComponent<Movement>().Move(newPosition);
+                    detail.interest--;
+                }
+                else
+                {
+                    AI.GetComponent<TurnFunction>().EndTurn();
+                }
             }
         }
         public static void TestPatrol(Entity AI)
@@ -93,6 +101,7 @@ namespace TheRuinsOfIpsus
                         AI.GetComponent<TurnFunction>().EndTurn();
                     }
                 }
+                AI.GetComponent<TurnFunction>().EndTurn();
             }
             else
             {
@@ -105,8 +114,154 @@ namespace TheRuinsOfIpsus
                     detail.interest = detail.baseInterest;
                 }
             }
+        }
 
+        public static void EngageEnemy(Entity AI)
+        {
+            AI detail = CMath.ReturnAI(AI);
+            Entity target = detail.target;
+
+            if (target == null)
+            {
+                detail.interest = 0;
+                detail.Process();
+                return;
+            }
+            else
+            {
+                int distanceToTarget = CMath.Distance(AI.GetComponent<Coordinate>(), target.GetComponent<Coordinate>());
+
+                Log.Add($"Distance is {distanceToTarget}");
+
+                if (distanceToTarget > detail.maxDistance)
+                {
+                    //Move to Target 
+                    MoveToTarget(AI, target);
+
+                    Log.Add($"Moves Forward 1");
+                }
+                else if (distanceToTarget < detail.minDistance)
+                {
+                    //Move away from Target
+                    MoveToTarget(AI, target);
+
+                    Log.Add($"Moves Away 1");
+                }
+                else
+                {
+                    //Engage target in combat
+                    //Randomly determine whether AI moves towards or preferred distance or not, modify based on AI interest
+                    //Randomly determine whether AI uses special ability or not
+                    //AI will prioritize abilities with shorter range if the AI can use them
+                    if (distanceToTarget <= 1)
+                    {
+                        if (!AttackCheck(AI, target, distanceToTarget))
+                        {
+                            AI.GetComponent<TurnFunction>().EndTurn();
+                        }
+                    }
+                    else if (distanceToTarget > detail.preferredDistance || detail.preferredDistance < distanceToTarget)
+                    {
+                        if (World.random.Next(1, 101) + detail.interest > detail.baseInterest)
+                        {
+                            if (distanceToTarget > detail.preferredDistance)
+                            {
+                                //Move to Target 
+                                MoveToTarget(AI, target);
+                            }
+                            else
+                            {
+                                //Move away from Target
+                                MoveToTarget(AI, target);
+                            }
+                        }
+                        else
+                        {
+                            if (!AttackCheck(AI, target, distanceToTarget))
+                            {
+                                if (distanceToTarget > detail.preferredDistance)
+                                {
+                                    //Move to Target 
+                                    MoveToTarget(AI, target);
+                                }
+                                else
+                                {
+                                    //Move away from Target
+                                    MoveToTarget(AI, target);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (!AttackCheck(AI, target, distanceToTarget))
+                        {
+                            AI.GetComponent<TurnFunction>().EndTurn();
+                        }
+                    }
+                }
+            }
+        }
+        public static void MoveToTarget(Entity AI, Entity target)
+        {
+            Vector2 positionToMove = DijkstraMaps.PathFromMap(AI, target.GetComponent<Faction>().faction);
+            AI.GetComponent<Movement>().Move(new Vector2(positionToMove.x, positionToMove.y));
+            CMath.ReturnAI(AI).interest--;
+        }
+        ///<summary>
+        ///Check if AI has any special attacks it can use on its target, if not try for a melee attack, if that fails return false otherwise return true.
+        ///</summary>
+        public static bool AttackCheck(Entity AI, Entity target, int distance)
+        {
+            List<OnUseProperty> abilities = GrabAbilities(AI);
+
+            AI detail = CMath.ReturnAI(AI);
+
+            if (World.random.Next(0, 101) < detail.abilityChance && abilities.Count != 0)
+            {
+                OnUseProperty abilityToUse = null;
+                foreach (OnUseProperty ability in abilities)
+                {
+                    if (ability.itemType == "Offense" && ability.range >= distance)
+                    {
+                        if (abilityToUse == null) { abilityToUse = ability; }
+                        else if (abilityToUse.range > abilityToUse.range) { abilityToUse = ability; }
+                    }
+                }
+                UseAbility(abilityToUse, AI, target);
+                return true;
+            }
+            else if (distance <= 1)
+            {
+                AttackManager.MeleeAllStrike(AI, target);
+
+                return true;
+            }
+
+            return false;
+        }
+        public static void UseAbility(OnUseProperty ability, Entity AI, Entity target)
+        {
+            ability.OnUse(AI, target.GetComponent<Coordinate>().vector2);
             AI.GetComponent<TurnFunction>().EndTurn();
+
+            if (ability.singleUse)
+            {
+                AI.RemoveComponent(ability);
+            }
+        }
+        public static List<OnUseProperty> GrabAbilities(Entity entity)
+        {
+            List<OnUseProperty> abilities = new List<OnUseProperty>();
+            foreach (Component property in entity.components)
+            {
+                if (property.GetType().BaseType.Equals(typeof(OnUseProperty)))
+                {
+                    abilities.Add((OnUseProperty)property);
+                }
+            }
+
+            return abilities;
         }
         public static void TestAwake(Entity AI)
         {

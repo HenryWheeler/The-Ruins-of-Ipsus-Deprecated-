@@ -35,6 +35,29 @@ namespace TheRuinsOfIpsus
                     Action.Interaction(entity, keyPress.Key);
                 }
             }
+            else
+            {
+                if (entity.GetComponent<TurnFunction>().turnActive)
+                {
+                    Action.PlayerAction(entity, RLKey.Unknown);
+                }
+                else if (Look.looking)
+                {
+                    Action.LookAction(RLKey.Unknown);
+                }
+                else if (InventoryManager.inventoryOpen)
+                {
+                    Action.InventoryAction(entity, RLKey.Unknown);
+                }
+                else if (TargetReticle.targeting)
+                {
+                    Action.TargetAction(entity, RLKey.Unknown);
+                }
+                else if (Action.interacting)
+                {
+                    Action.Interaction(entity, RLKey.Unknown);
+                }
+            }
         }
         public PlayerComponent(RLRootConsole console) 
         { 

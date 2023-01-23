@@ -13,3 +13,8 @@ Damage Types:
 4. Fire
 5. Frost
 6. Lightning
+
+Item Types:
+1. Offense
+2. Movement
+3. Support
