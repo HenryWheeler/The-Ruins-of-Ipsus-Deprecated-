@@ -11,7 +11,7 @@ namespace TheRuinsOfIpsus
     }
     public static class ShadowcastFOV
     {
-        public static List<Coordinate> visibleTiles = new List<Coordinate>();
+        public static List<Vector2> visibleTiles = new List<Vector2>();
         public static void Compute(Vector2 vector2, int rangeLimit)
         {
             SetVisible(vector2, true, rangeLimit, vector2.x, vector2.y);
@@ -70,7 +70,7 @@ namespace TheRuinsOfIpsus
         }
         public static void ClearSight()
         {
-            foreach (Coordinate coordinate in visibleTiles) { SetVisible(coordinate.vector2, false, 0, 0, 0); }
+            foreach (Vector2 coordinate in visibleTiles) { SetVisible(coordinate, false, 0, 0, 0); }
             ClearList();
         }
         public static void ClearList() { visibleTiles.Clear(); }
@@ -83,7 +83,7 @@ namespace TheRuinsOfIpsus
                     if (CMath.Distance(vector2.x, vector2.y, oX, oY) < sight)
                     {
                         World.tiles[vector2.x, vector2.y].entity.GetComponent<Visibility>().SetVisible(true);
-                        if (!all) { visibleTiles.Add(new Coordinate(vector2)); }
+                        if (!all) { visibleTiles.Add(vector2); }
                     }
                     else
                     {

@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public class BreathWeaponOnUse: OnUseProperty
+    public class BreathWeaponOnUse: OnUse
     {
         public string type { get; set; }
-        public override void OnUse(Entity entity, Vector2 target = null)
+        public override void Use(Entity entity, Vector2 target = null)
         {
-            if (entity.display)
+            if (entity.GetComponent<PlayerComponent>() != null)
             {
                 if (target == null)
                 {
@@ -22,7 +22,7 @@ namespace TheRuinsOfIpsus
                 else
                 {
                     this.entity.GetComponent<Usable>().DisplayMessage(entity);
-                    SpecialEffectManager.BreathWeapon(entity, new Coordinate(target), strength, range, type);
+                    SpecialEffectManager.BreathWeapon(entity, target, strength, range, type);
                     entity.GetComponent<TurnFunction>().EndTurn();
                 }
             }
@@ -30,12 +30,12 @@ namespace TheRuinsOfIpsus
             {
                 if (range == 0 || target == null)
                 {
-                    SpecialEffectManager.BreathWeapon(entity, entity.GetComponent<Coordinate>(), strength, range, type);
+                    SpecialEffectManager.BreathWeapon(entity, entity.GetComponent<Vector2>(), strength, range, type);
                 }
                 else
                 {
                     this.entity.GetComponent<Usable>().DisplayMessage(entity);
-                    SpecialEffectManager.BreathWeapon(entity, new Coordinate(target), strength, range, type);
+                    SpecialEffectManager.BreathWeapon(entity, target, strength, range, type);
                     entity.GetComponent<TurnFunction>().EndTurn();
                 }
             }

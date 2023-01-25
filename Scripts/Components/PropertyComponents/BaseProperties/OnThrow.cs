@@ -7,14 +7,13 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public abstract class OnUseProperty: Component
+    public abstract class OnThrow : Component
     {
         public string rangeModel { get; set; }
-        public int range { get; set; }
         public int strength { get; set; }
-        public bool singleUse { get; set; }
         public string itemType { get; set; }
-        public abstract void OnUse(Entity entity, Vector2 target = null);
-        public OnUseProperty() { }
+        public abstract void Throw(Entity user, Vector2 landingSite);
+        public OnThrow ReturnBase() { return this; }
+        public OnThrow() { }
     }
 }

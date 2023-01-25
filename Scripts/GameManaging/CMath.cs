@@ -10,9 +10,9 @@ namespace TheRuinsOfIpsus
     public class CMath
     {
         public static double Distance(int oX, int oY, int eX, int eY) { return Math.Sqrt(Math.Pow(eX - oX, 2) + Math.Pow(eY - oY, 2)); }
-        public static int Distance(Coordinate one, Coordinate two)
+        public static int Distance(Vector2 one, Vector2 two)
         {
-            Vector2 origin = one.vector2; Vector2 destination = two.vector2;
+            Vector2 origin = one; Vector2 destination = two;
             int returnValue = (int)Math.Sqrt(Math.Pow(destination.x - origin.x, 2) + Math.Pow(destination.y - origin.y, 2));
             if (returnValue == 0) { return 1; }
             else { return returnValue; }

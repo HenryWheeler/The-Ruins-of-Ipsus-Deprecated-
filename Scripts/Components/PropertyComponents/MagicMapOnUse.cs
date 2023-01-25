@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public class MagicMapOnUse : OnUseProperty
+    public class MagicMapOnUse : OnUse
     {
-        public override void OnUse(Entity entity, Vector2 target = null)
+        public override void Use(Entity entity, Vector2 target = null)
         {
             SpecialEffectManager.MagicMap(entity);
         }

@@ -39,7 +39,7 @@ namespace TheRuinsOfIpsus
             //    }
             //}
 
-            LoadSavedFloor(_random, true);
+            LoadSavedFloor(_random, testing);
         }
         public static void LoadSeedState(bool random = true, int _seed = 0)
         {
@@ -66,9 +66,10 @@ namespace TheRuinsOfIpsus
 
             List<Entity> tiles = new List<Entity>();
             foreach (Traversable tile in World.tiles) { if (tile != null && tile.entity.GetComponent<Traversable>().terrainType != 0) { tiles.Add(tile.entity); } }
-            Vector2 vector2 = tiles[seed.Next(0, tiles.Count - 1)].GetComponent<Coordinate>().vector2;
+            Vector2 vector2 = tiles[seed.Next(0, tiles.Count - 1)].GetComponent<Vector2>();
             World.tiles[vector2.x, vector2.y].actorLayer = Program.player;
-            Program.player.GetComponent<Coordinate>().vector2 = vector2;
+            Program.player.GetComponent<Vector2>().x = vector2.x;
+            Program.player.GetComponent<Vector2>().y = vector2.y;
             Renderer.MoveCamera(vector2);
             ShadowcastFOV.Compute(vector2, Program.player.GetComponent<Stats>().sight);
 
@@ -112,10 +113,6 @@ namespace TheRuinsOfIpsus
                     }
                 }
             }
-        }
-        public static Traversable GetTraversable(Vector2 vector2) 
-        {
-            return tiles[vector2.x, vector2.y]; 
         }
         public static Random seed { get; set; }
         public static int seedInt { get; set; }

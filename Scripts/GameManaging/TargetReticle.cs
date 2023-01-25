@@ -20,7 +20,7 @@ namespace TheRuinsOfIpsus
         {
             inInventory = _inInventory;
             if (inInventory) { InventoryManager.CloseInventory(); }
-            Vector2 vector3 = player.GetComponent<Coordinate>().vector2;
+            Vector2 vector3 = player.GetComponent<Vector2>();
             x = vector3.x; y = vector3.y;
             targeting = true; player.GetComponent<TurnFunction>().turnActive = false;
             Move(0, 0);
@@ -37,7 +37,7 @@ namespace TheRuinsOfIpsus
         {
             targeting = false; player.GetComponent<TurnFunction>().turnActive = true;
             ClearSFXPositions();
-            Renderer.MoveCamera(player.GetComponent<Coordinate>().vector2);
+            Renderer.MoveCamera(player.GetComponent<Vector2>());
             if (!inInventory) { Action.PlayerAction(player); Log.DisplayLog(); }
             else { InventoryManager.OpenInventory(); }
         }
@@ -50,58 +50,54 @@ namespace TheRuinsOfIpsus
                 if (Action.throwing)
                 {
                     bool check = CreateLine(player.GetComponent<Stats>().strength + 10, true);
-
-                    List<OnThrowProperty> properties = new List<OnThrowProperty>();
-                    foreach (Component property in Action.targetWeapon.components)
-                    { 
-                        if (property.GetType().BaseType.Equals(typeof(OnThrowProperty))) 
-                        { 
-                            properties.Add((OnThrowProperty)property); 
-                        } 
-                    }
-                    if (properties.Count != 0)
+                    if (Action.targetWeapon.GetComponent<Throwable>() != null)
                     {
-                        Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
+                        List<OnThrow> properties = Action.targetWeapon.GetComponent<Throwable>().onThrowComponents;
 
-                        foreach (OnThrowProperty property in properties)
+                        if (properties.Count != 0)
                         {
-                            foreach (Coordinate coordinate in RangeModels.FindModel(new Coordinate(vector2.x, vector2.y), new Coordinate(x, y), property.strength, player.GetComponent<Stats>().strength + 10, true, property.rangeModel))
+                            Vector2 vector2 = player.GetComponent<Vector2>();
+
+                            foreach (OnThrow property in properties)
                             {
-                                sfxPositions.Add(new Vector2(coordinate.vector2.x, coordinate.vector2.y));
-                                if (CMath.Distance(x, y, vector2.x, vector2.y) < player.GetComponent<Stats>().strength + 10 && World.tiles[x, y].terrainType != 0 && check)
+                                foreach (Vector2 coordinate in RangeModels.FindModel(vector2, new Vector2(x, y), property.strength, player.GetComponent<Stats>().strength + 10, true, property.rangeModel))
                                 {
-                                    if (World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer != null && World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer.GetComponent<Draw>().fColor == "Gray")
+                                    sfxPositions.Add(new Vector2(coordinate.x, coordinate.y));
+                                    if (CMath.Distance(x, y, vector2.x, vector2.y) < player.GetComponent<Stats>().strength + 10 && World.tiles[x, y].terrainType != 0 && check)
                                     {
-                                        if (coordinate.vector2.x == x && coordinate.vector2.y == y)
+                                        if (World.tiles[coordinate.x, coordinate.y].sfxLayer != null && World.tiles[coordinate.x, coordinate.y].sfxLayer.GetComponent<Draw>().fColor == "Gray")
                                         {
-                                            World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, 'X', "Gray");
+                                            if (coordinate.x == x && coordinate.y == y)
+                                            {
+                                                World.tiles[coordinate.x, coordinate.y].sfxLayer = Reticle(x, y, 'X', "Gray");
+                                            }
+                                            else
+                                            {
+                                                World.tiles[coordinate.x, coordinate.y].sfxLayer = Reticle(x, y, '*', "Gray");
+                                            }
                                         }
                                         else
                                         {
-                                            World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, '*', "Gray");
+                                            if (coordinate.x == x && coordinate.y == y)
+                                            {
+                                                World.tiles[coordinate.x, coordinate.y].sfxLayer = Reticle(x, y, 'X', "Yellow");
+                                            }
+                                            else
+                                            {
+                                                World.tiles[coordinate.x, coordinate.y].sfxLayer = Reticle(x, y, '*', "Yellow");
+                                            }
                                         }
                                     }
                                     else
                                     {
-                                        if (coordinate.vector2.x == x && coordinate.vector2.y == y)
+                                        if (coordinate.x == x && coordinate.y == y)
                                         {
-                                            World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, 'X', "Yellow");
+                                            World.tiles[coordinate.x, coordinate.y].sfxLayer = Reticle(x, y, 'X', "Gray");
                                         }
                                         else
                                         {
-                                            World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, '*', "Yellow");
+                                            World.tiles[coordinate.x, coordinate.y].sfxLayer = Reticle(x, y, '*', "Gray");
                                         }
-                                    }
-                                }
-                                else
-                                {
-                                    if (coordinate.vector2.x == x && coordinate.vector2.y == y)
-                                    {
-                                        World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, 'X', "Gray");
-                                    }
-                                    else
-                                    {
-                                        World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, '*', "Gray");
                                     }
                                 }
                             }
@@ -112,18 +108,11 @@ namespace TheRuinsOfIpsus
                 {
                     int maxRange = 1000;
 
-                    List<OnUseProperty> properties = new List<OnUseProperty>();
-                    foreach (Component property in Action.targetWeapon.components)
-                    {
-                        if (property.GetType().BaseType.Equals(typeof(OnUseProperty)))
-                        {
-                            properties.Add((OnUseProperty)property);
-                        }
-                    }
+                    List<OnUse> properties = Action.targetWeapon.GetComponent<Usable>().onUseComponents;
 
                     if (properties.Count != 0)
                     {
-                        foreach (OnUseProperty property in properties)
+                        foreach (OnUse property in properties)
                         {
                             if (property.range < maxRange)
                             {
@@ -136,49 +125,49 @@ namespace TheRuinsOfIpsus
 
                     if (properties.Count != 0)
                     {
-                        Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
-                        foreach (OnUseProperty property in properties)
+                        Vector2 vector2 = player.GetComponent<Vector2>();
+                        foreach (OnUse property in properties)
                         {
-                            List<Coordinate> coordinates = RangeModels.FindModel(new Coordinate(vector2.x, vector2.y), new Coordinate(x, y), property.strength, property.range, true, property.rangeModel);
+                            List<Vector2> coordinates = RangeModels.FindModel(vector2, new Vector2(x, y), property.strength, property.range, true, property.rangeModel);
                             if (coordinates != null && coordinates.Count != 0)
                             {
-                                foreach (Coordinate coordinate in coordinates)
+                                foreach (Vector2 coordinate in coordinates)
                                 {
-                                    sfxPositions.Add(new Vector2(coordinate.vector2.x, coordinate.vector2.y));
-                                    if (World.tiles[coordinate.vector2.x, coordinate.vector2.y].terrainType != 0)
+                                    sfxPositions.Add(new Vector2(coordinate.x, coordinate.y));
+                                    if (World.tiles[coordinate.x, coordinate.y].terrainType != 0)
                                     {
-                                        if (World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer != null && World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer.GetComponent<Draw>().fColor == "Gray")
+                                        if (World.tiles[coordinate.x, coordinate.y].sfxLayer != null && World.tiles[coordinate.x, coordinate.y].sfxLayer.GetComponent<Draw>().fColor == "Gray")
                                         {
-                                            if (coordinate.vector2.x == x && coordinate.vector2.y == y)
+                                            if (coordinate.x == x && coordinate.y == y)
                                             {
-                                                World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, 'X', "Gray");
+                                                World.tiles[coordinate.x, coordinate.y].sfxLayer = Reticle(x, y, 'X', "Gray");
                                             }
                                             else
                                             {
-                                                World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, '*', "Gray");
+                                                World.tiles[coordinate.x, coordinate.y].sfxLayer = Reticle(x, y, '*', "Gray");
                                             }
                                         }
                                         else
                                         {
-                                            if (coordinate.vector2.x == x && coordinate.vector2.y == y)
+                                            if (coordinate.x == x && coordinate.y == y)
                                             {
-                                                World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, 'X', "Yellow");
+                                                World.tiles[coordinate.x, coordinate.y].sfxLayer = Reticle(x, y, 'X', "Yellow");
                                             }
                                             else
                                             {
-                                                World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, '*', "Yellow");
+                                                World.tiles[coordinate.x, coordinate.y].sfxLayer = Reticle(x, y, '*', "Yellow");
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (coordinate.vector2.x == x && coordinate.vector2.y == y)
+                                        if (coordinate.x == x && coordinate.y == y)
                                         {
-                                            World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, 'X', "Gray");
+                                            World.tiles[coordinate.x, coordinate.y].sfxLayer = Reticle(x, y, 'X', "Gray");
                                         }
                                         else
                                         {
-                                            World.tiles[coordinate.vector2.x, coordinate.vector2.y].sfxLayer = Reticle(x, y, '*', "Gray");
+                                            World.tiles[coordinate.x, coordinate.y].sfxLayer = Reticle(x, y, '*', "Gray");
                                         }
                                     }
                                 }
@@ -192,7 +181,7 @@ namespace TheRuinsOfIpsus
         public static bool CreateLine(int range, bool visual)
         {
             bool check = true;
-            Vector2 vector3 = player.GetComponent<Coordinate>().vector2;
+            Vector2 vector3 = player.GetComponent<Vector2>();
             int t;
             int x = vector3.x; int y = vector3.y;
             int delta_x = TargetReticle.x - vector3.x; int delta_y = TargetReticle.y - vector3.y;
@@ -213,7 +202,7 @@ namespace TheRuinsOfIpsus
                         hasConnected = true;
                         if (CMath.Distance(vector3.x, vector3.y, x, y) < range) 
                         { 
-                            if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
+                            if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.tiles[x, y].terrainType != 0)
                             {
                                 if (visual)
                                 {
@@ -248,7 +237,7 @@ namespace TheRuinsOfIpsus
                     {
                         if (CMath.Distance(vector3.x, vector3.y, x, y) < range)
                         {
-                            if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
+                            if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.tiles[x, y].terrainType != 0)
                             {
                                 if (visual)
                                 {
@@ -295,7 +284,7 @@ namespace TheRuinsOfIpsus
                         hasConnected = true;
                         if (CMath.Distance(vector3.x, vector3.y, x, y) < range)
                         {
-                            if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
+                            if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.tiles[x, y].terrainType != 0)
                             {
                                 if (visual)
                                 {
@@ -330,7 +319,7 @@ namespace TheRuinsOfIpsus
                     {
                         if (CMath.Distance(vector3.x, vector3.y, x, y) < range)
                         {
-                            if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
+                            if (CMath.PathBlocked(vector3, new Vector2(x, y), range) && World.tiles[x, y].terrainType != 0)
                             {
                                 if (visual)
                                 {
@@ -373,18 +362,11 @@ namespace TheRuinsOfIpsus
             {
                 range = 1000;
 
-                List<OnUseProperty> properties = new List<OnUseProperty>();
-                foreach (Component property in Action.targetWeapon.components)
-                {
-                    if (property.GetType().BaseType.Equals(typeof(OnUseProperty)))
-                    {
-                        properties.Add((OnUseProperty)property);
-                    }
-                }
+                List<OnUse> properties = Action.targetWeapon.GetComponent<Usable>().onUseComponents;
 
                 if (properties.Count != 0)
                 {
-                    foreach (OnUseProperty property in properties)
+                    foreach (OnUse property in properties)
                     {
                         if (property.range < range)
                         {
@@ -397,10 +379,10 @@ namespace TheRuinsOfIpsus
             {
                 range = player.GetComponent<Stats>().strength + 10;
             }
-            Vector2 refVector3 = player.GetComponent<Coordinate>().vector2;
+            Vector2 refVector3 = player.GetComponent<Vector2>();
             if (CMath.Distance(refVector3.x, refVector3.y, x, y) < range)
             {
-                if (CMath.PathBlocked(player.GetComponent<Coordinate>().vector2, new Vector2(x, y), range) && World.GetTraversable(new Vector2(x, y)).terrainType != 0)
+                if (CMath.PathBlocked(player.GetComponent<Vector2>(), new Vector2(x, y), range) && World.tiles[x, y].terrainType != 0)
                 {
                     ClearSFXPositions();
                     StopTargeting();
@@ -415,12 +397,12 @@ namespace TheRuinsOfIpsus
             Vector2 vector2 = ReturnCoords(false);
             if (vector2 != null)
             {
-                AttackManager.ThrowWeapon(player, new Coordinate(vector2.x, vector2.y), weaponUsed);
+                AttackManager.ThrowWeapon(player, vector2, weaponUsed);
             }
         }
         public static Entity Reticle(int x, int y, char character, string fColor)
         {
-            return new Entity(new List<Component> { new Coordinate(x, y), new Draw(fColor, "Black", character) });
+            return new Entity(new List<Component> { new Vector2(x, y), new Draw(fColor, "Black", character) });
         }
     }
 }

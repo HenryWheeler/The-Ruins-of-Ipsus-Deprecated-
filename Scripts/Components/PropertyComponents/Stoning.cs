@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public class Stoning: OnTurnProperty
+    public class Stoning: OnTurn
     {
         public int timeLeft = 10;
-        public override void OnTurn()
+        public override void Turn()
         {
             timeLeft--; 
             switch (timeLeft)
@@ -32,15 +32,15 @@ namespace TheRuinsOfIpsus
                         if (entity.GetComponent<PronounSet>().present) { Log.AddToStoredLog(entity.GetComponent<Description>().name + "'s body has becomes completely stone"); }
                         else { Log.AddToStoredLog(entity.GetComponent<PronounSet>().possesive + " body has become completely stone"); }
 
-                        Vector2 vector2 = entity.GetComponent<Coordinate>().vector2;
+                        Vector2 vector2 = entity.GetComponent<Vector2>();
 
                         Entity statue = new Entity();
-                        statue.AddComponent(new Coordinate(vector2));
+                        statue.AddComponent(vector2);
                         statue.AddComponent(new Draw("Gray", "Black", entity.GetComponent<Draw>().character));
                         if (entity.GetComponent<PronounSet>().present) { statue.AddComponent(new Description("Statue of a " + entity.GetComponent<Description>().name, "A highly realistic statue of a " + entity.GetComponent<Description>().name)); }
                         else { statue.AddComponent(new Description("Statue of " + entity.GetComponent<Description>().name, "A highly realistic statue of " + entity.GetComponent<Description>().name)); }
                         statue.AddComponent(new ID(2500));
-                        World.GetTraversable(vector2).obstacleLayer = statue;
+                        World.tiles[vector2.x, vector2.y].obstacleLayer = statue;
                         entity.GetComponent<Harmable>().Death("Stoning");
                         break;
                     }

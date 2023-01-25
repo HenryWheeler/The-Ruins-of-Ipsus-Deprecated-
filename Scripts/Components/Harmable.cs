@@ -9,10 +9,11 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class Harmable: Component
     {
+        public List<OnHit> onHitComponents = new List<OnHit>();
         public List<string> statusEffects = new List<string>();
         public void Hit(int dmg, string type, string weaponName, Entity attacker) 
         {
-            SpecialComponentManager.TriggerOnHit(entity, attacker, entity, dmg, type, false);
+            TriggerOnHit(attacker, entity, dmg, type);
 
             if (CMath.ReturnAI(entity) != null) 
             {
@@ -22,7 +23,7 @@ namespace TheRuinsOfIpsus
             Stats stats = entity.GetComponent<Stats>();
             stats.hp -= dmg;
 
-            if (entity.display) 
+            if (entity.GetComponent<PlayerComponent>() != null) 
             {
                 StatManager.UpdateStats(entity); 
             }
@@ -53,11 +54,11 @@ namespace TheRuinsOfIpsus
 
                 Entity hitParticle = new Entity(new List<Component>
                         {
-                            new Coordinate(0, 0),
+                            new Vector2(0, 0),
                             new Draw("Red", "Black", (char)3),
                             new ParticleComponent(2, 1, "None", 1, new Draw[] { new Draw("Red", "Black", (char)3) })
                         });
-                Vector2 vector2 = entity.GetComponent<Coordinate>().vector2;
+                Vector2 vector2 = entity.GetComponent<Vector2>();
                 Renderer.AddParticle(vector2.x, vector2.y, hitParticle);
             }
         }
@@ -65,7 +66,7 @@ namespace TheRuinsOfIpsus
         {
             Stats stats = entity.GetComponent<Stats>();
             stats.hp -= dmg;
-            if (entity.display) 
+            if (entity.GetComponent<PlayerComponent>() != null) 
             { 
                 StatManager.UpdateStats(entity);
             }
@@ -74,25 +75,35 @@ namespace TheRuinsOfIpsus
                 Death(cause); 
             }
         }
+        public void TriggerOnHit(Entity attacker, Entity target, int dmg, string dmgType)
+        {
+            foreach (OnHit component in onHitComponents)
+            {
+                if (component != null)
+                {
+                    component.Hit(attacker, target, dmg, dmgType);
+                }
+            }
+        }
         public void Death(string causeOfDeath) 
         {
-            if (!entity.display)
+            if (entity.GetComponent<PlayerComponent>() == null)
             {
                 Entity hitParticle = new Entity(new List<Component>
                         {
-                            new Coordinate(0, 0),
+                            new Vector2(0, 0),
                             new Draw("Red", "Black", 'X'),
                             new ParticleComponent(2, 1, "None", 1, new Draw[] { new Draw("Red", "Black", 'X') })
                         });
-                Coordinate vector2 = entity.GetComponent<Coordinate>();
-                Renderer.AddParticle(vector2.vector2.x, vector2.vector2.y, hitParticle);
+                Vector2 vector2 = entity.GetComponent<Vector2>();
+                Renderer.AddParticle(vector2.x, vector2.y, hitParticle);
                 Log.Add($"{entity.GetComponent<Description>().name} has died.");
 
                 entity.RemoveComponent(CMath.ReturnAI(entity));
                 TurnManager.RemoveActor(entity.GetComponent<TurnFunction>());
                 EntityManager.ClearAIOfEntity(entity);
                 entity.GetComponent<TurnFunction>().turnActive = false;
-                World.GetTraversable(entity.GetComponent<Coordinate>().vector2).actorLayer = null;
+                World.tiles[vector2.x, vector2.y].actorLayer = null;
                 EntityManager.RemoveEntity(entity);
 
                 entity.ClearEntity();

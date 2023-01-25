@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public class RestrainOnMove: OnMoveProperty
+    public class RestrainOnMove: OnMove
     {
-        public override void OnMove(Vector2 initialPosition, Vector2 finalPosition)
+        public override void Move(Vector2 initialPosition, Vector2 finalPosition)
         {
             int chance = World.random.Next(1, 100);
             if (chance > 75)
             {
                 //Vector2 vector3 = entity.GetComponent<Coordinate>().vector2;
-                Traversable traversable = World.GetTraversable(finalPosition);
+                Traversable traversable = World.tiles[finalPosition.x, finalPosition.y];
                 if (traversable.actorLayer != null)
                 {
                     if (!traversable.actorLayer.GetComponent<Stats>().immunities.Contains("Restraint")) 

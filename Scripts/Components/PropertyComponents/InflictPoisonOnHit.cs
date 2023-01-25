@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public class InflictPoisonOnHit : OnHitProperty
+    public class InflictPoisonOnHit : OnHit
     {
         public int strength { get; set; }
-        public override void OnHit(Entity attacker, Entity target, int dmg, string type)
+        public override void Hit(Entity attacker, Entity target, int dmg, string type)
         {
             if (target.GetComponent<Poison>() == null && !target.GetComponent<Stats>().immunities.Contains("Poison")) 
             { 

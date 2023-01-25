@@ -9,6 +9,7 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class Usable: Component
     {
+        public List<OnUse> onUseComponents = new List<OnUse>();
         public string useMessage { get; set; }
         public bool autoTarget { get; set; }
         public void Use(Entity user, Vector2 target) 
@@ -17,11 +18,18 @@ namespace TheRuinsOfIpsus
             {
                 DisplayMessage(user);
             }
-            SpecialComponentManager.TriggerOnUse(user, entity, target); 
+
+            foreach (OnUse component in onUseComponents)
+            {
+                if (component != null)
+                {
+                    component.Use(user, target);
+                }
+            }
         }
         public void DisplayMessage(Entity user)
         {
-            if (user.display)
+            if (user != entity)
             {
                 if (user.GetComponent<PronounSet>().present)
                 {

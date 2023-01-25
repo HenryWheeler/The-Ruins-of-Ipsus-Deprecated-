@@ -12,7 +12,7 @@ namespace TheRuinsOfIpsus
         public bool disguised = false;
         public bool CaptureGuise()
         {
-            Vector2 vector2 = entity.GetComponent<Coordinate>().vector2;
+            Vector2 vector2 = entity.GetComponent<Vector2>();
             for (int x = vector2.x - 1; x < vector2.x + 1; x++)
             {
                 for (int y = vector2.y - 1; y < vector2.y + 1; y++)

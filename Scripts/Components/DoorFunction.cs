@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public class DoorFunction: OnMoveProperty
+    public class DoorFunction: OnMove
     {
         public bool open = false;
 
-        public override void OnMove(Vector2 initialPosition, Vector2 finalPosition)
+        public override void Move(Vector2 initialPosition, Vector2 finalPosition)
         {
             if (!open)
             {

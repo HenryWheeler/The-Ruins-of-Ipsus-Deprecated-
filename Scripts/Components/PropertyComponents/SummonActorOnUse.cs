@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public class SummonActorOnUse : OnUseProperty
+    public class SummonActorOnUse : OnUse
     {
         public int[] summonedCreatures { get; set; }
-        public override void OnUse(Entity entity, Vector2 target = null)
+        public override void Use(Entity entity, Vector2 target = null)
         {
-            if (entity.display)
+            if (entity.GetComponent<PlayerComponent>() != null)
             {
                 if (range == 0)
                 {
-                    SpecialEffectManager.SummonActor(entity, entity.GetComponent<Coordinate>().vector2, summonedCreatures, strength);
+                    SpecialEffectManager.SummonActor(entity, entity.GetComponent<Vector2>(), summonedCreatures, strength);
                 }
                 else if (target == null)
                 {
@@ -34,7 +34,7 @@ namespace TheRuinsOfIpsus
             {
                 if (range == 0 || target == null)
                 {
-                    SpecialEffectManager.SummonActor(entity, entity.GetComponent<Coordinate>().vector2, summonedCreatures, strength);
+                    SpecialEffectManager.SummonActor(entity, entity.GetComponent<Vector2>(), summonedCreatures, strength);
                 }
                 else
                 {
@@ -56,12 +56,12 @@ namespace TheRuinsOfIpsus
         public SummonActorOnUse() { }
     }
     [Serializable]
-    public class SummonActorOnThrow : OnThrowProperty
+    public class SummonActorOnThrow : OnThrow
     {
         public int[] summonedCreatures { get; set; }
-        public override void OnThrow(Entity user, Coordinate landingSite)
+        public override void Throw(Entity user, Vector2 landingSite)
         {
-            SpecialEffectManager.SummonActor(user, landingSite.vector2, summonedCreatures, strength);
+            SpecialEffectManager.SummonActor(user, landingSite, summonedCreatures, strength);
         }
         public SummonActorOnThrow(int[] _summonedCreatures, int amount)
         {

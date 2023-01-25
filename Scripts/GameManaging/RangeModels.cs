@@ -9,14 +9,14 @@ namespace TheRuinsOfIpsus
 {
     public class RangeModels
     {
-        private static List<Coordinate> returnCoordinates = new List<Coordinate>();
-        public static List<Coordinate> FindModel(Coordinate startingPoint, Coordinate target, int size, int range, bool includeStart, string type)
+        private static List<Vector2> returnCoordinates = new List<Vector2>();
+        public static List<Vector2> FindModel(Vector2 startingPoint, Vector2 target, int size, int range, bool includeStart, string type)
         {
             switch (type)
             {
                 case "SingleTarget":
                     {
-                        return new List<Coordinate>() { target };
+                        return new List<Vector2>() { target };
                     }
                 case "Line":
                     {
@@ -37,9 +37,9 @@ namespace TheRuinsOfIpsus
             }
             return null;
         }
-        public static List<Coordinate> SphereRangeModel(Coordinate startingPoint, int size, bool includeStart)
+        public static List<Vector2> SphereRangeModel(Vector2 startingPoint, int size, bool includeStart)
         {
-            Vector2 vector = startingPoint.vector2;
+            Vector2 vector = startingPoint;
             ClearCoordinates();
             for (uint octant = 0; octant < 8; octant++)
             {
@@ -48,13 +48,13 @@ namespace TheRuinsOfIpsus
             if (includeStart) { returnCoordinates.Add(startingPoint); }
             return returnCoordinates;
         }
-        public static List<Coordinate> ConeRangeModel(Coordinate startingPoint, Coordinate target, int size, int range)
+        public static List<Vector2> ConeRangeModel(Vector2 startingPoint, Vector2 target, int size, int range)
         {
-            Vector2 t = startingPoint.vector2;
-            Vector2 o = target.vector2;
-            List<Coordinate> coordinates = new List<Coordinate>();
+            Vector2 t = startingPoint;
+            Vector2 o = target;
+            List<Vector2> coordinates = new List<Vector2>();
 
-            if (CMath.Distance(startingPoint, target) >= range) { return new List<Coordinate>(); }
+            if (CMath.Distance(startingPoint, target) >= range) { return new List<Vector2>(); }
 
             double distanceChange = CMath.Distance(t.x, t.y, o.x, o.y) / 3;
 
@@ -227,21 +227,21 @@ namespace TheRuinsOfIpsus
             }
 
 
-            foreach (Coordinate coordinate in ReturnLine(new Coordinate((int)x, (int)y), new Coordinate((int)x2, (int)y2), false, true))
+            foreach (Vector2 coordinate in ReturnLine(new Vector2((int)x, (int)y), new Vector2((int)x2, (int)y2), false, true))
             {
-                if (coordinate != null && CMath.CheckBounds(coordinate.vector2.x, coordinate.vector2.y))
+                if (coordinate != null && CMath.CheckBounds(coordinate.x, coordinate.y))
                 {
                     //coordinates.Add(coordinate);
 
-                    foreach (Coordinate coordinate2 in ReturnLine(startingPoint, coordinate, true))
+                    foreach (Vector2 coordinate2 in ReturnLine(startingPoint, coordinate, true))
                     {
-                        if (coordinate2 != null && CMath.CheckBounds(coordinate2.vector2.x, coordinate2.vector2.y))
+                        if (coordinate2 != null && CMath.CheckBounds(coordinate2.x, coordinate2.y))
                         {
                             coordinates.Add(coordinate2);
 
-                            foreach (Coordinate coordinate3 in ReturnLine(coordinate2, coordinate))
+                            foreach (Vector2 coordinate3 in ReturnLine(coordinate2, coordinate))
                             {
-                                if (coordinate3 != null && CMath.CheckBounds(coordinate3.vector2.x, coordinate3.vector2.y))
+                                if (coordinate3 != null && CMath.CheckBounds(coordinate3.x, coordinate3.y))
                                 {
                                     coordinates.Add(coordinate3);
                                 }
@@ -253,13 +253,13 @@ namespace TheRuinsOfIpsus
 
             return coordinates;
         }
-        public static List<Coordinate> BeamRangeModel(Coordinate startingPoint, Coordinate target, int range, bool includeStart)
+        public static List<Vector2> BeamRangeModel(Vector2 startingPoint, Vector2 target, int range, bool includeStart)
         {
-            List<Coordinate> coordinates = new List<Coordinate>();
-            if (CMath.Distance(startingPoint, target) >= range) { return new List<Coordinate>(); }
-            foreach (Coordinate coordinate3 in ReturnLine(startingPoint, target))
+            List<Vector2> coordinates = new List<Vector2>();
+            if (CMath.Distance(startingPoint, target) >= range) { return new List<Vector2>(); }
+            foreach (Vector2 coordinate3 in ReturnLine(startingPoint, target))
             {
-                if (coordinate3 != null && CMath.CheckBounds(coordinate3.vector2.x, coordinate3.vector2.y))
+                if (coordinate3 != null && CMath.CheckBounds(coordinate3.x, coordinate3.y))
                 {
                     coordinates.Add(coordinate3);
                 }
@@ -269,9 +269,9 @@ namespace TheRuinsOfIpsus
             return coordinates;
         }
         public static void ClearCoordinates() { returnCoordinates.Clear(); }
-        public static List<Coordinate> ReturnLine(Coordinate origin, Coordinate target, bool returnOnWall = false, bool includeStart = false)
+        public static List<Vector2> ReturnLine(Vector2 origin, Vector2 target, bool returnOnWall = false, bool includeStart = false)
         {
-            List<Coordinate> coordinates = new List<Coordinate>();
+            List<Vector2> coordinates = new List<Vector2>();
 
             if (includeStart)
             {
@@ -279,8 +279,8 @@ namespace TheRuinsOfIpsus
             }
 
             int t;
-            int x = origin.vector2.x; int y = origin.vector2.y;
-            int delta_x = target.vector2.x - origin.vector2.x; int delta_y = target.vector2.y - origin.vector2.y;
+            int x = origin.x; int y = origin.y;
+            int delta_x = target.x - origin.x; int delta_y = target.y - origin.y;
             int abs_delta_x = Math.Abs(delta_x); int abs_delta_y = Math.Abs(delta_y);
             int sign_x = Math.Sign(delta_x); int sign_y = Math.Sign(delta_y);
             bool hasConnected = false;
@@ -296,8 +296,8 @@ namespace TheRuinsOfIpsus
                         x += sign_x;
                         t += abs_delta_y * 2;
 
-                        coordinates.Add(new Coordinate(x, y));
-                        if (x == target.vector2.x && y == target.vector2.y) { hasConnected = true; }
+                        coordinates.Add(new Vector2(x, y));
+                        if (x == target.x && y == target.y) { hasConnected = true; }
 
                         else if (World.tiles[x, y].obstacleLayer != null && World.tiles[x, y].obstacleLayer.GetComponent<Visibility>() != null && World.tiles[x, y].obstacleLayer.GetComponent<Visibility>().opaque)
                         {
@@ -319,8 +319,8 @@ namespace TheRuinsOfIpsus
                         y += sign_y;
                         t += abs_delta_x * 2;
 
-                        coordinates.Add(new Coordinate(x, y));
-                        if (x == target.vector2.x && y == target.vector2.y) { hasConnected = true; }
+                        coordinates.Add(new Vector2(x, y));
+                        if (x == target.x && y == target.y) { hasConnected = true; }
 
                         else if (World.tiles[x, y].obstacleLayer != null && World.tiles[x, y].obstacleLayer.GetComponent<Visibility>() != null && World.tiles[x, y].obstacleLayer.GetComponent<Visibility>().opaque)
                         {
@@ -344,8 +344,8 @@ namespace TheRuinsOfIpsus
                         if (t >= 0) { y += sign_y; t -= abs_delta_x * 2; }
                         x += sign_x;
                         t += abs_delta_y * 2;
-                        coordinates.Add(new Coordinate(x, y));
-                        if (x == target.vector2.x && y == target.vector2.y) { hasConnected = true; }
+                        coordinates.Add(new Vector2(x, y));
+                        if (x == target.x && y == target.y) { hasConnected = true; }
                     }
                     while (!hasConnected);
                 }
@@ -357,8 +357,8 @@ namespace TheRuinsOfIpsus
                         if (t >= 0) { x += sign_x; t -= abs_delta_y * 2; }
                         y += sign_y;
                         t += abs_delta_x * 2;
-                        coordinates.Add(new Coordinate(x, y));
-                        if (x == target.vector2.x && y == target.vector2.y) { hasConnected = true; }
+                        coordinates.Add(new Vector2(x, y));
+                        if (x == target.x && y == target.y) { hasConnected = true; }
                     }
                     while (!hasConnected);
                 }
@@ -392,7 +392,7 @@ namespace TheRuinsOfIpsus
                     bool inRange = rangeLimit < 0 || CMath.Distance(oX, oY, tx, ty) <= rangeLimit;
                     if (CMath.CheckBounds(tx, ty) && inRange && (y != topY || top.Y * x >= top.X * y) && (y != bottomY || bottom.Y * x <= bottom.X * y))
                     {
-                        returnCoordinates.Add(new Coordinate(tx, ty));
+                        returnCoordinates.Add(new Vector2(tx, ty));
                     }
 
                     bool isOpaque = !inRange || BlocksLight(new Vector2(tx, ty));

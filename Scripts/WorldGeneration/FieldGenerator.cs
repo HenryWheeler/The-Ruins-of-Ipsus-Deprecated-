@@ -118,7 +118,7 @@ namespace TheRuinsOfIpsus
             {
                 for (int y = sY - 1; y <= sY + 1; y++)
                 {
-                    if (x != sX || y != sY) { if (CMath.CheckBounds(x, y) && World.tiles[x, y] != null && World.GetTraversable(new Vector2(x, y)).terrainType == 2) { walls++; } }
+                    if (x != sX || y != sY) { if (CMath.CheckBounds(x, y) && World.tiles[x, y] != null && World.tiles[x, y].terrainType == 2) { walls++; } }
                 }
             }
 

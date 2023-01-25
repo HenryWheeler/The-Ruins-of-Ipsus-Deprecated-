@@ -40,7 +40,7 @@ namespace TheRuinsOfIpsus
         {
             List<Entity> entity = new List<Entity>
             {
-                new Entity(new List<Component>() { new Coordinate(coordinate) })
+                new Entity(new List<Component>() { coordinate })
             }; CreateMap(entity, name, 500);
         }
         public static void CreateMap(List<Entity> coordinates, string name, int strength = 25)
@@ -50,7 +50,7 @@ namespace TheRuinsOfIpsus
             int[,] intArray = (int[,])baseIntArray.Clone();
             for (int o = 0; o < coordinates.Count; o++)
             {
-                Vector2 vector3 = coordinates[o].GetComponent<Coordinate>().vector2;
+                Vector2 vector3 = coordinates[o].GetComponent<Vector2>();
                 intArray[vector3.x, vector3.y] = 0;
                 checkList.Enqueue(vector3);
                 tempList.Add(vector3);
@@ -125,7 +125,7 @@ namespace TheRuinsOfIpsus
         }
         public static Vector2 PathFromMap(Entity entity, string mapName)
         {
-            Vector2 start = entity.GetComponent<Coordinate>().vector2;
+            Vector2 start = entity.GetComponent<Vector2>();
             int[,] map;
             if (maps.ContainsKey(mapName)) 
             { 

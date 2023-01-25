@@ -77,7 +77,7 @@ namespace TheRuinsOfIpsus
                     if (t >= 0) { y += sign_y; t -= abs_delta_x * 2; }
                     x += sign_x;
                     t += abs_delta_y * 2;
-                    if (World.GetTraversable(new Vector2(x, y)).terrainType == 0)
+                    if (World.tiles[x, y].terrainType == 0)
                     {
                         SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
                         SetTile(x + 1, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
@@ -94,7 +94,7 @@ namespace TheRuinsOfIpsus
                     if (t >= 0) { x += sign_x; t -= abs_delta_y * 2; }
                     y += sign_y;
                     t += abs_delta_x * 2;
-                    if (World.GetTraversable(new Vector2(x, y)).terrainType == 0)
+                    if (World.tiles[x, y].terrainType == 0)
                     {
                         SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
                         SetTile(x, y + 1, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);

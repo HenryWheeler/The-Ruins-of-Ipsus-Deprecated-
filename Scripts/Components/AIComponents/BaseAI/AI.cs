@@ -117,7 +117,7 @@ namespace TheRuinsOfIpsus
         public void CallObservation(bool highLevel)
         {
             Input input = Input.None;
-            Vector2 startPos = entity.GetComponent<Coordinate>().vector2;
+            Vector2 startPos = entity.GetComponent<Vector2>();
             int rangeLimit = entity.GetComponent<Stats>().sight;
 
             for (uint octant = 0; octant < 8; octant++)

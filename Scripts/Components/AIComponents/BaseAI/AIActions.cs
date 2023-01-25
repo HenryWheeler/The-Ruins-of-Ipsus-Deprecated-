@@ -30,7 +30,7 @@ namespace TheRuinsOfIpsus
             }
             else
             {
-                Vector2 current = AI.GetComponent<Coordinate>().vector2;
+                Vector2 current = AI.GetComponent<Vector2>();
                 Vector2 newPosition = new Vector2(World.random.Next(-1, 2) + current.x, World.random.Next(-1, 2) + current.y);
                 if (CMath.CheckBounds(newPosition.x, newPosition.y))
                 {
@@ -108,7 +108,7 @@ namespace TheRuinsOfIpsus
                 detail.interest--;
                 if (detail.interest <= 0)
                 {
-                    Vector2 vector2 = AI.GetComponent<Coordinate>().vector2;
+                    Vector2 vector2 = AI.GetComponent<Vector2>();
                     AI.GetComponent<Movement>().Move(new Vector2(vector2.x + World.random.Next(-1, 2), vector2.y + World.random.Next(-1, 2)));
                     AI.GetComponent<Mimicry>().disguised = false;
                     detail.interest = detail.baseInterest;
@@ -129,7 +129,7 @@ namespace TheRuinsOfIpsus
             }
             else
             {
-                int distanceToTarget = CMath.Distance(AI.GetComponent<Coordinate>(), target.GetComponent<Coordinate>());
+                int distanceToTarget = CMath.Distance(AI.GetComponent<Vector2>(), target.GetComponent<Vector2>());
 
                 Log.Add($"Distance is {distanceToTarget}");
 
@@ -213,14 +213,14 @@ namespace TheRuinsOfIpsus
         ///</summary>
         public static bool AttackCheck(Entity AI, Entity target, int distance)
         {
-            List<OnUseProperty> abilities = GrabAbilities(AI);
+            List<OnUse> abilities = GrabAbilities(AI);
 
             AI detail = CMath.ReturnAI(AI);
 
             if (World.random.Next(0, 101) < detail.abilityChance && abilities.Count != 0)
             {
-                OnUseProperty abilityToUse = null;
-                foreach (OnUseProperty ability in abilities)
+                OnUse abilityToUse = null;
+                foreach (OnUse ability in abilities)
                 {
                     if (ability.itemType == "Offense" && ability.range >= distance)
                     {
@@ -240,9 +240,9 @@ namespace TheRuinsOfIpsus
 
             return false;
         }
-        public static void UseAbility(OnUseProperty ability, Entity AI, Entity target)
+        public static void UseAbility(OnUse ability, Entity AI, Entity target)
         {
-            ability.OnUse(AI, target.GetComponent<Coordinate>().vector2);
+            ability.Use(AI, target.GetComponent<Vector2>());
             AI.GetComponent<TurnFunction>().EndTurn();
 
             if (ability.singleUse)
@@ -250,14 +250,14 @@ namespace TheRuinsOfIpsus
                 AI.RemoveComponent(ability);
             }
         }
-        public static List<OnUseProperty> GrabAbilities(Entity entity)
+        public static List<OnUse> GrabAbilities(Entity entity)
         {
-            List<OnUseProperty> abilities = new List<OnUseProperty>();
+            List<OnUse> abilities = new List<OnUse>();
             foreach (Component property in entity.components)
             {
-                if (property.GetType().BaseType.Equals(typeof(OnUseProperty)))
+                if (property.GetType().BaseType.Equals(typeof(OnUse)))
                 {
-                    abilities.Add((OnUseProperty)property);
+                    abilities.Add((OnUse)property);
                 }
             }
 

@@ -176,12 +176,12 @@ namespace TheRuinsOfIpsus
                     {
                         if (entity.GetComponent<Movement>() != null)
                         {
-                            if (entity.GetComponent<Movement>().moveTypes.Contains(World.GetTraversable(vector3).terrainType))
+                            if (entity.GetComponent<Movement>().moveTypes.Contains(World.tiles[vector3.x, vector3.y].terrainType))
                             { sufficient = true; }
                         }
                         else
                         {
-                            if (World.GetTraversable(vector3).terrainType != 0)
+                            if (World.tiles[vector3.x, vector3.y].terrainType != 0)
                             { sufficient = true; }
                         }
                     }
@@ -197,11 +197,12 @@ namespace TheRuinsOfIpsus
                 AddEntity(entity);
             }
 
-            entity.GetComponent<Coordinate>().vector2 = vector3;
+            entity.GetComponent<Vector2>().x = vector3.x;
+            entity.GetComponent<Vector2>().y = vector3.y;
             int id = entity.GetComponent<ID>().id;
-            if (id <= 1000) { World.GetTraversable(vector3).actorLayer = entity; }
-            else if (id > 1000 && id <= 2000) { World.GetTraversable(vector3).itemLayer = entity; }
-            else { World.GetTraversable(vector3).obstacleLayer = entity; }
+            if (id <= 1000) { World.tiles[vector3.x, vector3.y].actorLayer = entity; }
+            else if (id > 1000 && id <= 2000) { World.tiles[vector3.x, vector3.y].itemLayer = entity; }
+            else { World.tiles[vector3.x, vector3.y].obstacleLayer = entity; }
             return entity;
         }
         public static Entity CreateEntity(Vector2 vector3, Entity entity, bool random, bool seeded = false)
@@ -231,23 +232,24 @@ namespace TheRuinsOfIpsus
                     {
                         if (entity.GetComponent<Movement>() != null)
                         {
-                            if (entity.GetComponent<Movement>().moveTypes.Contains(World.GetTraversable(vector3).terrainType))
+                            if (entity.GetComponent<Movement>().moveTypes.Contains(World.tiles[vector3.x, vector3.y].terrainType))
                             { sufficient = true; }
                         }
                         else
                         {
-                            if (World.GetTraversable(vector3).terrainType != 0)
+                            if (World.tiles[vector3.x, vector3.y].terrainType != 0)
                             { sufficient = true; }
                         }
                     }
                 }
             }
             AddEntity(entity);
-            entity.GetComponent<Coordinate>().vector2 = vector3;
+            entity.GetComponent<Vector2>().x = vector3.x;
+            entity.GetComponent<Vector2>().y = vector3.y;
             int id = entity.GetComponent<ID>().id;
-            if (id <= 1000) { World.GetTraversable(vector3).actorLayer = entity; }
-            else if (id > 1000 && id <= 2000) { World.GetTraversable(vector3).itemLayer = entity; }
-            else { World.GetTraversable(vector3).obstacleLayer = entity; }
+            if (id <= 1000) { World.tiles[vector3.x, vector3.y].actorLayer = entity; }
+            else if (id > 1000 && id <= 2000) { World.tiles[vector3.x, vector3.y].itemLayer = entity; }
+            else { World.tiles[vector3.x, vector3.y].obstacleLayer = entity; }
             return entity;
         }
         public static Entity ReloadEntity(Entity entityRef)

@@ -62,26 +62,26 @@ namespace TheRuinsOfIpsus
 
                 while (!doneConnecting)
                 {
-                    Coordinate firstCoordinate = null;
-                    Coordinate lastCoordinate = null;
+                    Vector2 firstCoordinate = null;
+                    Vector2 lastCoordinate = null;
                     List<Entity> cavernTiles = new List<Entity>();
 
                     foreach (Traversable tile in World.tiles) 
                     {
                         if (tile != null && tile.terrainType != 0) 
                         { 
-                            firstCoordinate = tile.entity.GetComponent<Coordinate>();
+                            firstCoordinate = tile.entity.GetComponent<Vector2>();
                             break;
                         }
                     }
 
-                    DijkstraMaps.CreateMap(World.GetTraversable(firstCoordinate.vector2).entity, "CurrentRoom");
+                    DijkstraMaps.CreateMap(World.tiles[firstCoordinate.x, firstCoordinate.y].entity, "CurrentRoom");
                     int[,] map = DijkstraMaps.maps["CurrentRoom"];
                     foreach (Traversable tile in World.tiles)    
                     {
                         if (tile != null)
                         {
-                            Vector2 vector2 = tile.entity.GetComponent<Coordinate>().vector2;
+                            Vector2 vector2 = tile.entity.GetComponent<Vector2>();
                             if (map[vector2.x, vector2.y] < 1000)
                             {
                                 cavernTiles.Add(tile.entity);
@@ -92,24 +92,24 @@ namespace TheRuinsOfIpsus
                     {
                         if (tile != null && tile.terrainType != 0 && !cavernTiles.Contains(tile.entity))
                         {
-                            Coordinate coordinate = tile.entity.GetComponent<Coordinate>();
+                            Vector2 coordinate = tile.entity.GetComponent<Vector2>();
                             if (lastCoordinate == null)
                             {
-                                lastCoordinate = tile.entity.GetComponent<Coordinate>(); 
+                                lastCoordinate = tile.entity.GetComponent<Vector2>(); 
                             }
                             else
                             {
-                                for (int y = coordinate.vector2.y - 1; y <= coordinate.vector2.y + 1; y++)
+                                for (int y = coordinate.y - 1; y <= coordinate.y + 1; y++)
                                 {
-                                    for (int x = coordinate.vector2.x - 1; x <= coordinate.vector2.x + 1; x++)
+                                    for (int x = coordinate.x - 1; x <= coordinate.x + 1; x++)
                                     {
                                         if (CMath.CheckBounds(x, y))
                                         {
                                             if (World.tiles[x, y].terrainType != 0)
                                             {
-                                                if (CMath.Distance(new Coordinate(x, y), firstCoordinate) < CMath.Distance(lastCoordinate, firstCoordinate))
+                                                if (CMath.Distance(new Vector2(x, y), firstCoordinate) < CMath.Distance(lastCoordinate, firstCoordinate))
                                                 {
-                                                    lastCoordinate = new Coordinate(x, y);
+                                                    lastCoordinate = new Vector2(x, y);
                                                 }
                                             }
                                             else { continue; }
@@ -124,20 +124,20 @@ namespace TheRuinsOfIpsus
                     {
                         if (tile != null && tile.GetComponent<Traversable>().terrainType != 0)
                         {
-                            Coordinate coordinate = tile.GetComponent<Coordinate>();
+                            Vector2 coordinate = tile.GetComponent<Vector2>();
                             if (lastCoordinate != null) 
                             {
-                                for (int y = coordinate.vector2.y - 1; y <= coordinate.vector2.y + 1; y++)
+                                for (int y = coordinate.y - 1; y <= coordinate.y + 1; y++)
                                 {
-                                    for (int x = coordinate.vector2.x - 1; x <= coordinate.vector2.x + 1; x++)
+                                    for (int x = coordinate.x - 1; x <= coordinate.x + 1; x++)
                                     {
                                         if (CMath.CheckBounds(x, y))
                                         {
                                             if (World.tiles[x, y].terrainType != 0)
                                             {
-                                                if (CMath.Distance(new Coordinate(x, y), lastCoordinate) < CMath.Distance(lastCoordinate, firstCoordinate))
+                                                if (CMath.Distance(new Vector2(x, y), lastCoordinate) < CMath.Distance(lastCoordinate, firstCoordinate))
                                                 {
-                                                    firstCoordinate = new Coordinate(x, y);
+                                                    firstCoordinate = new Vector2(x, y);
                                                 }
                                             }
                                             else { continue; }
@@ -153,9 +153,9 @@ namespace TheRuinsOfIpsus
                     {
                         switch (type)
                         {
-                            case 0: CreateStraightPassage(firstCoordinate.vector2.x, firstCoordinate.vector2.y, lastCoordinate.vector2.x, lastCoordinate.vector2.y); break;
-                            case 1: CreateDiagonalPassage(firstCoordinate.vector2.x, firstCoordinate.vector2.y, lastCoordinate.vector2.x, lastCoordinate.vector2.y); break;
-                            case 2: CreateBezierCurve(firstCoordinate.vector2.x, firstCoordinate.vector2.y, lastCoordinate.vector2.x, lastCoordinate.vector2.y); break;
+                            case 0: CreateStraightPassage(firstCoordinate.x, firstCoordinate.y, lastCoordinate.x, lastCoordinate.y); break;
+                            case 1: CreateDiagonalPassage(firstCoordinate.x, firstCoordinate.y, lastCoordinate.x, lastCoordinate.y); break;
+                            case 2: CreateBezierCurve(firstCoordinate.x, firstCoordinate.y, lastCoordinate.x, lastCoordinate.y); break;
                         }
                     }
                 }
@@ -168,9 +168,9 @@ namespace TheRuinsOfIpsus
             Entity upStair = tiles[World.seed.Next(0, tiles.Count - 1)];
             tiles.Remove(upStair);
             Entity downStair = tiles[World.seed.Next(0, tiles.Count - 1)];
-            Vector2 vector2 = upStair.GetComponent<Coordinate>().vector2;
+            Vector2 vector2 = upStair.GetComponent<Vector2>();
             SetTile(vector2.x, vector2.y, '<', "Stairs Up", "A winding staircase upward.", "White", "Black", false, 1);
-            vector2 = downStair.GetComponent<Coordinate>().vector2;
+            vector2 = downStair.GetComponent<Vector2>();
             SetTile(vector2.x, vector2.y, '>', "Stairs Down", "A winding staircase downward.", "White", "Black", false, 1);
         }
         public void CreateDoors()
@@ -190,7 +190,7 @@ namespace TheRuinsOfIpsus
                 for (int x = sX - 1; x <= eX + 1; x++)
                 {
                     if (x < 2 || y <= 2 || x >= mapWidth - 1 || y >= mapHeight - 1) return false;
-                    if (World.GetTraversable(new Vector2(x, y)).terrainType != 0) return false;
+                    if (World.tiles[x, y].terrainType != 0) return false;
                 }
             }
             return true;
@@ -199,7 +199,7 @@ namespace TheRuinsOfIpsus
         {
             Traversable traversable = new Traversable(moveType);
                 new Entity(new List<Component>() { 
-                new Coordinate(x, y), 
+                new Vector2(x, y), 
                 new Draw(fColor, bColor, character), 
                 new Description(name, description), 
                 new Visibility(opaque, false, false),

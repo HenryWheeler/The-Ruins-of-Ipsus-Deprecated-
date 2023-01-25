@@ -49,7 +49,7 @@ namespace TheRuinsOfIpsus
             {
                 if (tile != null && tile.entity != null)
                 {
-                    Vector2 vector2 = tile.entity.GetComponent<Coordinate>().vector2;
+                    Vector2 vector2 = tile.entity.GetComponent<Vector2>();
                     Visibility visibility1 = tile.entity.GetComponent<Visibility>();
                     visibility1.entity = null;
                     visibility[vector2.x, vector2.y] = visibility1;

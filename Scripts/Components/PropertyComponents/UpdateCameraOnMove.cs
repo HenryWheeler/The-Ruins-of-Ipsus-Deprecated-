@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    class UpdateCameraOnMove: OnMoveProperty
+    class UpdateCameraOnMove: OnMove
     {
-        public override void OnMove(Vector2 initialPosition, Vector2 finalPosition) { Renderer.MoveCamera(entity.GetComponent<Coordinate>().vector2); }
+        public override void Move(Vector2 initialPosition, Vector2 finalPosition) { Renderer.MoveCamera(entity.GetComponent<Vector2>()); }
         public UpdateCameraOnMove() { }
     }
 }

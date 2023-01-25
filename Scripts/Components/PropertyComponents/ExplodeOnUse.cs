@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace TheRuinsOfIpsus
 {
-    class ExplodeOnUse: OnUseProperty
+    class ExplodeOnUse: OnUse
     {
-        public override void OnUse(Entity entity, Vector2 target = null)
+        public override void Use(Entity entity, Vector2 target = null)
         {
-            if (entity.display)
+            if (entity.GetComponent<PlayerComponent>() != null)
             {
                 if (range == 0)
                 {
-                    SpecialEffectManager.Explosion(entity, entity.GetComponent<Coordinate>(), strength);
+                    SpecialEffectManager.Explosion(entity, entity.GetComponent<Vector2>(), strength);
                 }
                 else if (target == null)
                 {
@@ -24,7 +24,7 @@ namespace TheRuinsOfIpsus
                 else
                 {
                     this.entity.GetComponent<Usable>().DisplayMessage(entity);
-                    SpecialEffectManager.Explosion(entity, new Coordinate(target), strength);
+                    SpecialEffectManager.Explosion(entity, target, strength);
                     entity.GetComponent<TurnFunction>().EndTurn();
                 }
             }
@@ -32,12 +32,12 @@ namespace TheRuinsOfIpsus
             {
                 if (range == 0 || target == null)
                 {
-                    SpecialEffectManager.Explosion(entity, entity.GetComponent<Coordinate>(), strength);
+                    SpecialEffectManager.Explosion(entity, entity.GetComponent<Vector2>(), strength);
                 }
                 else
                 {
                     this.entity.GetComponent<Usable>().DisplayMessage(entity);
-                    SpecialEffectManager.Explosion(entity, new Coordinate(target), strength);
+                    SpecialEffectManager.Explosion(entity, target, strength);
                     entity.GetComponent<TurnFunction>().EndTurn();
                 }
             }
@@ -52,9 +52,9 @@ namespace TheRuinsOfIpsus
         }
         public ExplodeOnUse() { }
     }
-    class ExplodeOnThrow : OnThrowProperty
+    class ExplodeOnThrow : OnThrow
     {
-        public override void OnThrow(Entity user, Coordinate landingSite) 
+        public override void Throw(Entity user, Vector2 landingSite) 
         { 
             SpecialEffectManager.Explosion(entity, landingSite, strength); 
         }

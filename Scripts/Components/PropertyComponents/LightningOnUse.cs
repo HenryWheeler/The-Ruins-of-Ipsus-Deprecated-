@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public class LightningOnUse: OnUseProperty
+    public class LightningOnUse: OnUse
     {
-        public override void OnUse(Entity entity, Vector2 target = null)
+        public override void Use(Entity entity, Vector2 target = null)
         {
-            if (entity.display)
+            if (entity.GetComponent<PlayerComponent>() != null)
             {
                 if (target == null)
                 {
@@ -21,7 +21,7 @@ namespace TheRuinsOfIpsus
                 else
                 {
                     this.entity.GetComponent<Usable>().DisplayMessage(entity);
-                    SpecialEffectManager.Lightning(entity, new Coordinate(target), strength, range);
+                    SpecialEffectManager.Lightning(entity, target, strength, range);
                     entity.GetComponent<TurnFunction>().EndTurn();
                 }
             }

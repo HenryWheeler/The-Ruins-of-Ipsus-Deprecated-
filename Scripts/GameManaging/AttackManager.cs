@@ -15,7 +15,7 @@ namespace TheRuinsOfIpsus
             { 
                 Attack(attacker, target, new Entity(new List<Component>() 
                 { 
-                    new AttackFunction("1-1-1-0-0", "Bludgeoning"), 
+                    new AttackFunction(1, 1, 0, 0, "Bludgeoning"), 
                     new Description("Fists", "Fists") 
                 })); 
             }
@@ -24,26 +24,26 @@ namespace TheRuinsOfIpsus
                 Attack(attacker, target, attacker.GetComponent<Inventory>().ReturnSlot("Weapon").item);
             }
         }
-        public static void ThrowWeapon(Entity attacker, Coordinate target, Entity weapon)
+        public static void ThrowWeapon(Entity attacker, Vector2 target, Entity weapon)
         {
             try
             {
-                int time = CMath.Distance(attacker.GetComponent<Coordinate>(), target);
+                int time = CMath.Distance(attacker.GetComponent<Vector2>(), target);
                 Entity particle2 = new Entity(new List<Component>
                         {
-                            new Coordinate(0, 0),
+                            new Vector2(0, 0),
                             new Draw("Yellow", "Black", 'X'),
                             new ParticleComponent(time, 2, "None", 0, new Draw[] { new Draw("Yellow", "Black", 'X'), new Draw("Black", "Black", 'X') }),
                         });
-                Renderer.AddParticle(target.vector2.x, target.vector2.y, particle2);
+                Renderer.AddParticle(target.x, target.y, particle2);
 
                 Entity particle = new Entity(new List<Component>
                         {
-                            new Coordinate(0, 0),
+                            new Vector2(0, 0),
                             weapon.GetComponent<Draw>(),
-                            new ParticleComponent(time, 2, "Target", 0, new Draw[] { weapon.GetComponent<Draw>() }, target.vector2, true),
+                            new ParticleComponent(time, 2, "Target", 0, new Draw[] { weapon.GetComponent<Draw>() }, target, true),
                         });
-                Vector2 vector2 = attacker.GetComponent<Coordinate>().vector2;
+                Vector2 vector2 = attacker.GetComponent<Vector2>();
                 Renderer.AddParticle(vector2.x, vector2.y, particle);
 
                 if (weapon.GetComponent<Equippable>() != null && weapon.GetComponent<Equippable>().equipped)
@@ -79,9 +79,9 @@ namespace TheRuinsOfIpsus
                         Log.AddToStoredLog($"{attacker.GetComponent<Description>().name} have thrown {pronounSet.possesive} {weapon.GetComponent<Description>().name}!");
                     }
                 }
-                if (World.GetTraversable(target.vector2).actorLayer != null)
+                if (World.tiles[target.x, target.y].actorLayer != null)
                 {
-                    Attack(attacker, World.GetTraversable(target.vector2).actorLayer, weapon, false);
+                    Attack(attacker, World.tiles[target.x, target.y].actorLayer, weapon, false);
                 }
 
                 InventoryManager.RemoveFromInventory(attacker, weapon);
@@ -99,50 +99,46 @@ namespace TheRuinsOfIpsus
             if (attacker != null && target != null && weapon != null && weapon.GetComponent<AttackFunction>() != null)
             {
                 AttackFunction attackFunction = weapon.GetComponent<AttackFunction>();
-                string[] parts = attackFunction.details.Split('-');
-                int numberOfAttacks = int.Parse(parts[0]);
 
-                for (int i = 0; i < numberOfAttacks; i++)
+                if (World.random.Next(0, 20) + attackFunction.toHitModifier + attacker.GetComponent<Stats>().strength >= target.GetComponent<Stats>().ac)
                 {
-                    if (World.random.Next(0, 20) + int.Parse(parts[4]) + attacker.GetComponent<Stats>().strength >= target.GetComponent<Stats>().ac)
+                    if (target.GetComponent<Stats>().immunities.Contains(attackFunction.dmgType))
                     {
-                        if (target.GetComponent<Stats>().immunities.Contains(attackFunction.dmgType))
+                        if (attacker.GetComponent<PlayerComponent>() != null)
                         {
-                            if (attacker.display)
-                            {
-                                Log.Add($"Your {weapon.GetComponent<Description>().name} deals the {target.GetComponent<Description>().name} no harm. The {target.GetComponent<Description>().name} is immune to {attackFunction.dmgType}.");
-                            }
-                        }
-                        else
-                        {
-                            int dmg = 0;
-                            for (int d = 0; d < int.Parse(parts[1]); d++)
-                            {
-                                dmg += World.random.Next(1, int.Parse(parts[2]));
-                            }
-                            dmg += int.Parse(parts[3]);
-                            SpecialComponentManager.TriggerOnHit(weapon, attacker, target, dmg, attackFunction.dmgType, true);
-                            SpecialComponentManager.TriggerOnHit(attacker, attacker, target, dmg, null, true);
-
-                            if (target.GetComponent<Stats>().weaknesses.Contains(attackFunction.dmgType))
-                            {
-                                if (attacker.display)
-                                {
-                                    Log.Add($"Your {weapon.GetComponent<Description>().name} deals the {target.GetComponent<Description>().name} major harm! The {target.GetComponent<Description>().name} is weak to {attackFunction.dmgType}!");
-                                }
-                                target.GetComponent<Harmable>().Hit(dmg * 2, attackFunction.dmgType, weapon.GetComponent<Description>().name, attacker);
-                            }
-                            else
-                            {
-                                target.GetComponent<Harmable>().Hit(dmg, attackFunction.dmgType, weapon.GetComponent<Description>().name, attacker);
-                            }
+                            Log.Add($"Your {weapon.GetComponent<Description>().name} deals the {target.GetComponent<Description>().name} no harm. The {target.GetComponent<Description>().name} is immune to {attackFunction.dmgType}.");
                         }
                     }
                     else
                     {
-                        Log.Add($"{attacker.GetComponent<Description>().name} missed with {attacker.GetComponent<PronounSet>().possesive} {weapon.GetComponent<Description>().name}.");
+                        int dmg = 0;
+                        for (int d = 0; d < attackFunction.die1; d++)
+                        {
+                            dmg += World.random.Next(1, attackFunction.die2);
+                        }
+                        dmg += attackFunction.damageModifier;
+
+                        TriggerOnHit(attackFunction, attacker, target, dmg, attackFunction.dmgType);
+
+                        if (target.GetComponent<Stats>().weaknesses.Contains(attackFunction.dmgType))
+                        {
+                            if (attacker.GetComponent<PlayerComponent>() != null)
+                            {
+                                Log.Add($"Your {weapon.GetComponent<Description>().name} deals the {target.GetComponent<Description>().name} major harm! The {target.GetComponent<Description>().name} is weak to {attackFunction.dmgType}!");
+                            }
+                            target.GetComponent<Harmable>().Hit(dmg * 2, attackFunction.dmgType, weapon.GetComponent<Description>().name, attacker);
+                        }
+                        else
+                        {
+                            target.GetComponent<Harmable>().Hit(dmg, attackFunction.dmgType, weapon.GetComponent<Description>().name, attacker);
+                        }
                     }
                 }
+                else
+                {
+                    Log.Add($"{attacker.GetComponent<Description>().name} missed with {attacker.GetComponent<PronounSet>().possesive} {weapon.GetComponent<Description>().name}.");
+                }
+
                 if (endTurn)
                 { 
                     attacker.GetComponent<TurnFunction>().EndTurn(); 
@@ -161,37 +157,31 @@ namespace TheRuinsOfIpsus
                 {
                     if (target.GetComponent<Stats>().immunities.Contains(attackFunction.dmgType))
                     {
-                        if (attacker.display)
+                        if (attacker.GetComponent<PlayerComponent>() != null)
                         {
                             Log.Add($"Your {attackName} deals the {target.GetComponent<Description>().name} no harm. The {target.GetComponent<Description>().name} is immune to {attackFunction.dmgType}.");
                         }
                     }
                     else
                     {
-                        string[] parts = attackFunction.details.Split('-');
-                        int numberOfAttacks = int.Parse(parts[0]);
-
-                        for (int i = 0; i < numberOfAttacks; i++)
+                        int dmg = 0;
+                        for (int d = 0; d < attackFunction.die1; d++)
                         {
-                            int dmg = 0;
-                            for (int d = 0; d < int.Parse(parts[1]); d++)
-                            {
-                                dmg += World.random.Next(1, int.Parse(parts[2]));
-                            }
-                            dmg += int.Parse(parts[3]);
+                            dmg += World.random.Next(1, attackFunction.die2);
+                        }
+                        dmg += attackFunction.damageModifier;
 
-                            if (target.GetComponent<Stats>().weaknesses.Contains(attackFunction.dmgType))
+                        if (target.GetComponent<Stats>().weaknesses.Contains(attackFunction.dmgType))
+                        {
+                            if (attacker.GetComponent<PlayerComponent>() != null)
                             {
-                                if (attacker.display)
-                                {
-                                    Log.Add($"Your {attackName} deals the {target.GetComponent<Description>().name} major harm! The {target.GetComponent<Description>().name} is weak to {attackFunction.dmgType}!");
-                                }
-                                target.GetComponent<Harmable>().Hit(dmg * 2, attackFunction.dmgType, attackName, attacker);
+                                Log.Add($"Your {attackName} deals the {target.GetComponent<Description>().name} major harm! The {target.GetComponent<Description>().name} is weak to {attackFunction.dmgType}!");
                             }
-                            else
-                            {
-                                target.GetComponent<Harmable>().Hit(dmg, attackFunction.dmgType, attackName, attacker);
-                            }
+                            target.GetComponent<Harmable>().Hit(dmg * 2, attackFunction.dmgType, attackName, attacker);
+                        }
+                        else
+                        {
+                            target.GetComponent<Harmable>().Hit(dmg, attackFunction.dmgType, attackName, attacker);
                         }
                     }
                 }
@@ -215,6 +205,13 @@ namespace TheRuinsOfIpsus
             {
                 Log.Add($"Cannot attack because {e.Message} is null");
                 attacker.GetComponent<TurnFunction>().EndTurn();
+            }
+        }
+        public static void TriggerOnHit(AttackFunction attackFunction, Entity attacker, Entity target, int dmg, string dmgType)
+        {
+            foreach (OnHit component in attackFunction.onHitComponents)
+            {
+                component.Hit(attacker, target, dmg, dmgType);
             }
         }
     }

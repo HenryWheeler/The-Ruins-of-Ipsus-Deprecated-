@@ -14,10 +14,10 @@ namespace TheRuinsOfIpsus
         public static int y { get; set; }
         public static bool looking = false;
         public Look(Entity _player) { player = _player; }
-        public static void StartLooking(Coordinate coordinate) 
+        public static void StartLooking(Vector2 coordinate) 
         { 
-            x = coordinate.vector2.x; 
-            y = coordinate.vector2.y;
+            x = coordinate.x; 
+            y = coordinate.y;
             looking = true; 
             player.GetComponent<TurnFunction>().turnActive = false; 
             Move(0, 0); 
@@ -26,9 +26,9 @@ namespace TheRuinsOfIpsus
         public static void StopLooking() 
         { 
             player.GetComponent<TurnFunction>().turnActive = true;
-            Renderer.MoveCamera(player.GetComponent<Coordinate>().vector2);
+            Renderer.MoveCamera(player.GetComponent<Vector2>());
             looking = false;
-            World.GetTraversable(new Vector2(x, y)).sfxLayer = null;
+            World.tiles[x, y].sfxLayer = null;
             Action.PlayerAction(player);
             StatManager.UpdateStats(player);
         }
@@ -36,9 +36,9 @@ namespace TheRuinsOfIpsus
         {
             if (CMath.CheckBounds(x + _x, y + _y))
             {
-                World.GetTraversable(new Vector2(x, y)).sfxLayer = null;
+                World.tiles[x, y].sfxLayer = null;
                 x += _x; y += _y;
-                Traversable traversable = World.GetTraversable(new Vector2(x, y));
+                Traversable traversable = World.tiles[x, y];
                 Description description = null;
                 if (!World.tiles[x, y].entity.GetComponent<Visibility>().visible) 
                 {
@@ -167,7 +167,7 @@ namespace TheRuinsOfIpsus
         {
             return new Entity(new List<Component> 
             { 
-                new Coordinate(x, y), 
+                new Vector2(x, y), 
                 new Draw(fColor, "Black", character) 
             });
         }

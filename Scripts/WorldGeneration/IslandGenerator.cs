@@ -45,7 +45,7 @@ namespace TheRuinsOfIpsus
             {
                 if (tile != null && tile.terrainType == 1)
                 {
-                    Vector2 coordinate = tile.entity.GetComponent<Coordinate>().vector2;
+                    Vector2 coordinate = tile.entity.GetComponent<Vector2>();
                     if (WaterCount(coordinate.x, coordinate.y) != 0)
                     {
                         if (World.seed.Next(0, 100) < 50) { SetTile(coordinate.x, coordinate.y, (char)176, "Sandy Shore", "A grainy shore of white sand.", "Light_Gray", "Dark_Yellow", false, 1); }
@@ -99,7 +99,7 @@ namespace TheRuinsOfIpsus
             {
                 for (int y = sY - 1; y <= sY + 1; y++)
                 {
-                    if (x != sX || y != sY) { if (CMath.CheckBounds(x, y) && World.GetTraversable(new Vector2(x, y)).terrainType == 2) { walls++; } }
+                    if (x != sX || y != sY) { if (CMath.CheckBounds(x, y) && World.tiles[x, y].terrainType == 2) { walls++; } }
                 }
             }
 

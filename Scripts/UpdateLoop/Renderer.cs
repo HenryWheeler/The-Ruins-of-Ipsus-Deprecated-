@@ -76,7 +76,8 @@ namespace TheRuinsOfIpsus
         }
         public static void AddParticle(int x, int y, Entity particle)
         {
-            particle.GetComponent<Coordinate>().vector2 = new Vector2(x, y);
+            particle.GetComponent<Vector2>().x = x;
+            particle.GetComponent<Vector2>().y = y;
             World.tiles[x, y].sfxLayer = particle;
             ParticleComponent particleComponent = particle.GetComponent<ParticleComponent>();
             particles.Add(particleComponent);
@@ -245,7 +246,7 @@ namespace TheRuinsOfIpsus
                 {
                     if (particle != null)
                     {
-                        Vector2 position = particle.GetComponent<Coordinate>().vector2;
+                        Vector2 position = particle.GetComponent<Vector2>();
                         if (CMath.CheckBounds(position.x, position.y))
                         {
                             World.tiles[position.x, position.y].sfxLayer = null;
@@ -300,7 +301,7 @@ namespace TheRuinsOfIpsus
         public bool animation = false;
         public void Progress()
         {
-            Vector2 position = entity.GetComponent<Coordinate>().vector2;
+            Vector2 position = entity.GetComponent<Vector2>();
 
             if (CMath.CheckBounds(position.x, position.y))
             {
@@ -312,8 +313,8 @@ namespace TheRuinsOfIpsus
                 case "Target":
                     {
                         Vector2 newPosition = DijkstraMaps.PathFromMap(position, "ParticlePath");
-                        entity.GetComponent<Coordinate>().vector2.x = newPosition.x;
-                        entity.GetComponent<Coordinate>().vector2.y = newPosition.y;
+                        entity.GetComponent<Vector2>().x = newPosition.x;
+                        entity.GetComponent<Vector2>().y = newPosition.y;
                         break;
                     }
                 case "Wander": 

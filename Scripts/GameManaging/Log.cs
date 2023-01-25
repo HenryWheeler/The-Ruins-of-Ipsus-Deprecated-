@@ -89,7 +89,7 @@ namespace TheRuinsOfIpsus
                 {
                     Entity particle = new Entity(new List<Component>
                                 {
-                                    new Coordinate(0, 0),
+                                    new Vector2(0, 0),
                                     new Draw(color, "Black", characters[i]),
                                     new ParticleComponent(World.random.Next(9, 12), 2, "North", 1, new Draw[] { new Draw(color, "Black", characters[i]) })
                                 });

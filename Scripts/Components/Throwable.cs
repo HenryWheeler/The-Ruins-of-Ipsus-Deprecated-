@@ -9,11 +9,18 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class Throwable : Component
     {
+        public List<OnThrow> onThrowComponents = new List<OnThrow>();
         public bool consumable = true;
         public string throwMessage { get; set; }
-        public void Throw(Entity user, Coordinate landingSite)
+        public void Throw(Entity user, Vector2 landingSite)
         {
-            SpecialComponentManager.TriggerOnThrow(user, entity, landingSite);
+            foreach (OnThrow component in onThrowComponents)
+            {
+                if (component != null)
+                {
+                    component.Throw(user, landingSite);
+                }
+            }
         }
         public Throwable(string _throwMessage) 
         {

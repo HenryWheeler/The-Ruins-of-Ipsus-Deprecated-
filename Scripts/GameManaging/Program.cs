@@ -73,9 +73,8 @@ namespace TheRuinsOfIpsus
         }
         public static void ReloadPlayer(List<Component> components)
         {
-            player = new Entity(components, true);
+            player = new Entity(components);
             rootConsole.Update += player.GetComponent<PlayerComponent>().Update;
-            player.display = true;
 
             List<Entity> entities = new List<Entity>();
             foreach (Entity entity in player.GetComponent<Inventory>().inventory) { if (entity != null) { entities.Add(entity); } }
@@ -84,13 +83,13 @@ namespace TheRuinsOfIpsus
             entities.Clear();
             foreach (EquipmentSlot entity in player.GetComponent<Inventory>().equipment) { if (entity != null && entity.item != null) { entities.Add(entity.item); } }
             foreach (Entity id in entities) { new Entity(id).GetComponent<Equippable>().Equip(player); } 
-            Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
+            Vector2 vector2 = player.GetComponent<Vector2>();
             World.tiles[vector2.x, vector2.y].actorLayer = player;
             StatManager.UpdateStats(player);
             TurnManager.AddActor(player.GetComponent<TurnFunction>());
             Action.PlayerAction(player);
             ShadowcastFOV.Compute(vector2, player.GetComponent<Stats>().sight);
-            player.GetComponent<UpdateCameraOnMove>().OnMove(vector2, vector2);
+            player.GetComponent<UpdateCameraOnMove>().Move(vector2, vector2);
             player.GetComponent<TurnFunction>().StartTurn();
 
             EntityManager.AddEntity(player);
@@ -98,9 +97,8 @@ namespace TheRuinsOfIpsus
         public static void CreateNewPlayer()
         {
             player = new Entity();
-            player.display = true;
             player.AddComponent(new ID(0));
-            player.AddComponent(new Coordinate(0, 0));
+            player.AddComponent(new Vector2(0, 0));
             player.AddComponent(new Draw("White", "Black", '@'));
             player.AddComponent(new Description("You", "It's you."));
             player.AddComponent(PronounReferences.pronounSets["Player"]);
@@ -114,20 +112,20 @@ namespace TheRuinsOfIpsus
             player.AddComponent(new PlayerComponent(rootConsole));
             Entity startingWeapon = new Entity(new List<Component>() 
             {
-                new Coordinate(0, 0),
+                new Vector2(0, 0),
                 new ID(1100),
                 new Draw("Orange", "Black", '!'),
                 new Description("Potion of Orange*Explosion", "The label reads: 'Do Not Drink'."),
                 new Usable("The potion explodes in a Red*fiery burst!"),
                 new Throwable("The potion explodes in a Red*fiery burst!"),
-                new ExplodeOnUse(8, 0),
-                new ExplodeOnThrow(8),
+                new ExplodeOnUse(4, 0),
+                new ExplodeOnThrow(4),
             });
             InventoryManager.AddToInventory(player, startingWeapon);
 
             Entity testScrollOfLightning = new Entity(new List<Component>()
             {
-                new Coordinate(0, 0),
+                new Vector2(0, 0),
                 new ID(1300),
                 new Draw("Yellow", "Black", '?'),
                 new Description("Scroll of Yellow*Lightning", "This scroll is carved with Yellow*yellow Yellow*runes onto a vellum of human skin."),
@@ -142,7 +140,7 @@ namespace TheRuinsOfIpsus
 
             Entity testMagicMappingScroll = new Entity(new List<Component>()
             {
-                new Coordinate(0, 0),
+                new Vector2(0, 0),
                 new ID(1301),
                 new Draw("Cyan", "Black", '?'),
                 new Description("Scroll of Cyan*Mapping", "This scroll seems as if lighter than air and feels charged with unearthly knowledge."),
@@ -156,7 +154,7 @@ namespace TheRuinsOfIpsus
 
             Entity djinnInABottle = new Entity(new List<Component>()
             {
-                new Coordinate(0, 0),
+                new Vector2(0, 0),
                 new ID(1101),
                 new Draw("Cyan", "Black", '!'),
                 new Description("Cyan*Djinn in a Bottle", "This glass bottle is filled with a furious Cyan*Djinn."),
@@ -172,7 +170,7 @@ namespace TheRuinsOfIpsus
 
             Entity testPotionOfDragonsFire = new Entity(new List<Component>()
             {
-                new Coordinate(0, 0),
+                new Vector2(0, 0),
                 new ID(1102),
                 new Draw("Red", "Black", '!'),
                 new Description("Potion of Red*Dragon's Red*Fire", "The label reads: 'Breathe with the fire of Red*Dragons!'"),
@@ -208,15 +206,15 @@ namespace TheRuinsOfIpsus
             EntityManager.LoadAllEntities();
             World world = new World(gameMapWidth, gameMapHeight, saveData.depth, saveData.seed);
 
-            foreach (Entity actor in saveData.actors) { if (actor != null) { Entity entity = EntityManager.ReloadEntity(actor); World.GetTraversable(entity.GetComponent<Coordinate>().vector2).actorLayer = entity; } }
-            foreach (Entity item in saveData.items) { if (item != null) { Entity entity = EntityManager.ReloadEntity(item); World.GetTraversable(entity.GetComponent<Coordinate>().vector2).itemLayer = entity; } }
-            foreach (Entity terrain in saveData.terrain) { if (terrain != null) { Entity entity = EntityManager.ReloadEntity(terrain); World.GetTraversable(entity.GetComponent<Coordinate>().vector2).obstacleLayer = entity; } }
-            foreach (Traversable tile in World.tiles) { if (tile != null && tile.entity != null) { Vector2 vector2 = tile.entity.GetComponent<Coordinate>().vector2; if (saveData.visibility[vector2.x, vector2.y] != null) { tile.entity.RemoveComponent(tile.entity.GetComponent<Visibility>()); tile.entity.AddComponent(saveData.visibility[vector2.x, vector2.y]); } } }
+            foreach (Entity actor in saveData.actors) { if (actor != null) { Entity entity = EntityManager.ReloadEntity(actor); World.tiles[entity.GetComponent<Vector2>().x, entity.GetComponent<Vector2>().y].actorLayer = entity; } }
+            foreach (Entity item in saveData.items) { if (item != null) { Entity entity = EntityManager.ReloadEntity(item); World.tiles[entity.GetComponent<Vector2>().x, entity.GetComponent<Vector2>().y].itemLayer = entity; } }
+            foreach (Entity terrain in saveData.terrain) { if (terrain != null) { Entity entity = EntityManager.ReloadEntity(terrain); World.tiles[entity.GetComponent<Vector2>().x, entity.GetComponent<Vector2>().y].obstacleLayer = entity; } }
+            foreach (Traversable tile in World.tiles) { if (tile != null && tile.entity != null) { Vector2 vector2 = tile.entity.GetComponent<Vector2>(); if (saveData.visibility[vector2.x, vector2.y] != null) { tile.entity.RemoveComponent(tile.entity.GetComponent<Visibility>()); tile.entity.AddComponent(saveData.visibility[vector2.x, vector2.y]); } } }
 
             ReloadPlayer(saveData.player.components);
             LoadPlayerFunctions(player);
             RecordKeeper.record = saveData.records;
-            Renderer.MoveCamera(player.GetComponent<Coordinate>().vector2);
+            Renderer.MoveCamera(player.GetComponent<Vector2>());
             Log.Add("Welcome to the Ruins of Ipsus");
             Log.DisplayLog();
             gameActive = true;

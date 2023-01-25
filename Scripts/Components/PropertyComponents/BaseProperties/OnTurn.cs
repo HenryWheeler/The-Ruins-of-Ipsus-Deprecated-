@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public abstract class OnTurnProperty : Component
+    public abstract class OnTurn : Component
     {
         public bool start { get; set; }
-        public abstract void OnTurn();
-        public OnTurnProperty() { }
+        public abstract void Turn();
+        public OnTurn ReturnBase() { return this; }
+        public OnTurn() { }
     }
 }

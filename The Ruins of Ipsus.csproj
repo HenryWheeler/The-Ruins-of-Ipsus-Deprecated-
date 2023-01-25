@@ -56,6 +56,7 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <None Include=".editorconfig" />
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
@@ -129,7 +130,7 @@
     <Compile Include="Scripts\Components\AttackFunction.cs" />
     <Compile Include="Scripts\Components\Commerce.cs" />
     <Compile Include="Scripts\Components\Component.cs" />
-    <Compile Include="Scripts\Components\Coordinate.cs" />
+    <Compile Include="Scripts\Components\Vector2.cs" />
     <Compile Include="Scripts\Components\Description.cs" />
     <Compile Include="Scripts\Components\DoorFunction.cs" />
     <Compile Include="Scripts\Components\Faction.cs" />
@@ -143,13 +144,13 @@
     <Compile Include="Scripts\Components\Inventory.cs" />
     <Compile Include="Scripts\Components\PlayerComponent.cs" />
     <Compile Include="Scripts\Components\PronounSet.cs" />
-    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnThrowProperty.cs" />
-    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnUseProperty.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnThrow.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnUse.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\ExplodeOnUse.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\InflictPoisonOnHit.cs" />
-    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnHitProperty.cs" />
-    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnMoveProperty.cs" />
-    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnTurnProperty.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnHit.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnMove.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\BaseProperties\OnTurn.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\InflictStoningOnHit.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\BreathWeaponOnUse.cs" />
     <Compile Include="Scripts\Components\PropertyComponents\LightningOnUse.cs" />
@@ -171,7 +172,6 @@
     <Compile Include="Scripts\GameManaging\RangeModels.cs" />
     <Compile Include="Scripts\GameManaging\RecordKeeper.cs" />
     <Compile Include="Scripts\GameManaging\SpawnTables.cs" />
-    <Compile Include="Scripts\GameManaging\SpecialComponentManager.cs" />
     <Compile Include="Scripts\GameManaging\SpecialEffectManager.cs" />
     <Compile Include="Scripts\WorldGeneration\VerdantCaveGenerator.cs" />
     <Compile Include="Scripts\WorldGeneration\TestingGenerator.cs" />

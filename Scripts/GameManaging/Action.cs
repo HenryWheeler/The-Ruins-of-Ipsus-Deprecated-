@@ -39,44 +39,44 @@ namespace TheRuinsOfIpsus
             {
                 switch (key)
                 {
-                    case RLKey.Up: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Coordinate>().vector2, new Vector2(0, -1))); break;
-                    case RLKey.Down: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Coordinate>().vector2, new Vector2(0, 1))); break;
-                    case RLKey.Left: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Coordinate>().vector2, new Vector2(-1, 0))); break;
-                    case RLKey.Right:  player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Coordinate>().vector2, new Vector2(1, 0))); break;
-                    case RLKey.Keypad8: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Coordinate>().vector2, new Vector2(0, -1))); break;
-                    case RLKey.Keypad9: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Coordinate>().vector2, new Vector2(1, -1))); break;
-                    case RLKey.Keypad6: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Coordinate>().vector2, new Vector2(1, 0))); break;
-                    case RLKey.Keypad3: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Coordinate>().vector2, new Vector2(1, 1))); break;
-                    case RLKey.Keypad2: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Coordinate>().vector2, new Vector2(0, 1))); break;
-                    case RLKey.Keypad1: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Coordinate>().vector2, new Vector2(-1, 1))); break;
-                    case RLKey.Keypad4: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Coordinate>().vector2, new Vector2(-1, 0))); break;
-                    case RLKey.Keypad7: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Coordinate>().vector2, new Vector2(-1, -1))); break;
+                    case RLKey.Up: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, -1))); break;
+                    case RLKey.Down: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, 1))); break;
+                    case RLKey.Left: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, 0))); break;
+                    case RLKey.Right:  player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, 0))); break;
+                    case RLKey.Keypad8: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, -1))); break;
+                    case RLKey.Keypad9: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, -1))); break;
+                    case RLKey.Keypad6: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, 0))); break;
+                    case RLKey.Keypad3: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, 1))); break;
+                    case RLKey.Keypad2: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, 1))); break;
+                    case RLKey.Keypad1: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, 1))); break;
+                    case RLKey.Keypad4: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, 0))); break;
+                    case RLKey.Keypad7: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, -1))); break;
                     case RLKey.KeypadMinus:
                         {
-                            Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
+                            Vector2 vector2 = player.GetComponent<Vector2>();
                             if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '<') { World.GenerateNewFloor(true); }
                             break;
                         }
                     case RLKey.KeypadPlus:
                         {
-                            Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
+                            Vector2 vector2 = player.GetComponent<Vector2>();
                             if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '>') { World.GenerateNewFloor(false); }
                             break;
                         }
                     case RLKey.Plus:
                         {
-                            Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
+                            Vector2 vector2 = player.GetComponent<Vector2>();
                             if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '>') { World.GenerateNewFloor(true); }
                             break;
                         }
                     case RLKey.Minus:
                         {
-                            Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
+                            Vector2 vector2 = player.GetComponent<Vector2>();
                             if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '<') { World.GenerateNewFloor(false); }
                             break;
                         }
                     case RLKey.Period: player.GetComponent<TurnFunction>().EndTurn(); break;
-                    case RLKey.L: Look.StartLooking(player.GetComponent<Coordinate>()); break;
+                    case RLKey.L: Look.StartLooking(player.GetComponent<Vector2>()); break;
                     case RLKey.I: InventoryManager.OpenInventory(); break;
                     case RLKey.G: InventoryManager.GetItem(player); Log.DisplayLog(); break;
                     case RLKey.J: SaveDataManager.CreateSave(); Program.gameActive = false; Renderer.running = false; Program.rootConsole.Close(); break;
@@ -85,7 +85,7 @@ namespace TheRuinsOfIpsus
                         {
                             if (tile != null)
                             {
-                                Vector2 vector2 = tile.entity.GetComponent<Coordinate>().vector2;
+                                Vector2 vector2 = tile.entity.GetComponent<Vector2>();
                                 ShadowcastFOV.SetVisible(vector2, true, 1000, vector2.x, vector2.y, true);
                             }
                         }
@@ -314,7 +314,13 @@ namespace TheRuinsOfIpsus
                 Vector2 vector2 = TargetReticle.ReturnCoords(true);
                 if (vector2 != null)
                 {
-                    SpecialComponentManager.TriggerOnUse(player, targetWeapon, vector2);
+                    foreach (OnUse component in targetWeapon.GetComponent<Usable>().onUseComponents)
+                    {
+                        if (component != null)
+                        {
+                            component.Use(player, vector2);
+                        }
+                    }
                 }
             }
         }
@@ -345,7 +351,7 @@ namespace TheRuinsOfIpsus
         {
             interactionText = "";
             interactionKeyText = "";
-            Traversable traversable = World.GetTraversable(chosenLocation);
+            Traversable traversable = World.tiles[chosenLocation.x, chosenLocation.y];
             if (type == 0) 
             { chosenEntity = traversable.actorLayer; }
             else if (type == 1) 
@@ -381,9 +387,9 @@ namespace TheRuinsOfIpsus
         }
         public static void ChooseDirection(Entity player, int x, int y)
         {
-            Vector2 vector2 = player.GetComponent<Coordinate>().vector2;
+            Vector2 vector2 = player.GetComponent<Vector2>();
             chosenLocation = new Vector2(vector2.x + x, vector2.y + y);
-            Traversable traversable = World.GetTraversable(chosenLocation);
+            Traversable traversable = World.tiles[chosenLocation.x, chosenLocation.y];
             interactionKeyText = "";
             int interactions = 0;
             if (x != 0 || y != 0)

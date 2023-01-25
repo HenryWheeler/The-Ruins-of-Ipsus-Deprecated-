@@ -9,6 +9,7 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class Movement: Component
     {
+        public List<OnMove> onMoveComponents = new List<OnMove>();
         public List<int> moveTypes = new List<int>();
         public void Move(Vector2 newPosition)
         {
@@ -42,39 +43,42 @@ namespace TheRuinsOfIpsus
             }
             else
             {
-                Vector2 originalPosition = entity.GetComponent<Coordinate>().vector2;
-                Traversable newTraversable = World.GetTraversable(newPosition);
+                Vector2 originalPosition = entity.GetComponent<Vector2>();
+                Traversable newTraversable = World.tiles[newPosition.x, newPosition.y];
                 if (CMath.CheckBounds(newPosition.x, newPosition.y) && moveTypes.Contains(newTraversable.terrainType))
                 {
                     if (newTraversable.actorLayer == null)
                     {
-                        World.GetTraversable(originalPosition).actorLayer = null;
-                        entity.GetComponent<Coordinate>().vector2 = newPosition;
+                        World.tiles[originalPosition.x, originalPosition.y].actorLayer = null;
+                        entity.GetComponent<Vector2>().x = newPosition.x;
+                        entity.GetComponent<Vector2>().y = newPosition.y;
                         newTraversable.actorLayer = entity;
-                        SpecialComponentManager.TriggerOnMove(entity, originalPosition, newPosition);
+                        TriggerOnMove(originalPosition, newPosition);
                         if (newTraversable.obstacleLayer != null)
-                        { 
-                            SpecialComponentManager.TriggerOnMove(newTraversable.obstacleLayer, originalPosition, newPosition);
+                        {
+                            newTraversable.obstacleLayer.GetComponent<Movement>().TriggerOnMove(originalPosition, newPosition);
                         }
                         entity.GetComponent<TurnFunction>().EndTurn();
                         EntityManager.UpdateMap(entity);
                     }
                     else if (CMath.ReturnAI(newTraversable.actorLayer) != null && !CMath.ReturnAI(newTraversable.actorLayer).hatedEntities.Contains(entity.GetComponent<Faction>().faction))
                     {
-                        World.GetTraversable(originalPosition).actorLayer = newTraversable.actorLayer;
-                        newTraversable.actorLayer.GetComponent<Coordinate>().vector2 = entity.GetComponent<Coordinate>().vector2;
+                        World.tiles[originalPosition.x, originalPosition.y].actorLayer = newTraversable.actorLayer;
+                        newTraversable.actorLayer.GetComponent<Vector2>().x = entity.GetComponent<Vector2>().x;
+                        newTraversable.actorLayer.GetComponent<Vector2>().y = entity.GetComponent<Vector2>().y;
                         EntityManager.UpdateMap(newTraversable.actorLayer);
-                        entity.GetComponent<Coordinate>().vector2 = newPosition;
+                        entity.GetComponent<Vector2>().x = newPosition.x;
+                        entity.GetComponent<Vector2>().y = newPosition.y;
                         newTraversable.actorLayer = entity;
-                        SpecialComponentManager.TriggerOnMove(entity, originalPosition, newPosition);
+                        TriggerOnMove(originalPosition, newPosition);
                         if (newTraversable.obstacleLayer != null)
                         {
-                            SpecialComponentManager.TriggerOnMove(newTraversable.obstacleLayer, originalPosition, newPosition);
+                            newTraversable.obstacleLayer.GetComponent<Movement>().TriggerOnMove(originalPosition, newPosition);
                         }
                         entity.GetComponent<TurnFunction>().EndTurn();
                         EntityManager.UpdateMap(entity);
                     }
-                    else if (entity.display) 
+                    else if (entity.GetComponent<PlayerComponent>() != null) 
                     { 
                         AttackManager.MeleeAllStrike(entity, newTraversable.actorLayer); 
                     }
@@ -83,7 +87,7 @@ namespace TheRuinsOfIpsus
                         entity.GetComponent<TurnFunction>().EndTurn();
                     }
                 }
-                else if (entity.display) 
+                else if (entity.GetComponent<PlayerComponent>() != null) 
                 { 
                     Log.Add("You cannot move there.");
                     Log.DisplayLog();
@@ -91,6 +95,16 @@ namespace TheRuinsOfIpsus
                 else 
                 {
                     entity.GetComponent<TurnFunction>().EndTurn(); 
+                }
+            }
+        }
+        public void TriggerOnMove(Vector2 initialPosition, Vector2 finalPosition)
+        {
+            foreach (OnMove component in onMoveComponents)
+            {
+                if (component != null)
+                {
+                    component.Move(initialPosition, finalPosition);
                 }
             }
         }

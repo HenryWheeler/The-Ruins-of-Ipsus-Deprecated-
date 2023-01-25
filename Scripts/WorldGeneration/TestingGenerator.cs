@@ -10,9 +10,6 @@ namespace TheRuinsOfIpsus
 {
     public class TestingGenerator: AGenerator
     {
-        private int roomsToGenerate = 15;
-        private int minRoomSize = 5;
-        private int maxRoomSize = 12;
         private int wallsNeeded = 4;
         public void CreateMap(int _mapWidth, int _mapHeight, int strength)
         {
@@ -53,10 +50,10 @@ namespace TheRuinsOfIpsus
                     if (World.seed.Next(0, 10000) > 19995)
                     {
                         TurnFunction function = new TurnFunction();
-                        EntityManager.CreateEntity(tile.entity.GetComponent<Coordinate>().vector2, new Entity(new List<Component>()
+                        EntityManager.CreateEntity(tile.entity.GetComponent<Vector2>(), new Entity(new List<Component>()
                             {
                                 new ID(1),
-                                tile.entity.GetComponent<Coordinate>(),
+                                tile.entity.GetComponent<Vector2>(),
                                 new Draw("Red", "Black", (char)(current + 48)),
                                 new Description("Test Entity", "Testing."),
                                 PronounReferences.pronounSets["Nueter"],
@@ -78,10 +75,10 @@ namespace TheRuinsOfIpsus
                     } else if (World.seed.Next(0, 15000) > 14997)
                     {
                         TurnFunction function = new TurnFunction();
-                        EntityManager.CreateEntity(tile.entity.GetComponent<Coordinate>().vector2, new Entity(new List<Component>()
+                        EntityManager.CreateEntity(tile.entity.GetComponent<Vector2>(), new Entity(new List<Component>()
                             {
                                 new ID(1),
-                                tile.entity.GetComponent<Coordinate>(),
+                                tile.entity.GetComponent<Vector2>(),
                                 new Draw("Red", "Black", 'D'),
                                 new Description("Red*Red Red*Dragon", "A terrifying sight, the hulking form of one of the ancient tyrant drakes stands before you. Smoke billowing out of every nostril the ancient Red*Red Red*Dragon is a fearsome foe indeed."),
                                 PronounReferences.pronounSets["Nueter"],
@@ -138,7 +135,7 @@ namespace TheRuinsOfIpsus
             {
                 for (int y = sY - 1; y <= sY + 1; y++)
                 {
-                   if (x != sX || y != sY) { if (CMath.CheckBounds(x, y) && World.GetTraversable(new Vector2(x, y)).terrainType == 0) { walls++; } }
+                   if (x != sX || y != sY) { if (CMath.CheckBounds(x, y) && World.tiles[x, y].terrainType == 0) { walls++; } }
                 }
             }
 
@@ -174,7 +171,7 @@ namespace TheRuinsOfIpsus
                     if (t >= 0) { y += sign_y; t -= abs_delta_x * 2; }
                     x += sign_x;
                     t += abs_delta_y * 2;
-                    if (World.GetTraversable(new Vector2(x, y)).terrainType != 0)
+                    if (World.tiles[x, y].terrainType != 0)
                     {
                         SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
                         SetTile(x + 1, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
@@ -191,7 +188,7 @@ namespace TheRuinsOfIpsus
                     if (t >= 0) { x += sign_x; t -= abs_delta_y * 2; }
                     y += sign_y;
                     t += abs_delta_x * 2;
-                    if (World.GetTraversable(new Vector2(x, y)).terrainType != 0)
+                    if (World.tiles[x, y].terrainType != 0)
                     {
                         SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);
                         SetTile(x, y + 1, '.', "Stone Floor", "A simple stone floor.", "Brown", "Black", false, 1);

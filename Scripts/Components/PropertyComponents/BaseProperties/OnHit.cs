@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 namespace TheRuinsOfIpsus
 {
     [Serializable]
-    public abstract class OnHitProperty : Component
+    public abstract class OnHit : Component
     {
         public bool attack { get; set; }
-        public abstract void OnHit(Entity attacker, Entity target, int dmg, string type);
-        public OnHitProperty() { }
+        public abstract void Hit(Entity attacker, Entity target, int dmg, string type);
+        public OnHit ReturnBase() { return this; }
+        public OnHit() { }
     }
 }

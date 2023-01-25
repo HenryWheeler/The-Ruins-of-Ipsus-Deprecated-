@@ -9,6 +9,7 @@ namespace TheRuinsOfIpsus
     [Serializable]
     public class TurnFunction: Component
     {
+        public List<OnTurn> onTurnComponents = new List<OnTurn>();
         public bool turnActive = false;
         public float actionLeft { get; set; }
         public void StartTurn()
@@ -16,13 +17,13 @@ namespace TheRuinsOfIpsus
             if (entity != null)
             {
                 turnActive = true;
-                SpecialComponentManager.TriggerTurn(entity, true);
+                TriggerTurnComponents(true);
 
                 if (CMath.ReturnAI(entity) != null) 
                 {
                     CMath.ReturnAI(entity).Process();
                 }
-                else if (entity.display)
+                else if (entity.GetComponent<PlayerComponent>() != null)
                 {
                     Log.DisplayLog();
                     StatManager.UpdateStats(entity);
@@ -36,18 +37,33 @@ namespace TheRuinsOfIpsus
             { 
                 TurnManager.ProgressTurnOrder();
             }
+            entity.ClearCollections();
         }
         public void EndTurn() 
         { 
             turnActive = false;
-            SpecialComponentManager.TriggerTurn(entity, false);
-            if (entity.display)
+            TriggerTurnComponents(false);
+            if (entity.GetComponent<PlayerComponent>() != null)
             {
-                Vector2 vector3 = entity.GetComponent<Coordinate>().vector2;
+                Vector2 vector3 = entity.GetComponent<Vector2>();
                 ShadowcastFOV.ClearSight();
                 ShadowcastFOV.Compute(vector3, entity.GetComponent<Stats>().sight);
             }
             TurnManager.ProgressActorTurn(this);
+        }
+        public void TriggerTurnComponents(bool start)
+        {
+            foreach (OnTurn component in onTurnComponents)
+            {
+                if (component != null && start && component.start)
+                {
+                    component.Turn();
+                }
+                else if (component != null && !start && !component.start)
+                {
+                    component.Turn();
+                }
+            }
         }
         public TurnFunction() { }
     }

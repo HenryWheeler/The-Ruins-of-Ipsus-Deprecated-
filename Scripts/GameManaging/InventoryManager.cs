@@ -20,12 +20,12 @@ namespace TheRuinsOfIpsus
         public InventoryManager(RLConsole _console, Entity _player) { console = _console; player = _player; }
         public static void GetItem(Entity entity)
         {
-            Vector2 vector2 = entity.GetComponent<Coordinate>().vector2;
-            Traversable traversable = World.GetTraversable(vector2);
+            Vector2 vector2 = entity.GetComponent<Vector2>();
+            Traversable traversable = World.tiles[vector2.x, vector2.y];
             if (traversable.itemLayer != null)
             {
                 Entity itemRef = traversable.itemLayer;
-                if (entity.display)
+                if (entity.GetComponent<PlayerComponent>() != null)
                 {
                     Log.Add($"You picked up the {traversable.itemLayer.GetComponent<Description>().name}.");
 
@@ -38,7 +38,7 @@ namespace TheRuinsOfIpsus
             }
             else 
             { 
-                if (entity.display)
+                if (entity.GetComponent<PlayerComponent>() != null)
                 {
                     Log.Add("There is nothing to pick up.");
                 }
@@ -47,12 +47,12 @@ namespace TheRuinsOfIpsus
         public static void DropItem(Entity entity, Entity item)
         {
             RemoveFromInventory(entity, item);
-            PlaceItem(entity.GetComponent<Coordinate>(), item);
+            PlaceItem(entity.GetComponent<Vector2>(), item);
             if (item.GetComponent<Equippable>() != null && item.GetComponent<Equippable>().equipped) 
             {
                 UnequipItem(entity, item); 
             }
-            if (entity.display) 
+            if (entity.GetComponent<PlayerComponent>() != null) 
             { 
                 CloseInventory(); 
                 Log.Add($"You dropped the {item.GetComponent<Description>().name}."); 
@@ -127,14 +127,14 @@ namespace TheRuinsOfIpsus
                     {
                         UnequipItem(entity, entity.GetComponent<Inventory>().ReturnSlot(item.GetComponent<Equippable>().slot).item);
                         item.GetComponent<Equippable>().Equip(entity);
-                        if (entity.display)
+                        if (entity.GetComponent<PlayerComponent>() != null)
                         {
                             Log.Add($"You equip the {item.GetComponent<Description>().name}.");
                             CloseInventory();
                         }
                         entity.GetComponent<TurnFunction>().EndTurn();
                     }
-                    else if (entity.display)
+                    else if (entity.GetComponent<PlayerComponent>() != null)
                     {
                         Log.Add($"You cannot equip the {item.GetComponent<Description>().name} because the {entity.GetComponent<Inventory>().ReturnSlot(item.GetComponent<Equippable>().slot).item.GetComponent<Description>().name} cannot be unequipped.");
                     }
@@ -142,7 +142,7 @@ namespace TheRuinsOfIpsus
                 else
                 {
                     item.GetComponent<Equippable>().Equip(entity);
-                    if (entity.display)
+                    if (entity.GetComponent<PlayerComponent>() != null)
                     {
                         Log.Add($"You equip the {item.GetComponent<Description>().name}.");
                         CloseInventory();
@@ -150,7 +150,7 @@ namespace TheRuinsOfIpsus
                     entity.GetComponent<TurnFunction>().EndTurn();
                 }
             }
-            else if (entity.display)
+            else if (entity.GetComponent<PlayerComponent>() != null)
             {
                 Log.Add($"You cannot equip the {item.GetComponent<Description>().name} ."); 
             }
@@ -160,14 +160,14 @@ namespace TheRuinsOfIpsus
             if (item.GetComponent<Equippable>().unequipable)
             {
                 item.GetComponent<Equippable>().Unequip(entity);
-                if (entity.display && display)
+                if (entity.GetComponent<PlayerComponent>() != null && display)
                 {
                     CloseInventory();
                     Log.Add($"You unequip the {item.GetComponent<Description>().name}.");
                     entity.GetComponent<TurnFunction>().EndTurn();
                 }
             }
-            else if (entity.display)
+            else if (entity.GetComponent<PlayerComponent>() != null)
             {
                 Log.Add($"You cannot unequip the {item.GetComponent<Description>().name}."); 
             }
@@ -179,17 +179,18 @@ namespace TheRuinsOfIpsus
             {
                 item.GetComponent<Equippable>().Unequip(entity);
             }
-            if (entity.display) { CloseInventory(); }
+            if (entity.GetComponent<PlayerComponent>() != null) { CloseInventory(); }
             item.GetComponent<Usable>().Use(entity, null);
             if (!TargetReticle.targeting)
             {
                 entity.GetComponent<TurnFunction>().EndTurn();
             }
         }
-        public static void PlaceItem(Coordinate targetCoordinate, Entity item)
+        public static void PlaceItem(Vector2 targetCoordinate, Entity item)
         {
-            Vector2 placement = CMath.ReturnNearestValidCoordinate("Item", targetCoordinate.vector2);
-            item.GetComponent<Coordinate>().vector2 = placement;
+            Vector2 placement = CMath.ReturnNearestValidCoordinate("Item", targetCoordinate);
+            item.GetComponent<Vector2>().x = placement.x;
+            item.GetComponent<Vector2>().y = placement.y;
             World.tiles[placement.x, placement.y].itemLayer = item;
             EntityManager.UpdateMap(item);
 
@@ -280,8 +281,8 @@ namespace TheRuinsOfIpsus
 
                 if (inventoryDisplay[currentPage][selection].GetComponent<AttackFunction>() != null)
                 {
-                    string[] function = inventoryDisplay[currentPage][selection].GetComponent<AttackFunction>().details.Split('-');
-                    addition += $"{spacer} Does Yellow*{function[1]}d{function[2]} damage with a damage modifier of Yellow*{function[3]} and a bonus to hit of Yellow*{function[4]}.";
+                    AttackFunction function = inventoryDisplay[currentPage][selection].GetComponent<AttackFunction>();
+                    addition += $"{spacer} Does Yellow*{function.die1}d{function.die2} damage with a damage modifier of Yellow*{function.damageModifier} and a bonus to hit of Yellow*{function.toHitModifier}.";
                 }
             }
             else 
