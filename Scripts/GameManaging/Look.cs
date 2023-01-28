@@ -161,7 +161,11 @@ namespace TheRuinsOfIpsus
                     traversable.sfxLayer = Reticle(x, y, 'X', "Gray");
                 }
             }
+
             Renderer.MoveCamera(new Vector2(x, y));
+
+            CMath.DisplayToConsole(Program.rogueConsole, $"Move Reticle Yellow*[Arrow Yellow*Keys]", 0, 2, 1, 29, false);
+            CMath.DisplayToConsole(Program.rogueConsole, $"Cancel Look Yellow*[L/Escape]", 0, 2, 1, 32, false);
         }
         public static Entity Reticle(int x, int y, char character, string fColor)
         {

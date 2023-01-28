@@ -28,23 +28,24 @@ namespace TheRuinsOfIpsus
         {
             try
             {
+                Vector2 vector2 = attacker.GetComponent<Vector2>();
+                List<Entity> particles = new List<Entity>();
                 int time = CMath.Distance(attacker.GetComponent<Vector2>(), target);
-                Entity particle2 = new Entity(new List<Component>
+
+                Renderer.StartAnimation(new List<Entity>() { 
+                    new Entity(new List<Component>
                         {
-                            new Vector2(0, 0),
+                            new Vector2(target.x, target.y),
                             new Draw("Yellow", "Black", 'X'),
                             new ParticleComponent(time, 2, "None", 0, new Draw[] { new Draw("Yellow", "Black", 'X'), new Draw("Black", "Black", 'X') }),
-                        });
-                Renderer.AddParticle(target.x, target.y, particle2);
-
-                Entity particle = new Entity(new List<Component>
+                        }), 
+                    new Entity(new List<Component>
                         {
-                            new Vector2(0, 0),
+                            new Vector2(vector2.x, vector2.y),
                             weapon.GetComponent<Draw>(),
                             new ParticleComponent(time, 2, "Target", 0, new Draw[] { weapon.GetComponent<Draw>() }, target, true),
-                        });
-                Vector2 vector2 = attacker.GetComponent<Vector2>();
-                Renderer.AddParticle(vector2.x, vector2.y, particle);
+                        })
+                });
 
                 if (weapon.GetComponent<Equippable>() != null && weapon.GetComponent<Equippable>().equipped)
                 {

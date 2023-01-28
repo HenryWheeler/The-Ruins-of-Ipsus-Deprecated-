@@ -43,6 +43,7 @@ namespace TheRuinsOfIpsus
                 case "Dark_Brown": return RLColor.Blend(RLColor.Brown, RLColor.Gray, 50);
                 case "Brown": return RLColor.Brown;
                 case "Pale": return RLColor.Blend(RLColor.White, RLColor.LightRed, 0.75f);
+                case "Pink": return RLColor.Blend(RLColor.White, RLColor.Red, 0.5f);
             }
             return RLColor.Black;
         }

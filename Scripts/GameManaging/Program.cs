@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using RLNET;
+using System.Threading;
 
 namespace TheRuinsOfIpsus
 {
@@ -36,21 +37,41 @@ namespace TheRuinsOfIpsus
             settings.CharHeight = 6;
             settings.Width = screenWidth;
             settings.Height = screenHeight;
-            settings.Scale = 3f;
+            settings.Scale = 1f;
             settings.Title = "The Ruins of Ipsus";
-            settings.WindowBorder = RLWindowBorder.Hidden;
-            settings.ResizeType = RLResizeType.None;
+            settings.WindowBorder = RLWindowBorder.Resizable;
+            settings.ResizeType = RLResizeType.ResizeScale;
             settings.StartWindowState = RLWindowState.Maximized;
-            
+
             rootConsole = new RLRootConsole(settings);
+
+            rootConsole.OnClosing += CloseGame;
+            rootConsole.OnResize += OnResize;
+
             mapConsole = new RLConsole(mapWidth, mapHeight);
             messageConsole = new RLConsole(messageWidth, messageHeight);
             rogueConsole = new RLConsole(rogueWidth, rogueHeight);
 
-            LoadFunctions();
+            Thread thread = new Thread(() => LoadFunctions());
+            thread.Start();
 
             rootConsole.Run(60);
+
+            //thread.Join();
         }
+
+        private static void OnResize(object sender, ResizeEventArgs e)
+        {
+            if (rootConsole.Height > 50 && rootConsole.Width > 100) { rootConsole.LoadBitmap("ascii_12x12.png", 12, 12); }
+            else { rootConsole.LoadBitmap("ascii_6x6.png", 6, 6); }
+        }
+
+        public static void CloseGame(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            gameActive = false;
+            Renderer.running = false;
+        }
+        
         public static void LoadFunctions()
         {
             Renderer renderer = new Renderer(rootConsole, mapConsole, mapWidth, mapHeight, messageConsole, messageWidth, messageHeight, rogueConsole, rogueWidth, rogueHeight);
@@ -73,16 +94,11 @@ namespace TheRuinsOfIpsus
         }
         public static void ReloadPlayer(List<Component> components)
         {
-            player = new Entity(components);
-            rootConsole.Update += player.GetComponent<PlayerComponent>().Update;
+            player = EntityManager.ReloadEntity(new Entity(components));
+            Thread thread = new Thread(() => player.GetComponent<PlayerComponent>().Update());
+            thread.Start();
+            //rootConsole.Update += player.GetComponent<PlayerComponent>().Update;
 
-            List<Entity> entities = new List<Entity>();
-            foreach (Entity entity in player.GetComponent<Inventory>().inventory) { if (entity != null) { entities.Add(entity); } }
-            player.GetComponent<Inventory>().inventory.Clear();
-            foreach (Entity id in entities) { player.GetComponent<Inventory>().inventory.Add(new Entity(id)); }
-            entities.Clear();
-            foreach (EquipmentSlot entity in player.GetComponent<Inventory>().equipment) { if (entity != null && entity.item != null) { entities.Add(entity.item); } }
-            foreach (Entity id in entities) { new Entity(id).GetComponent<Equippable>().Equip(player); } 
             Vector2 vector2 = player.GetComponent<Vector2>();
             World.tiles[vector2.x, vector2.y].actorLayer = player;
             StatManager.UpdateStats(player);
@@ -118,10 +134,13 @@ namespace TheRuinsOfIpsus
                 new Description("Potion of Orange*Explosion", "The label reads: 'Do Not Drink'."),
                 new Usable("The potion explodes in a Red*fiery burst!"),
                 new Throwable("The potion explodes in a Red*fiery burst!"),
-                new ExplodeOnUse(4, 0),
-                new ExplodeOnThrow(4),
+                new ExplodeOnUse(6, 0),
+                new ExplodeOnThrow(6),
             });
-            InventoryManager.AddToInventory(player, startingWeapon);
+            InventoryManager.AddToInventory(player, new Entity(startingWeapon));
+            InventoryManager.AddToInventory(player, new Entity(startingWeapon));
+            InventoryManager.AddToInventory(player, new Entity(startingWeapon));
+            InventoryManager.AddToInventory(player, new Entity(startingWeapon));
 
             Entity testScrollOfLightning = new Entity(new List<Component>()
             {
@@ -183,6 +202,21 @@ namespace TheRuinsOfIpsus
             InventoryManager.AddToInventory(player, new Entity(testPotionOfDragonsFire));
             InventoryManager.AddToInventory(player, new Entity(testPotionOfDragonsFire));
 
+            Entity testTongueLash = new Entity(new List<Component>()
+            {
+                new Vector2(0, 0),
+                new ID(1932),
+                new Draw("Pink", "Black", '/'),
+                new Description("Pink*Tongue Test", "Test"),
+                new Usable($"A giant Pink*Tongue emits from your mouth!", false),
+                new TongueLashOnUse(5, 100),
+            });
+            InventoryManager.AddToInventory(player, new Entity(testTongueLash));
+            InventoryManager.AddToInventory(player, new Entity(testTongueLash));
+            InventoryManager.AddToInventory(player, new Entity(testTongueLash));
+            InventoryManager.AddToInventory(player, new Entity(testTongueLash));
+            InventoryManager.AddToInventory(player, new Entity(testTongueLash));
+
             Action.PlayerAction(player);
             EntityManager.AddEntity(player);
             TurnManager.AddActor(player.GetComponent<TurnFunction>());
@@ -191,6 +225,7 @@ namespace TheRuinsOfIpsus
         }
         public static void NewGame()
         {
+            gameActive = true;
             World world = new World(gameMapWidth, gameMapHeight);
             CreateNewPlayer();
             World.GenerateNewFloor(true);
@@ -198,8 +233,6 @@ namespace TheRuinsOfIpsus
             Log.Add("Welcome to the Ruins of Ipsus");
             Log.DisplayLog();
             //EntityManager.CreateNewEntityTest();
-
-            gameActive = true;
         }
         public static void LoadSave(SaveData saveData)
         {

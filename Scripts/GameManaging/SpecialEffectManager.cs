@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace TheRuinsOfIpsus
 {
@@ -16,22 +17,31 @@ namespace TheRuinsOfIpsus
             Draw frame3 = new Draw("Red_Orange", "Red_Orange", (char)176);
             Draw[] frames = new Draw[3] { frame1, frame2, frame3 };
             List<Vector2> coordinates = RangeModels.SphereRangeModel(origin, strength, true);
+
+            List<Entity> particles = new List<Entity>();
+
             foreach (Vector2 coordinate in coordinates)
             {
-                Vector2 vector3 = coordinate;
-                if (World.tiles[coordinate.x, coordinate.y].actorLayer != null)
-                {
-                    AttackManager.Attack(originator, World.tiles[vector3.x, vector3.y].actorLayer, new AttackFunction(strength, strength, strength, strength, "Fire"), "Explosion");
-                }
-                else
-                {
-                    Entity particle = new Entity(new List<Component>
+                Entity particle = new Entity(new List<Component>
                         {
-                            new Vector2(0, 0),
+                            new Vector2(coordinate.x, coordinate.y),
                             frame1,
                             new ParticleComponent(World.random.Next(11, 14), World.random.Next(3, 5), "None", 1, frames)
                         });
-                    Renderer.AddParticle(vector3.x, vector3.y, particle);
+                particles.Add(particle);
+            }
+
+            Renderer.StartAnimation(particles);
+
+            foreach (Vector2 coordinate in coordinates)
+            {
+                if (World.tiles[coordinate.x, coordinate.y].obstacleLayer != null)
+                {
+                    World.tiles[coordinate.x, coordinate.y].obstacleLayer = null;
+                }
+                if (World.tiles[coordinate.x, coordinate.y].actorLayer != null)
+                {
+                    AttackManager.Attack(originator, World.tiles[coordinate.x, coordinate.y].actorLayer, new AttackFunction(strength, strength, strength, strength, "Fire"), "Explosion");
                 }
             }
         }
@@ -49,22 +59,25 @@ namespace TheRuinsOfIpsus
                     Draw frame3 = new Draw("Blue", "Black", ')');
                     Draw[] frames = new Draw[3] { frame1, frame2, frame3 };
 
+                    List<Entity> particles = new List<Entity>();
                     List<Vector2> coordinates = RangeModels.SphereRangeModel(target, 10, true);
                     foreach (Vector2 coordinate in coordinates)
                     {
                         Entity particle = new Entity(new List<Component>
                         {
-                            new Vector2(0, 0),
+                            new Vector2(coordinate.x, coordinate.y),
                             frame1,
                             new ParticleComponent(World.random.Next(8, 10), 5, "Wander", 5, frames)
                         });
-                        Renderer.AddParticle(coordinate.x, coordinate.y, new Entity(particle));
+                        particles.Add(particle);
                     }
+                    Renderer.StartAnimation(particles);
                 }
             }
         }
         public static void BreathWeapon(Entity originator, Vector2 target, int strength, int range, string type)
         {
+            List<Entity> particles = new List<Entity>();
             switch (type)
             {
                 case "Fire":
@@ -74,21 +87,28 @@ namespace TheRuinsOfIpsus
                         Draw frame3 = new Draw("Red", "Black", (char)176);
                         Draw[] frames = new Draw[3] { frame1, frame2, frame3 };
                         List<Vector2> coordinates = RangeModels.ConeRangeModel(originator.GetComponent<Vector2>(), target, strength, range);
-                        foreach (var coordinate in coordinates)
+                        foreach (Vector2 coordinate in coordinates)
                         {
-                            if (World.tiles[coordinate.x, coordinate.y].actorLayer != null)
-                            {
-                                AttackManager.Attack(originator, World.tiles[coordinate.x, coordinate.y].actorLayer, new AttackFunction(strength, strength, strength, strength, "Fire"), "Fire");
-                            }
-                            else
-                            {
-                                Entity particle = new Entity(new List<Component>
+                            Entity particle = new Entity(new List<Component>
                                 {
-                                    new Vector2(0, 0),
+                                    new Vector2(coordinate.x, coordinate.y),
                                     frame1,
                                     new ParticleComponent(World.random.Next(22, 26), 5, "None", 1, frames)
                                 });
-                                Renderer.AddParticle(coordinate.x, coordinate.y, particle);
+                            particles.Add(particle);
+                        }
+
+                        Renderer.StartAnimation(particles);
+
+                        foreach (var coordinate in coordinates)
+                        {
+                            if (World.tiles[coordinate.x, coordinate.y].obstacleLayer != null)
+                            {
+                                World.tiles[coordinate.x, coordinate.y].obstacleLayer = null;
+                            }
+                            if (World.tiles[coordinate.x, coordinate.y].actorLayer != null)
+                            {
+                                AttackManager.Attack(originator, World.tiles[coordinate.x, coordinate.y].actorLayer, new AttackFunction(strength, strength, strength, strength, "Fire"), "Fire");
                             }
                         }
                         break;
@@ -101,35 +121,82 @@ namespace TheRuinsOfIpsus
             Draw frame2 = new Draw("Yellow", "Black", '+');
             Draw frame3 = new Draw("Yellow", "Black", (char)176);
             Draw[] frames = new Draw[3] { frame1, frame2, frame3 };
+
+            List<Entity> particles = new List<Entity>();
             List<Vector2> coordinates = RangeModels.BeamRangeModel(originator.GetComponent<Vector2>(), target, range, false);
             foreach (Vector2 coordinate in coordinates)
             {
+                Entity particle = new Entity(new List<Component>
+                        {
+                            new Vector2(coordinate.x, coordinate.y),
+                            frame1,
+                            new ParticleComponent(World.random.Next(22, 26), 5, "None", 1, frames)
+                        });
+                particles.Add(particle);
+
+                if (World.random.Next(0, 2) == 1)
+                {
+                    Entity particle2 = new Entity(new List<Component>
+                        {
+                            new Vector2(coordinate.x + World.random.Next(-1, 2), coordinate.y + World.random.Next(-1, 2)),
+                            frame1,
+                            new ParticleComponent(World.random.Next(22, 26), 5, "None", 1, frames)
+                        });
+                    particles.Add(particle2);
+                }
+            }
+
+            Renderer.StartAnimation(particles);
+
+            foreach (Vector2 coordinate in coordinates)
+            {
                 Vector2 vector3 = coordinate;
+
+                if (World.tiles[coordinate.x, coordinate.y].obstacleLayer != null)
+                {
+                    World.tiles[coordinate.x, coordinate.y].obstacleLayer = null;
+                }
                 if (World.tiles[coordinate.x, coordinate.y].actorLayer != null)
                 {
                     AttackManager.Attack(originator, World.tiles[vector3.x, vector3.y].actorLayer,
                     new AttackFunction(strength, 8, 2, strength, "Lightning"), "Lightning");
                 }
-                else
+            }
+        }
+        public static void TongueLash(Entity originator, Vector2 target, int strength, int range)
+        {
+            List<Entity> particles = new List<Entity>();
+            List<Vector2> coordinates = RangeModels.BeamRangeModel(originator.GetComponent<Vector2>(), target, range, false);
+            foreach (Vector2 coordinate in coordinates)
+            {
+                if (coordinate == target)
                 {
                     Entity particle = new Entity(new List<Component>
                         {
-                            new Vector2(0, 0),
-                            frame1,
-                            new ParticleComponent(World.random.Next(22, 26), 5, "None", 1, frames)
+                            new Vector2(coordinate.x, coordinate.y),
+                            new Draw("Pink", "Black", 'X'),
+                            new ParticleComponent(4, 1, "None", 1, new Draw[] { new Draw("Pink", "Black", 'X')})
                         });
-                    Renderer.AddParticle(vector3.x, vector3.y, particle);
-                    if (World.random.Next(0, 2) == 1)
-                    {
-                        Entity particle2 = new Entity(new List<Component>
-                        {
-                            new Vector2(0, 0),
-                            frame1,
-                            new ParticleComponent(World.random.Next(22, 26), 5, "None", 1, frames)
-                        });
-                        Renderer.AddParticle(vector3.x + World.random.Next(-1, 2), vector3.y + World.random.Next(-1, 2), particle2);
-                    }
+                    particles.Add(particle);
                 }
+                else
+                {
+                    Entity particle = new Entity(new List<Component>
+                    {                            
+                        new Vector2(coordinate.x, coordinate.y),
+                        new Draw("Pink", "Black", '*'),
+                        new ParticleComponent(4, 1, "None", 1, new Draw[] { new Draw("Pink", "Black", '*')})
+                    });
+                    particles.Add(particle);
+                }
+            }
+
+            Renderer.StartAnimation(particles);
+
+            if (World.tiles[target.x, target.y].actorLayer != null)
+            {
+                AttackManager.Attack(originator, World.tiles[target.x, target.y].actorLayer,
+                new AttackFunction(strength, 8, 2, strength, "Bludgeoning"), "Tongue");
             }
         }
         public static void MagicMap(Entity entity)
@@ -138,6 +205,8 @@ namespace TheRuinsOfIpsus
             Draw frame1 = new Draw("Light_Yellow", "Light_Yellow", (char)0);
             Draw frame2 = new Draw("Yellow", "Yellow", (char)0);
             Draw[] frames = new Draw[2] { frame1, frame2 };
+
+            List<Entity> particles = new List<Entity>();
             foreach (Traversable tile in World.tiles)
             {
                 if (tile.terrainType != 0)
@@ -146,13 +215,15 @@ namespace TheRuinsOfIpsus
                     tile.entity.GetComponent<Visibility>().explored = true;
                     Entity particle = new Entity(new List<Component>
                         {
-                            new Vector2(0, 0),
+                            new Vector2(coordinate.x, coordinate.y),
                             frame1,
                             new ParticleComponent((int)CMath.Distance(origin.x, origin.y, coordinate.x, coordinate.y), 4, "None", 0, frames)
                         });
-                    Renderer.AddParticle(coordinate.x, coordinate.y, particle);
+                    particles.Add(particle);
                 }
             }
+
+            Renderer.StartAnimation(particles);
         }
     }
 }

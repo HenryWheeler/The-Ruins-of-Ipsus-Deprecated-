@@ -48,6 +48,7 @@ namespace TheRuinsOfIpsus
         }
         public static void SaveEntity(Entity entity)
         {
+            entity.ClearImbeddedComponents();
             if (!Directory.Exists(entityPath)) Directory.CreateDirectory(entityPath);
             File.WriteAllText(Path.Combine(entityPath, "Entity-"+ entity.GetComponent<ID>().id + ".json"), JsonConvert.SerializeObject(entity, options));
         }

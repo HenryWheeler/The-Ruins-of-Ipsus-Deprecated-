@@ -106,6 +106,33 @@ namespace TheRuinsOfIpsus
                 collectionsToRemove.Clear(); 
             } 
         }
+        public void ClearImbeddedComponents()
+        {
+            if (GetComponent<Harmable>() != null)
+            {
+                GetComponent<Harmable>().onHitComponents.Clear();
+            }
+            if (GetComponent<AttackFunction>() != null)
+            {
+                GetComponent<AttackFunction>().onHitComponents.Clear();
+            }
+            if (GetComponent<Movement>() != null)
+            {
+                GetComponent<Movement>().onMoveComponents.Clear();
+            }
+            if (GetComponent<Throwable>() != null)
+            {
+                GetComponent<Throwable>().onThrowComponents.Clear();
+            }
+            if (GetComponent<TurnFunction>() != null)
+            {
+                GetComponent<TurnFunction>().onTurnComponents.Clear();
+            }
+            if (GetComponent<Usable>() != null)
+            {
+                GetComponent<Usable>().onUseComponents.Clear();
+            }
+        }
         public void ClearEntity()
         {
             foreach (Component component in components)
@@ -144,33 +171,7 @@ namespace TheRuinsOfIpsus
             {
                 if (component != null)
                 {
-                    if (component.GetType().BaseType.Equals(typeof(OnHit)))
-                    {
-                        if (GetComponent<Harmable>() != null)
-                        {
-                            AddComponent((OnHit)component);
-                        }
-                        else if (GetComponent<AttackFunction>() != null)
-                        {
-                            AddComponent((OnHit)component);
-                        }
-                    }
-                    else if (component.GetType().BaseType.Equals(typeof(OnMove)))
-                    {
-                        AddComponent((OnMove)component);
-                    }
-                    else if (component.GetType().BaseType.Equals(typeof(OnThrow)))
-                    {
-                        AddComponent((OnThrow)component);
-                    }
-                    else if (component.GetType().BaseType.Equals(typeof(OnTurn)))
-                    {
-                        AddComponent((OnTurn)component);
-                    }
-                    else if (component.GetType().BaseType.Equals(typeof(OnUse)))
-                    {
-                        AddComponent((OnUse)component);
-                    }
+                    AddComponent(component);
                 }
             }
         }
@@ -201,33 +202,7 @@ namespace TheRuinsOfIpsus
             {
                 if (component != null)
                 {
-                    if (component.GetType().BaseType.Equals(typeof(OnHit)))
-                    {
-                        if (GetComponent<Harmable>() != null)
-                        {
-                            AddComponent((OnHit)component);
-                        }
-                        else if (GetComponent<AttackFunction>() != null)
-                        {
-                            AddComponent((OnHit)component);
-                        }
-                    }
-                    else if (component.GetType().BaseType.Equals(typeof(OnMove)))
-                    {
-                        AddComponent((OnMove)component);
-                    }
-                    else if (component.GetType().BaseType.Equals(typeof(OnThrow)))
-                    {
-                        AddComponent((OnThrow)component);
-                    }
-                    else if (component.GetType().BaseType.Equals(typeof(OnTurn)))
-                    {
-                        AddComponent((OnTurn)component);
-                    }
-                    else if (component.GetType().BaseType.Equals(typeof(OnUse)))
-                    {
-                        AddComponent((OnUse)component);
-                    }
+                    AddComponent(component);
                 }
             }
         }

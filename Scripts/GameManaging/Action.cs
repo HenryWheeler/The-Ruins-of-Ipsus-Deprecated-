@@ -78,6 +78,7 @@ namespace TheRuinsOfIpsus
                     case RLKey.Period: player.GetComponent<TurnFunction>().EndTurn(); break;
                     case RLKey.L: Look.StartLooking(player.GetComponent<Vector2>()); break;
                     case RLKey.I: InventoryManager.OpenInventory(); break;
+                    case RLKey.E: InventoryManager.OpenEquipment(); break;
                     case RLKey.G: InventoryManager.GetItem(player); Log.DisplayLog(); break;
                     case RLKey.J: SaveDataManager.CreateSave(); Program.gameActive = false; Renderer.running = false; Program.rootConsole.Close(); break;
                     case RLKey.V:
@@ -98,6 +99,25 @@ namespace TheRuinsOfIpsus
                             interacting = true;
                             choosingDirection = true;
                             Interaction(player);
+                            break;
+                        }
+                }
+            }
+        }
+        public static void EquipmentAction(Entity player, RLKey key = RLKey.Unknown)
+        {
+            if (key != RLKey.Unknown)
+            {
+                switch (key)
+                {
+                    case RLKey.Escape:
+                        {
+                            InventoryManager.CloseEquipment();
+                            break;
+                        }
+                    case RLKey.E:
+                        {
+                            InventoryManager.CloseEquipment();
                             break;
                         }
                 }

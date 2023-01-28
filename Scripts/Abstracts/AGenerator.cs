@@ -57,11 +57,19 @@ namespace TheRuinsOfIpsus
         public void CreateConnections(int loopCount, int type)
         {
             bool doneConnecting = false;
+            int maxVisitations = 100;
             for (int v = 0; v < loopCount; v++)
             {
-
+                int currentVisitation = 0; 
                 while (!doneConnecting)
                 {
+                    currentVisitation++;
+
+                    if (currentVisitation >= maxVisitations)
+                    {
+                        break;
+                    }
+
                     Vector2 firstCoordinate = null;
                     Vector2 lastCoordinate = null;
                     List<Entity> cavernTiles = new List<Entity>();

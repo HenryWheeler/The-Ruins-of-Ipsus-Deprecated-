@@ -71,14 +71,27 @@ namespace TheRuinsOfIpsus
         //The chance for a creature to use an ability each round
         public void Process()
         {
-            Observe();
-            StateMachine stateMachine = new StateMachine(currentState, currentInput);
-            if (transitions.ContainsKey(stateMachine))
+            try
             {
-                currentState = transitions[stateMachine];
-                currentInput = Input.None;
+                if (transitions.Count == 0)
+                {
+                    throw new Exception("Entity Transition Count == 0");
+                }
+
+                Observe();
+                StateMachine stateMachine = new StateMachine(currentState, currentInput);
+                if (transitions.ContainsKey(stateMachine))
+                {
+                    currentState = transitions[stateMachine];
+                    currentInput = Input.None;
+                }
+                ExecuteAction();
             }
-            ExecuteAction();
+            catch (Exception e)
+            {
+                Log.Add($"{entity.GetComponent<Description>().name} gives error: {e.Message}");
+                entity.GetComponent<TurnFunction>().EndTurn();
+            }
         }
         public abstract void ExecuteAction();
         public abstract void SetTransitions();

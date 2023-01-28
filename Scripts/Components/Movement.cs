@@ -54,7 +54,7 @@ namespace TheRuinsOfIpsus
                         entity.GetComponent<Vector2>().y = newPosition.y;
                         newTraversable.actorLayer = entity;
                         TriggerOnMove(originalPosition, newPosition);
-                        if (newTraversable.obstacleLayer != null)
+                        if (newTraversable.obstacleLayer != null && newTraversable.obstacleLayer.GetComponent<Movement>() != null)
                         {
                             newTraversable.obstacleLayer.GetComponent<Movement>().TriggerOnMove(originalPosition, newPosition);
                         }
@@ -71,7 +71,7 @@ namespace TheRuinsOfIpsus
                         entity.GetComponent<Vector2>().y = newPosition.y;
                         newTraversable.actorLayer = entity;
                         TriggerOnMove(originalPosition, newPosition);
-                        if (newTraversable.obstacleLayer != null)
+                        if (newTraversable.obstacleLayer != null && newTraversable.obstacleLayer.GetComponent<Movement>() != null)
                         {
                             newTraversable.obstacleLayer.GetComponent<Movement>().TriggerOnMove(originalPosition, newPosition);
                         }

@@ -121,6 +121,6 @@ namespace TheRuinsOfIpsus
         public static int mapWidth { get; set; }
         public static int mapHeight { get; set; }
         public static int depth { get; set; }
-        public static bool testing = false;
+        public static bool testing = true;
     }
 }

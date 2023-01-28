@@ -55,8 +55,24 @@ namespace TheRuinsOfIpsus
                     {
                         if (World.seed.Next(0, 100) > 90 && World.tiles[x, y].terrainType == 1)
                         {
-                            if (World.seed.Next(0, 100) < 50) { SetTile(x, y, 'f', "Green*Foliage", "Some thick Green*Foliage.", "Dark_Green", "Black", false, 1); }
-                            else { SetTile(x, y, 'f', "Green*Foliage", "Some thick Green*Foliage.", "Green", "Black", false, 1); }
+                            if (World.seed.Next(0, 100) < 50) { SetTile(x, y, '.', "Yellow*Dead Leaves", "Some Yellow*Dead Leaves.", "Yellow", "Black", false, 1); }
+                            else { SetTile(x, y, ',', "Yellow*Dead Leaves", "Some Yellow*Dead Leaves.", "Yellow", "Black", false, 1); }
+                        }
+                        if (World.seed.Next(0, 100) > 80 && World.tiles[x, y].terrainType == 1)
+                        {
+                            if (World.seed.Next(0, 100) < 50) { SetTile(x, y, '.', "Red*Dead Leaves", "Some Red*Dead Leaves.", "Red", "Black", false, 1); }
+                            else { SetTile(x, y, ',', "Red*Dead Leaves", "Some Red*Dead Leaves.", "Red", "Black", false, 1); }
+                        }
+                        else if (World.seed.Next(0, 90) > 60 && World.tiles[x, y].terrainType == 1)
+                        {
+                            Entity foliage = new Entity(new List<Component>()
+                            {
+                                new Vector2(x, y),
+                                new Draw("Green", "Black", (char)231),
+                                new Description("Green*Foliage", "Some thick Green*green Green*foliage."),
+                                new Visibility(true, false, false),
+                            });
+                            World.tiles[x, y].obstacleLayer = foliage;
                         }
                     }
                 }

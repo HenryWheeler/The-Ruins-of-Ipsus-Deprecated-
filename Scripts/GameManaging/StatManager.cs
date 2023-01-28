@@ -11,26 +11,10 @@ namespace TheRuinsOfIpsus
     {
         public static RLConsole console;
         private static string spacer { get; set; }
-        public static float average = 0;
-        public static List<float> averages = new List<float>();
         public StatManager(RLConsole _console) 
         { 
             console = _console; 
             spacer = " + ";
-        }
-        public static void Average(long time)
-        {
-            averages.Add(time);
-
-            float newAverage = 0;
-
-            foreach (float current in averages)
-            {
-                newAverage += current;
-            }
-            newAverage /= averages.Count;
-            average = newAverage;
-            UpdateStats(Program.player);
         }
         public static void UpdateStats(Entity entity)
         {
@@ -40,30 +24,12 @@ namespace TheRuinsOfIpsus
 
             string display = "";
 
-            //display += $"Average Tick Speed: {average}{spacer}";
-            //display += $"Average Millisecond Speed: {average / 10000}{spacer}";
             display += $"Red*Health: {stats.hp}/{stats.hpCap}{spacer}";
             display += $"Light_Gray*Armor: {stats.ac}{spacer}";
-            display += $"Yellow*Celerity: {stats.maxAction}{spacer}";
+            display += $"Yellow*Speed: {stats.maxAction}{spacer}";
             display += $"Brown*Might: {stats.strength}{spacer}";
             display += $"Cyan*Acuity: {stats.acuity}{spacer}";
             display += $"Sight: {stats.sight}{spacer}";
-
-            display += "Equipment: " + spacer;
-            foreach (EquipmentSlot slot in entity.GetComponent<Inventory>().equipment)
-            {
-                if (slot != null)
-                {
-                    if (slot.item != null) 
-                    {
-                        display += $"{slot.name}: {slot.item.GetComponent<Description>().name},{spacer}"; 
-                    }
-                    else 
-                    {
-                        display += $"{slot.name}: Empty,{spacer}"; 
-                    }
-                }
-            }
 
             display += $"Status:{spacer}";
             for (int i = 0; i < entity.GetComponent<Harmable>().statusEffects.Count; i++)
@@ -79,7 +45,13 @@ namespace TheRuinsOfIpsus
             }
 
             CMath.DisplayToConsole(console, display, 0, 2, 1);
-            console.Print(11, 0, " The Rogue @ ", RLColor.White);
+
+            CMath.DisplayToConsole(Program.rogueConsole, $"Open Inventory Yellow*[I] {spacer}Open Equipment Yellow*[E]", 0, 2, 1, 29, false);
+
+            console.Print(2, 0, $" Stats {(char)196} ", RLColor.White);
+            console.Print(11, 0, $"Equipment ", RLColor.Gray);
+            console.Print(21, 0, $"{(char)196}", RLColor.White);
+            console.Print(22, 0, $" Inventory ", RLColor.Gray);
         }
         public static void ClearStats()
         {

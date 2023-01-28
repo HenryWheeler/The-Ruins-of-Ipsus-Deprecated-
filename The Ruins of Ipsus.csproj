@@ -105,6 +105,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ascii_12x12.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ascii_6x6.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -130,6 +133,7 @@
     <Compile Include="Scripts\Components\AttackFunction.cs" />
     <Compile Include="Scripts\Components\Commerce.cs" />
     <Compile Include="Scripts\Components\Component.cs" />
+    <Compile Include="Scripts\Components\PropertyComponents\TongueLashOnUse.cs" />
     <Compile Include="Scripts\Components\Vector2.cs" />
     <Compile Include="Scripts\Components\Description.cs" />
     <Compile Include="Scripts\Components\DoorFunction.cs" />

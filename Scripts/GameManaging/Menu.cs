@@ -35,7 +35,7 @@ namespace TheRuinsOfIpsus
         {
             causeOfDeath = "You were slain by " + _causeOfDeath;
             openingScreen = false;
-            rootConsole.Update -= Program.player.GetComponent<PlayerComponent>().Update;
+            //rootConsole.Update -= Program.player.GetComponent<PlayerComponent>().Update;
             rootConsole.Update += Update;
             SaveDataManager.DeleteSave();
             foreach (TurnFunction entity in TurnManager.entities)

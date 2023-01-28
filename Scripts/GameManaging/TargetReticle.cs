@@ -108,18 +108,24 @@ namespace TheRuinsOfIpsus
                 {
                     int maxRange = 1000;
 
-                    List<OnUse> properties = Action.targetWeapon.GetComponent<Usable>().onUseComponents;
+                    List<OnUse> properties = new List<OnUse>();
 
-                    if (properties.Count != 0)
+                    if (Action.targetWeapon.GetComponent<Usable>() != null)
                     {
-                        foreach (OnUse property in properties)
+                        properties = Action.targetWeapon.GetComponent<Usable>().onUseComponents;
+
+                        if (properties.Count != 0)
                         {
-                            if (property.range < maxRange)
+                            foreach (OnUse property in properties)
                             {
-                                maxRange = property.range;
+                                if (property.range < maxRange)
+                                {
+                                    maxRange = property.range;
+                                }
                             }
                         }
                     }
+
 
                     CreateLine(maxRange, true);
 
@@ -176,6 +182,10 @@ namespace TheRuinsOfIpsus
                     }
                 }
             }
+            CMath.DisplayToConsole(Log.console, $"Use/Throw Item Yellow*[T/U/Enter]", 0, 2, 1, 6, false);
+            CMath.DisplayToConsole(Log.console, $"Move Reticle Yellow*[Arrow Yellow*Keys]", 0, 2, 1, 9, false);
+            CMath.DisplayToConsole(Log.console, $"Cancel Target Yellow*[S/Escape]", 0, 2, 1, 12, false);
+
             Renderer.MoveCamera(new Vector2(x, y));
         }
         public static bool CreateLine(int range, bool visual)

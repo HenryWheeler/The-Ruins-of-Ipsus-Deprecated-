@@ -262,18 +262,22 @@ namespace TheRuinsOfIpsus
                     List<Entity> entities = new List<Entity>();
                     if (entityToUse.GetComponent<Inventory>().inventory != null)
                     {
-                        foreach (Entity entity in entityToUse.GetComponent<Inventory>().inventory) { if (entity != null) { entities.Add(entity); } }
+                        foreach (Entity entity in entityToUse.GetComponent<Inventory>().inventory) { if (entity != null) { entity.ClearImbeddedComponents(); entities.Add(entity); } }
                         entityToUse.GetComponent<Inventory>().inventory.Clear();
                         foreach (Entity id in entities) { entityToUse.GetComponent<Inventory>().inventory.Add(new Entity(id)); }
-                    }
-                    if (entityToUse.GetComponent<Inventory>() != null)
-                    {
+
                         entities.Clear();
-                        foreach (EquipmentSlot entity in entityToUse.GetComponent<Inventory>().equipment) { if (entity != null && entity.item != null) { entities.Add(entity.item); } }
+                        foreach (EquipmentSlot entity in entityToUse.GetComponent<Inventory>().equipment) { if (entity != null && entity.item != null) { entity.item.ClearImbeddedComponents(); entities.Add(entity.item); } }
                         foreach (Entity id in entities) { new Entity(id).GetComponent<Equippable>().Equip(entityToUse); }
                     }
                 }
                 if (CMath.ReturnAI(entityToUse) != null) { CMath.ReturnAI(entityToUse).SetTransitions(); }
+
+                foreach (Component component in entityToUse.components)
+                {
+                    component.entity = entityToUse;
+                }
+
 
                 AddEntity(entityToUse);
                 return entityToUse;

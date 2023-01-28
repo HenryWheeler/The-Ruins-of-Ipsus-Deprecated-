@@ -205,9 +205,12 @@ namespace TheRuinsOfIpsus
             }
             return null;
         }
-        public static void DisplayToConsole(RLConsole console, string logOut, int a, int b, int m = 0, int y = 2)
+        public static void DisplayToConsole(RLConsole console, string logOut, int a, int b, int m = 0, int y = 2, bool clear = true)
         {
-            console.Clear();
+            if (clear)
+            {
+                console.Clear();
+            }
             string[] outPut = logOut.Split(' ');
             int c = a;
             foreach (string text in outPut)
@@ -234,7 +237,10 @@ namespace TheRuinsOfIpsus
                     }
                 }
             }
-            Renderer.CreateConsoleBorder(console);
+            if (clear)
+            {
+                Renderer.CreateConsoleBorder(console);
+            }
         }
         public static bool CheckBounds(int x, int y)
         {

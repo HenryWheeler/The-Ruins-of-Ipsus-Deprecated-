@@ -57,17 +57,19 @@ namespace TheRuinsOfIpsus
                     { 
                         if (tile.actorLayer.GetComponent<ID>().id != 0) 
                         {
+                            tile.actorLayer.ClearImbeddedComponents();
                             AI AI = CMath.ReturnAI(tile.actorLayer);
                             AI.transitions.Clear();
                             AI.target = null;
                             actors.Add(tile.actorLayer); 
                         } 
                     }
-                    if (tile.itemLayer != null) { items.Add(tile.itemLayer); }
-                    if (tile.obstacleLayer != null) { terrain.Add(tile.obstacleLayer); }
+                    if (tile.itemLayer != null) { tile.itemLayer.ClearImbeddedComponents(); items.Add(tile.itemLayer); }
+                    if (tile.obstacleLayer != null) { tile.obstacleLayer.ClearImbeddedComponents(); terrain.Add(tile.obstacleLayer); }
                 }
             }
-            
+
+            Program.player.ClearImbeddedComponents();
 
             SaveData data = new SaveData(World.depth, World.seedInt, RecordKeeper.record, Program.player, actors, items, terrain, visibility);
 

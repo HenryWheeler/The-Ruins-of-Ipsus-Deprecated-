@@ -23,11 +23,12 @@ namespace TheRuinsOfIpsus
         public static List<Entity> clearList = new List<Entity>();
         public static int current = 1;
         public static bool running = false;
-        public static bool playingAnimation = false;
         public static int minX { get; set; }
         public static int maxX { get; set; }
         public static int minY { get; set; }
         public static int maxY { get; set; }
+
+
         public Renderer(RLRootConsole _rootConsole, RLConsole _mapConsole, int _mapWidth, int _mapHeight, RLConsole _messageConsole, int _messageWidth, int _messageHeight, RLConsole _rogueConsole, int _rogueWidth, int _rogueHeight)
         {
             rootConsole = _rootConsole;
@@ -44,13 +45,8 @@ namespace TheRuinsOfIpsus
             rogueHeight = _rogueHeight;
 
             rootConsole.Render += Render;
-
-            running = true;
-
-            Thread thread = new Thread(() => RenderParticles());
-            thread.Start();
         }
-        public void Render(object sender, UpdateEventArgs e)
+        public static void Render(object sender, UpdateEventArgs e)
         {
             rootConsole.Clear();
             if (Program.gameActive)
@@ -58,37 +54,44 @@ namespace TheRuinsOfIpsus
                 RenderMap();
                 RenderLog();
                 RenderRogue();
-                RenderAction();
             }
             else { RenderMenu(); }
             rootConsole.Draw();
         }
-        public static async Task WaitWhile(bool condition, Thread thread, int frequency = 25, int timeout = -1)
-        {
-            var waitTask = Task.Run(async () =>
-            {
-                while (!condition) await Task.Delay(frequency);
-            });
-
-            if (waitTask != await Task.WhenAny(waitTask,
-                    Task.Delay(timeout)))
-                throw new TimeoutException();
-        }
         public static void AddParticle(int x, int y, Entity particle)
         {
+            if (particles.Count > 0)
+            {
+                Log.Add("Started Thread");
+                Thread thread = new Thread(() => RenderParticles());
+                thread.Start();
+            }
             particle.GetComponent<Vector2>().x = x;
             particle.GetComponent<Vector2>().y = y;
             World.tiles[x, y].sfxLayer = particle;
             ParticleComponent particleComponent = particle.GetComponent<ParticleComponent>();
             particles.Add(particleComponent);
-            if (particleComponent.animation) 
+        }
+        public static void StartAnimation(List<Entity> particlesRef)
+        {
+            foreach (Entity particle in particlesRef)
             {
-                playingAnimation = true;
+                if (particle != null)
+                {
+                    Vector2 vector2 = particle.GetComponent<Vector2>();
+                    World.tiles[vector2.x, vector2.y].sfxLayer = particle;
+                    ParticleComponent particleComponent = particle.GetComponent<ParticleComponent>();
+                    particles.Add(particleComponent);
+                }
             }
+            Log.Add("Started Thread");
+            Thread thread = new Thread(() => RenderParticles());
+            thread.Start();
+            thread.Join();
         }
         public static void RenderParticles()
         {
-            while (running)
+            while (particles.Count > 0)
             {
                 if (particles.Count > 0)
                 {
@@ -119,7 +122,7 @@ namespace TheRuinsOfIpsus
                 }
             }
         }  
-        public void RenderMenu()
+        public static void RenderMenu()
         {
             if (Menu.openingScreen)
             {
@@ -209,9 +212,10 @@ namespace TheRuinsOfIpsus
                         Entity tile = World.tiles[tx, ty].entity;
                         Visibility visibility = tile.GetComponent<Visibility>();
                         Traversable traversable = tile.GetComponent<Traversable>();
-                        if (traversable.sfxLayer != null) 
+                        Entity sfx = traversable.sfxLayer;
+                        if (sfx != null) 
                         {
-                            traversable.sfxLayer.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); 
+                            sfx.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); 
                         }
                         else if (!visibility.visible && !visibility.explored) { mapConsole.Set(x, y, RLColor.Black, RLColor.Black, '?'); }
                         else if (!visibility.visible && visibility.explored)
@@ -267,10 +271,6 @@ namespace TheRuinsOfIpsus
         {
             RLConsole.Blit(rogueConsole, 0, 0, rogueWidth, rogueHeight, rootConsole, mapWidth, 0);
         }
-        public static void RenderAction()
-        {
-            //RLConsole.Blit(actionConsole, 0, 0, actionWidth, actionHeight, rootConsole, 0, messageHeight);
-        }
         public static void CreateConsoleBorder(RLConsole console)
         {
             int h = console.Height - 1;
@@ -310,6 +310,11 @@ namespace TheRuinsOfIpsus
 
             switch (direction)
             {
+                case "Attached":
+                    {
+                        //Work for later, go make particle that can be stuck to an entity.
+                        break;
+                    }
                 case "Target":
                     {
                         Vector2 newPosition = DijkstraMaps.PathFromMap(position, "ParticlePath");
@@ -454,10 +459,6 @@ namespace TheRuinsOfIpsus
         {
             Renderer.particles.Remove(this);
             Renderer.clearList.Add(entity);
-            if (animation)
-            {
-                Renderer.playingAnimation = false;
-            }
         }
         public ParticleComponent(int _life, int _speed, string _direction, int _threshHold, Draw[] _particles, Vector2 target = null, bool _animation = false)
         {

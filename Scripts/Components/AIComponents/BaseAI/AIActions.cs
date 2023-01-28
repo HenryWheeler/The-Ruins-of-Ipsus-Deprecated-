@@ -204,23 +204,25 @@ namespace TheRuinsOfIpsus
         }
         public static void MoveToTarget(Entity AI, Entity target)
         {
-            Vector2 positionToMove = DijkstraMaps.PathFromMap(AI, target.GetComponent<Faction>().faction);
-            AI.GetComponent<Movement>().Move(new Vector2(positionToMove.x, positionToMove.y));
-            CMath.ReturnAI(AI).interest--;
+            if (target.GetComponent<Faction>() != null)
+            {
+                Vector2 positionToMove = DijkstraMaps.PathFromMap(AI, target.GetComponent<Faction>().faction);
+                AI.GetComponent<Movement>().Move(new Vector2(positionToMove.x, positionToMove.y));
+                CMath.ReturnAI(AI).interest--;
+            }
+            else { AI.GetComponent<TurnFunction>().EndTurn(); }
         }
         ///<summary>
         ///Check if AI has any special attacks it can use on its target, if not try for a melee attack, if that fails return false otherwise return true.
         ///</summary>
         public static bool AttackCheck(Entity AI, Entity target, int distance)
         {
-            List<OnUse> abilities = GrabAbilities(AI);
-
             AI detail = CMath.ReturnAI(AI);
 
-            if (World.random.Next(0, 101) < detail.abilityChance && abilities.Count != 0)
+            if (World.random.Next(0, 101) < detail.abilityChance && AI.GetComponent<Usable>() != null)
             {
                 OnUse abilityToUse = null;
-                foreach (OnUse ability in abilities)
+                foreach (OnUse ability in AI.GetComponent<Usable>().onUseComponents)
                 {
                     if (ability.itemType == "Offense" && ability.range >= distance)
                     {
@@ -249,19 +251,6 @@ namespace TheRuinsOfIpsus
             {
                 AI.RemoveComponent(ability);
             }
-        }
-        public static List<OnUse> GrabAbilities(Entity entity)
-        {
-            List<OnUse> abilities = new List<OnUse>();
-            foreach (Component property in entity.components)
-            {
-                if (property.GetType().BaseType.Equals(typeof(OnUse)))
-                {
-                    abilities.Add((OnUse)property);
-                }
-            }
-
-            return abilities;
         }
         public static void TestAwake(Entity AI)
         {

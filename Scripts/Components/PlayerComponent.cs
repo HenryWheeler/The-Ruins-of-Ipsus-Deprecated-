@@ -4,64 +4,78 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace TheRuinsOfIpsus
 {
     class PlayerComponent: Component
     {
-        public void Update(object sender, UpdateEventArgs e)
+        public void Update()
         {
-            RLKeyPress keyPress = Program.rootConsole.Keyboard.GetKeyPress();
-            if (keyPress != null)
+            while (true)
             {
-                if (entity.GetComponent<TurnFunction>().turnActive) 
-                { 
-                    Action.PlayerAction(entity, keyPress.Key); 
-                }
-                else if (Look.looking) 
-                { 
-                    Action.LookAction(keyPress.Key);
-                }
-                else if (InventoryManager.inventoryOpen) 
+                RLKeyPress keyPress = Program.rootConsole.Keyboard.GetKeyPress();
+                if (keyPress != null)
                 {
-                    Action.InventoryAction(entity, keyPress.Key); 
+                    if (entity.GetComponent<TurnFunction>().turnActive)
+                    {
+                        Action.PlayerAction(entity, keyPress.Key);
+                    }
+                    else if (Look.looking)
+                    {
+                        Action.LookAction(keyPress.Key);
+                    }
+                    else if (InventoryManager.inventoryOpen)
+                    {
+                        Action.InventoryAction(entity, keyPress.Key);
+                    }
+                    else if (InventoryManager.equipmentOpen)
+                    {
+                        Action.EquipmentAction(entity, keyPress.Key);
+                    }
+                    else if (TargetReticle.targeting)
+                    {
+                        Action.TargetAction(entity, keyPress.Key);
+                    }
+                    else if (Action.interacting)
+                    {
+                        Action.Interaction(entity, keyPress.Key);
+                    }
                 }
-                else if (TargetReticle.targeting) 
+                else
                 {
-                    Action.TargetAction(entity, keyPress.Key);
-                }
-                else if (Action.interacting) 
-                {
-                    Action.Interaction(entity, keyPress.Key);
-                }
-            }
-            else
-            {
-                if (entity.GetComponent<TurnFunction>().turnActive)
-                {
-                    Action.PlayerAction(entity, RLKey.Unknown);
-                }
-                else if (Look.looking)
-                {
-                    Action.LookAction(RLKey.Unknown);
-                }
-                else if (InventoryManager.inventoryOpen)
-                {
-                    Action.InventoryAction(entity, RLKey.Unknown);
-                }
-                else if (TargetReticle.targeting)
-                {
-                    Action.TargetAction(entity, RLKey.Unknown);
-                }
-                else if (Action.interacting)
-                {
-                    Action.Interaction(entity, RLKey.Unknown);
+                    if (entity.GetComponent<TurnFunction>().turnActive)
+                    {
+                        Action.PlayerAction(entity, RLKey.Unknown);
+                    }
+                    else if (Look.looking)
+                    {
+                        Action.LookAction(RLKey.Unknown);
+                    }
+                    else if (InventoryManager.inventoryOpen)
+                    {
+                        Action.InventoryAction(entity, RLKey.Unknown);
+                    }
+                    else if (InventoryManager.equipmentOpen)
+                    {
+                        //Action.EquipmentAction(entity, keyPress.Key);
+                    }
+                    else if (TargetReticle.targeting)
+                    {
+                        Action.TargetAction(entity, RLKey.Unknown);
+                    }
+                    else if (Action.interacting)
+                    {
+                        Action.Interaction(entity, RLKey.Unknown);
+                    }
                 }
             }
         }
         public PlayerComponent(RLRootConsole console) 
-        { 
-            console.Update += Update; 
+        {
+            Thread thread = new Thread(() => Update());
+            thread.Start();
+            //console.Update += Update;
         }
         public PlayerComponent() { }
     }
