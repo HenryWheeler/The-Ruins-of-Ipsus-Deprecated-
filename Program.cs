@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using RLNET;
 using System.Threading;
 using SadConsole;
 using Console = SadConsole.Console;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using RLNET;
 
 namespace TheRuinsOfIpsus
 {
@@ -13,7 +13,7 @@ namespace TheRuinsOfIpsus
     {
         private static readonly int screenWidth = 100;
         private static readonly int screenHeight = 50;
-        public static RLRootConsole rootConsole;
+        public static Console rootConsole;
  
         // The map console takes up most of the screen and is where the map will be drawn
         private static readonly int mapWidth = 65;
@@ -22,12 +22,10 @@ namespace TheRuinsOfIpsus
         // Below the map console is the message console which displays attack rolls and other information
         private static readonly int messageWidth = 35;
         private static readonly int messageHeight = 15;
-        public static RLConsole messageConsole;
         public static TitleConsole logConsole;
         // The stat console is to the right of the map and display player and monster stats
         private static readonly int rogueWidth = 35;
         private static readonly int rogueHeight = 35;
-        public static RLConsole rogueConsole;
         public static TitleConsole playerConsole;
 
         public static Entity player;
@@ -37,36 +35,12 @@ namespace TheRuinsOfIpsus
         public static int gameMapHeight = 100;
         public static void Main()
         {
-            RLSettings settings = new RLSettings();
-            settings.BitmapFile = "ascii_6x6.png";
-            settings.CharWidth = 6;
-            settings.CharHeight = 6;
-            settings.Width = screenWidth;
-            settings.Height = screenHeight;
-            settings.Scale = 1f;
-            settings.Title = "The Ruins of Ipsus";
-            settings.WindowBorder = RLWindowBorder.Resizable;
-            settings.ResizeType = RLResizeType.ResizeScale;
-            settings.StartWindowState = RLWindowState.Maximized;
+            //RLRootConsole Rconsole = new RLRootConsole("ascii_6x6.png", 1, 1, 1, 1);
 
-            //rootConsole = new RLRootConsole(settings);
-
-            //rootConsole.OnClosing += CloseGame;
-            //rootConsole.OnResize += OnResize;
-
-            //mapConsole = new RLConsole(mapWidth, mapHeight);
-            //messageConsole = new RLConsole(messageWidth, messageHeight);
-            //rogueConsole = new RLConsole(rogueWidth, rogueHeight);
-
-            //Thread thread = new Thread(() => LoadFunctions());
-            //thread.Start();
-
-            //rootConsole.Run(60);
-
-            //thread.Join();
 
             // Setup the engine and create the main window.
-            SadConsole.Game.Create(screenWidth, screenHeight);
+            Settings.UseHardwareFullScreen = true;
+            SadConsole.Game.Create("fonts/ascii_6x6.font.json", screenWidth, screenHeight);
 
             // Hook the start event so we can add consoles to the system.
             SadConsole.Game.OnInitialize = Init;
@@ -74,22 +48,26 @@ namespace TheRuinsOfIpsus
             // Start the game.
             SadConsole.Game.Instance.Run();
             SadConsole.Game.Instance.Dispose();
+
+            //Rconsole.Close();
         }
         private static void Init()
         {
+            //Settings.ToggleFullScreen();
+
+            var console = new ContainerConsole();
+            console.IsFocused = true;
+            console.Components.Add(new KeyboardComponent());
+            Global.CurrentScreen = console;
             mapConsole = new TitleConsole(" Map ", mapWidth, mapHeight) { Position = new Point(0, 0) };
             logConsole = new TitleConsole(" Message Log ", messageWidth, messageHeight) { Position = new Point(mapWidth, rogueHeight) };
             playerConsole = new TitleConsole(" The Rogue @ ", rogueWidth, rogueHeight) { Position = new Point(mapWidth, 0) };
 
-            Global.CurrentScreen = new SadConsole.ContainerConsole();
             Global.CurrentScreen.Children.Add(mapConsole);
             Global.CurrentScreen.Children.Add(playerConsole);
             Global.CurrentScreen.Children.Add(logConsole);
-        }
-        private static void OnResize(object sender, ResizeEventArgs e)
-        {
-            if (rootConsole.Height > 50 && rootConsole.Width > 100) { rootConsole.LoadBitmap("ascii_12x12.png", 12, 12); }
-            else { rootConsole.LoadBitmap("ascii_6x6.png", 6, 6); }
+
+            LoadFunctions();
         }
         public static void CloseGame(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -98,36 +76,38 @@ namespace TheRuinsOfIpsus
         }
         public static void LoadFunctions()
         {
-            //Renderer renderer = new Renderer(rootConsole, mapConsole, mapWidth, mapHeight, messageConsole, messageWidth, messageHeight, rogueConsole, rogueWidth, rogueHeight);
-            Log log = new Log(messageConsole);
-            Action action = new Action(rogueConsole);
-            Menu update = new Menu(rootConsole);
-            StatManager stats = new StatManager(rogueConsole);
+            Renderer renderer = new Renderer(mapConsole, mapWidth, mapHeight);
+            Log log = new Log(logConsole);
+            Action action = new Action(playerConsole);
+            //Menu update = new Menu(rootConsole);
+            StatManager stats = new StatManager(playerConsole);
             SaveDataManager saveDataManager = new SaveDataManager();
             JsonDataManager jsonDataManager = new JsonDataManager();
             PronounReferences pronounReferences = new PronounReferences();
             SpawnTableManager spawnTableManager = new SpawnTableManager();
             DijkstraMaps dijkstraMaps = new DijkstraMaps(gameMapWidth, gameMapHeight);
             EntityManager.LoadAllEntities();
+
+            NewGame();
         }
         public static void LoadPlayerFunctions(Entity player)
         {
-            InventoryManager inventory = new InventoryManager(messageConsole, player);
+            InventoryManager inventory = new InventoryManager(logConsole, player);
             Look look = new Look(player);
             TargetReticle reticle = new TargetReticle(player);
         }
         public static void ReloadPlayer(List<Component> components)
         {
             player = EntityManager.ReloadEntity(new Entity(components));
-            Thread thread = new Thread(() => player.GetComponent<PlayerComponent>().Update());
-            thread.Start();
+            //Thread thread = new Thread(() => player.GetComponent<PlayerComponent>().Update());
+            //thread.Start();
             //rootConsole.Update += player.GetComponent<PlayerComponent>().Update;
 
             Vector2 vector2 = player.GetComponent<Vector2>();
             World.tiles[vector2.x, vector2.y].actorLayer = player;
             StatManager.UpdateStats(player);
             TurnManager.AddActor(player.GetComponent<TurnFunction>());
-            Action.PlayerAction(player);
+            //Action.PlayerAction(player);
             ShadowcastFOV.Compute(vector2, player.GetComponent<Stats>().sight);
             player.GetComponent<UpdateCameraOnMove>().Move(vector2, vector2);
             player.GetComponent<TurnFunction>().StartTurn();
@@ -149,7 +129,7 @@ namespace TheRuinsOfIpsus
             player.AddComponent(new Harmable());
             player.AddComponent(new Faction("Player"));
             player.AddComponent(new UpdateCameraOnMove());
-            player.AddComponent(new PlayerComponent(rootConsole));
+            player.AddComponent(new PlayerComponent());
             Entity startingWeapon = new Entity(new List<Component>() 
             {
                 new Vector2(0, 0),
@@ -241,7 +221,7 @@ namespace TheRuinsOfIpsus
             InventoryManager.AddToInventory(player, new Entity(testTongueLash));
             InventoryManager.AddToInventory(player, new Entity(testTongueLash));
 
-            Action.PlayerAction(player);
+            //Action.PlayerAction(player);
             EntityManager.AddEntity(player);
             TurnManager.AddActor(player.GetComponent<TurnFunction>());
             StatManager.UpdateStats(player);
@@ -256,6 +236,8 @@ namespace TheRuinsOfIpsus
             LoadPlayerFunctions(player);
             Log.Add("Welcome to the Ruins of Ipsus");
             Log.DisplayLog();
+
+            Renderer.DrawToScreen();
             //EntityManager.CreateNewEntityTest();
         }
         public static void LoadSave(SaveData saveData)
@@ -282,28 +264,9 @@ namespace TheRuinsOfIpsus
         public TitleConsole(string title, int _width, int _height)
             :  base(_width, _height)
         {
-            var fontMaster = Global.LoadFont("fonts/ascii_6x6");
-            var normalSizedFont = fontMaster.GetFont(Font.FontSizes.One);
-            Font = normalSizedFont;
-
             Fill(Color.White, Color.Black, 176);
 
-            int h = _height - 1;
-            int w = _width - 1;
-            for (int y = h; y >= 0; y--)
-            {
-                for (int x = 0; x < w + 1; x++)
-                {
-                    if (y == h && x == 0) { SetCellAppearance(x, y, new Cell(Color.White, Color.Black, 192)); }
-                    else if (y == h && x == w) { SetCellAppearance(x, y, new Cell(Color.White, Color.Black, 217)); }
-                    else if (y == 0 && x == 0) { SetCellAppearance(x, y, new Cell(Color.White, Color.Black, 218)); }
-                    else if (x == w && y == 0) { SetCellAppearance(x, y, new Cell(Color.White, Color.Black, 191)); }
-                    else if (y == 0 || y == h) { SetCellAppearance(x, y, new Cell(Color.White, Color.Black, 196)); }
-                    else if (x == 0 || x == w) { SetCellAppearance(x, y, new Cell(Color.White, Color.Black, 179)); }
-                }
-            }
-
-            Print(0, 0, title.Align(HorizontalAlignment.Center, Width), Color.Black, Color.White);
+            TheRuinsOfIpsus.Renderer.CreateConsoleBorder(this, title);
         }
     }
 }

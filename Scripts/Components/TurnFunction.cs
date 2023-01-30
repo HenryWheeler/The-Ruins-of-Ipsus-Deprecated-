@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SadConsole;
 
 namespace TheRuinsOfIpsus
 {
@@ -38,6 +39,8 @@ namespace TheRuinsOfIpsus
                 TurnManager.ProgressTurnOrder();
             }
             entity.ClearCollections();
+
+            Renderer.DrawToScreen();
         }
         public void EndTurn() 
         { 
@@ -50,6 +53,8 @@ namespace TheRuinsOfIpsus
                 ShadowcastFOV.Compute(vector3, entity.GetComponent<Stats>().sight);
             }
             TurnManager.ProgressActorTurn(this);
+
+            Renderer.DrawToScreen();
         }
         public void TriggerTurnComponents(bool start)
         {

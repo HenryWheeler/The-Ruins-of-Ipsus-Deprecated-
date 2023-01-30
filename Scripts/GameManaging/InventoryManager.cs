@@ -1,5 +1,6 @@
 ﻿using System;
-using RLNET;
+using SadConsole;
+using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace TheRuinsOfIpsus
 {
     public class InventoryManager
     {
-        private static RLConsole console;
+        private static TitleConsole console;
         public static bool inventoryOpen = false;
         public static bool equipmentOpen = false;
         private static Entity player;
@@ -18,7 +19,7 @@ namespace TheRuinsOfIpsus
         private static int maxItemPerPage = 6;
         private static string spacer = " + + ";
         public static List<List<Entity>> inventoryDisplay = new List<List<Entity>>();
-        public InventoryManager(RLConsole _console, Entity _player) { console = _console; player = _player; }
+        public InventoryManager(TitleConsole _console, Entity _player) { console = _console; player = _player; }
         public static void GetItem(Entity entity)
         {
             Vector2 vector2 = entity.GetComponent<Vector2>();
@@ -76,10 +77,10 @@ namespace TheRuinsOfIpsus
         }
         public static void OpenEquipment()
         {
-            CMath.ClearConsole(console);
+            console.Clear();
             equipmentOpen = true;
             player.GetComponent<TurnFunction>().turnActive = false;
-            StatManager.ClearStats();
+            Program.playerConsole.Clear();
 
             string display = "";
 
@@ -98,32 +99,33 @@ namespace TheRuinsOfIpsus
                 }
             }
 
-            CMath.DisplayToConsole(Program.rogueConsole, display, 0, 2, 1);
+            CMath.DisplayToConsole(Program.playerConsole, display, 0, 2, 1);
 
-            CMath.DisplayToConsole(Program.rogueConsole, $"Close Equipment Yellow*[E/Escape]", 0, 2, 1, 32, false);
+            CMath.DisplayToConsole(Program.playerConsole, $"Close Equipment Yellow*[E/Escape]", 0, 2, 1, 32, false);
 
-            Program.rogueConsole.Print(2, 0, " Stats ", RLColor.Gray);
-            Program.rogueConsole.Print(9, 0, $"{(char)196} Equipment {(char)196}", RLColor.White);
-            Program.rogueConsole.Print(22, 0, " Inventory ", RLColor.Gray);
+            Renderer.CreateConsoleBorder(Program.playerConsole, "");
+            Program.playerConsole.Print(2, 0, " Stats ", Color.Gray);
+            Program.playerConsole.Print(9, 0, $"{(char)196} Equipment {(char)196}", Color.Black);
+            Program.playerConsole.Print(22, 0, " Inventory ", Color.Gray);
         }
         public static void CloseEquipment()
         {
             equipmentOpen = false; player.GetComponent<TurnFunction>().turnActive = true;
-            Action.PlayerAction(player);
+            //Action.PlayerAction(player);
             StatManager.UpdateStats(player);
             Log.DisplayLog();
         }
         public static void OpenInventory()
         {
-            CMath.ClearConsole(console);
+            console.Clear();
             inventoryOpen = true; 
             player.GetComponent<TurnFunction>().turnActive = false; 
             selection = 0; currentPage = 0;
-            StatManager.ClearStats();
+            Program.playerConsole.Clear();
 
             if (player.GetComponent<Inventory>().inventory.Count == 0) 
             {
-                console.Print(2, 2, "Inventory is Empty.", RLColor.White);
+                console.Print(2, 2, "Inventory is Empty.", Color.White);
                 //Action.InventoryAction(player);
             }
             else  
@@ -139,7 +141,7 @@ namespace TheRuinsOfIpsus
         {
             inventoryDisplay.Clear();
             inventoryOpen = false; player.GetComponent<TurnFunction>().turnActive = true;
-            Action.PlayerAction(player);
+            //Action.PlayerAction(player);
             StatManager.UpdateStats(player);
             Log.DisplayLog();
         }
@@ -237,7 +239,7 @@ namespace TheRuinsOfIpsus
         }
         public static void DisplayInventory()
         {
-            CMath.ClearConsole(console);
+            console.Clear();
             int x = 0;
             string output = "";
             foreach (Entity item in inventoryDisplay[currentPage])
@@ -258,8 +260,8 @@ namespace TheRuinsOfIpsus
                 x++;
             }
             CMath.DisplayToConsole(console, output, 2, 0, 0, 2);
-            console.Print(12, 13, " Page:" + (currentPage + 1) + "/" + inventoryDisplay.Count + " ", RLColor.White);
-            console.Print((Renderer.messageWidth / 2) - 5, 0, " Inventory ", RLColor.White);
+            console.Print(12, 13, " Page:" + (currentPage + 1) + "/" + inventoryDisplay.Count + " ", Color.White);
+            Renderer.CreateConsoleBorder(console, " Inventory ");
         }
         public static void MoveSelection(int move)
         {
@@ -342,7 +344,7 @@ namespace TheRuinsOfIpsus
             addition += $"{spacer}Yellow*Can be thrown with Yellow*[T].";
 
             Description description = inventoryDisplay[currentPage][selection].GetComponent<Description>();
-            CMath.DisplayToConsole(Program.rogueConsole, description.description + addition, 1, 1);
+            CMath.DisplayToConsole(Program.playerConsole, description.description + addition, 1, 1);
             string[] nameParts = description.name.Split(' ');
             string name = "";
             foreach (string part in nameParts)
@@ -359,7 +361,7 @@ namespace TheRuinsOfIpsus
             }
             int start = 17 - (int)Math.Ceiling((double)name.Length / 2);
 
-            Program.rogueConsole.Print(start, 0, " ", RLColor.White, RLColor.Black);
+            Program.playerConsole.Print(start, 0, " ", Color.White);
 
             start++;
 
@@ -368,21 +370,23 @@ namespace TheRuinsOfIpsus
                 string[] temp = part.Split('*');
                 if (temp.Length == 1)
                 {
-                    Program.rogueConsole.Print(start, 0, temp[0] + " ", RLColor.White, RLColor.Black);
+                    Program.playerConsole.Print(start, 0, temp[0] + " ", Color.White, Color.Black);
                     start += temp[0].Length + 1;
                 }
                 else
                 {
-                    Program.rogueConsole.Print(start, 0, temp[1] + " ", ColorFinder.ColorPicker(temp[0]), RLColor.Black);
+                    Program.playerConsole.Print(start, 0, temp[1] + " ", ColorFinder.ColorPicker(temp[0]), Color.Black);
                     start += temp[1].Length + 1;
                 }
             }
 
-            CMath.DisplayToConsole(Program.rogueConsole, $"Select Item Yellow*[Arrow Yellow*Keys] {spacer} Close Inventory Yellow*[I/Escape]", 0, 2, 1, 29, false);
-            CMath.DisplayToConsole(Program.rogueConsole, $"Close Inventory Yellow*[I/Escape]", 0, 2, 1, 32, false);
+            CMath.DisplayToConsole(Program.playerConsole, $"Select Item Yellow*[Arrow Yellow*Keys] {spacer} Close Inventory Yellow*[I/Escape]", 0, 2, 1, 29, false);
+            CMath.DisplayToConsole(Program.playerConsole, $"Close Inventory Yellow*[I/Escape]", 0, 2, 1, 32, false);
 
-            Program.rogueConsole.Print(2, 0, $" Stats {(char)196} Equipment ", RLColor.Gray);
-            Program.rogueConsole.Print(21, 0, $"{(char)196} Inventory ", RLColor.White);
+            Renderer.CreateConsoleBorder(Program.playerConsole, "");
+
+            Program.playerConsole.Print(2, 0, $" Stats {(char)196} Equipment ", Color.Gray);
+            Program.playerConsole.Print(21, 0, $"{(char)196} Inventory ", Color.White);
         }
     }
 }

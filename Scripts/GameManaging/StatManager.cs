@@ -1,5 +1,6 @@
 ﻿using System;
-using RLNET;
+using SadConsole;
+using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,16 +10,16 @@ namespace TheRuinsOfIpsus
 {
     public class StatManager
     {
-        public static RLConsole console;
+        public static TitleConsole console;
         private static string spacer { get; set; }
-        public StatManager(RLConsole _console) 
+        public StatManager(TitleConsole _console) 
         { 
             console = _console; 
             spacer = " + ";
         }
         public static void UpdateStats(Entity entity)
         {
-            ClearStats();
+            console.Clear();
 
             Stats stats = entity.GetComponent<Stats>();
 
@@ -43,27 +44,18 @@ namespace TheRuinsOfIpsus
                     display += $"{entity.GetComponent<Harmable>().statusEffects[i]}, "; 
                 }
             }
-
+            
             CMath.DisplayToConsole(console, display, 0, 2, 1);
 
-            CMath.DisplayToConsole(Program.rogueConsole, $"Open Inventory Yellow*[I] {spacer}Open Equipment Yellow*[E]", 0, 2, 1, 29, false);
+            CMath.DisplayToConsole(console, $"Open Inventory Yellow*[I] {spacer}Open Equipment Yellow*[E]", 0, 2, 1, 29, false);
 
-            console.Print(2, 0, $" Stats {(char)196} ", RLColor.White);
-            console.Print(11, 0, $"Equipment ", RLColor.Gray);
-            console.Print(21, 0, $"{(char)196}", RLColor.White);
-            console.Print(22, 0, $" Inventory ", RLColor.Gray);
-        }
-        public static void ClearStats()
-        {
-            int h = console.Height - 2;
-            int w = console.Width - 2;
-            for (int y = (h); y >= 2; y--)
-            {
-                for (int x = 1; x < w + 1; x++)
-                {
-                    console.SetColor(x, y, RLColor.Black);
-                }
-            }
+            Renderer.CreateConsoleBorder(console, "");
+
+            console.Print(2, 0, $" Stats {(char)196} ", Color.White);
+            console.Print(11, 0, $"Equipment ", Color.Gray);
+            console.Print(21, 0, $"{(char)196}", Color.White);
+            console.Print(22, 0, $" Inventory ", Color.Gray);
+            
         }
     }
 }

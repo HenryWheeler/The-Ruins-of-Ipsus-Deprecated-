@@ -22,7 +22,7 @@ namespace TheRuinsOfIpsus
                 {
                     if (CMath.CheckBounds(x, y))
                     {
-                        SetTile(x, y, '.', "Stone Floor", "A simple stone floor.", "Gray_Blue", "Black", false, 1);
+                        SetTile(x, y, '.', "Stone Floor", "A simple stone floor.","Brown", "Black", false, 1);
                     }
                 }
             }

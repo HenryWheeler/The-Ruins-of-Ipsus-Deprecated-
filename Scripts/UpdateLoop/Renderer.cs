@@ -3,13 +3,17 @@ using RLNET;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
+using SadConsole;
+using Console = SadConsole.Console;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace TheRuinsOfIpsus
 {
     public class Renderer
     {
         private static RLRootConsole rootConsole;
-        public static RLConsole mapConsole;
+        public static TitleConsole mapConsole;
         public static int mapWidth;
         public static int mapHeight;
         private static RLConsole messageConsole;
@@ -29,22 +33,12 @@ namespace TheRuinsOfIpsus
         public static int maxY { get; set; }
 
 
-        public Renderer(RLRootConsole _rootConsole, RLConsole _mapConsole, int _mapWidth, int _mapHeight, RLConsole _messageConsole, int _messageWidth, int _messageHeight, RLConsole _rogueConsole, int _rogueWidth, int _rogueHeight)
+        public Renderer(TitleConsole _mapConsole, int _mapWidth, int _mapHeight)
         {
-            rootConsole = _rootConsole;
+            //rootConsole = _rootConsole;
             mapConsole = _mapConsole;
             mapWidth = _mapWidth;
             mapHeight = _mapHeight;
-
-            messageConsole = _messageConsole;
-            messageWidth = _messageWidth;
-            messageHeight = _messageHeight;
-
-            rogueConsole = _rogueConsole;
-            rogueWidth = _rogueWidth;
-            rogueHeight = _rogueHeight;
-
-            rootConsole.Render += Render;
         }
         public static void Render(object sender, UpdateEventArgs e)
         {
@@ -110,6 +104,8 @@ namespace TheRuinsOfIpsus
                     }
                 }
 
+                DrawToScreen();
+
                 Thread.Sleep(TimeSpan.FromMilliseconds(16.66f));
 
                 if (current == 10)
@@ -142,29 +138,29 @@ namespace TheRuinsOfIpsus
                 {
                     for (int y = 48; y > 40; y--)
                     {
-                        rootConsole.Set(x, y, ColorFinder.ColorPicker("Dark_Brown"), ColorFinder.ColorPicker("Black"), (char)177);
+                        //rootConsole.Set(x, y, ColorFinder.ColorPicker("Dark_Brown"), ColorFinder.ColorPicker("Black"), (char)177);
                     }
                 }
                 for (int x = 0; x < 100; x++)
                 {
                     for (int y = 40; y > 32; y--)
                     {
-                        rootConsole.Set(x, y, ColorFinder.ColorPicker("Dark_Brown"), ColorFinder.ColorPicker("Dark_Gray"), (char)177);
+                        //rootConsole.Set(x, y, ColorFinder.ColorPicker("Dark_Brown"), ColorFinder.ColorPicker("Dark_Gray"), (char)177);
                     }
                 }
                 for (int x = 0; x < 100; x++)
                 {
-                    rootConsole.Set(x, 32, ColorFinder.ColorPicker("Dark_Brown"), ColorFinder.ColorPicker("Dark_Gray"), ',');
+                    //rootConsole.Set(x, 32, ColorFinder.ColorPicker("Dark_Brown"), ColorFinder.ColorPicker("Dark_Gray"), ',');
                 }
                 for (int x = 0; x < 100; x++)
                 {
-                    rootConsole.Set(x, 31, ColorFinder.ColorPicker("Green"), ColorFinder.ColorPicker("Dark_Green"), 'x');
+                    //rootConsole.Set(x, 31, ColorFinder.ColorPicker("Green"), ColorFinder.ColorPicker("Dark_Green"), 'x');
                 }
                 for (int x = 20; x < 80; x++)
                 {
                     for (int y = 30; y > 5; y--)
                     {
-                        rootConsole.Set(x, y, ColorFinder.ColorPicker("Gray"), ColorFinder.ColorPicker("Dark_Gray"), (char)177);
+                        //rootConsole.Set(x, y, ColorFinder.ColorPicker("Gray"), ColorFinder.ColorPicker("Dark_Gray"), (char)177);
                     }
                 }
 
@@ -183,11 +179,11 @@ namespace TheRuinsOfIpsus
                     }
                 }
 
-                Program.rootConsole.Print(50 - (int)Math.Ceiling((double)name.Length/ 2 + 1), (rootConsole.Height / 3) - 2, " " + name.Trim() + ". ", ColorFinder.ColorPicker("Light_Gray"), RLColor.Black);
+                //Program.rootConsole.Print(50 - (int)Math.Ceiling((double)name.Length/ 2 + 1), (rootConsole.Height / 3) - 2, " " + name.Trim() + ". ", ColorFinder.ColorPicker("Light_Gray"), RLColor.Black);
 
                 rootConsole.Print((rootConsole.Width / 2) - 13, (rootConsole.Height / 2) + 16, "New Game: [N] - Quit: [Q]", RLColor.Brown, RLColor.Black);
             }
-            CreateConsoleBorder(rootConsole);
+            //CreateConsoleBorder(rootConsole);
         }
         public static void MoveCamera(Vector2 vector3)
         {
@@ -196,11 +192,8 @@ namespace TheRuinsOfIpsus
             minY = vector3.y - mapHeight / 2;
             maxY = minY + mapHeight;
         }
-        public static void RenderMap()
+        public static void DrawToScreen()
         {
-            //mapConsole.Clear();
-            RLConsole.Blit(mapConsole, 0, 0, mapWidth, mapHeight, rootConsole, 0, 0);
-
             int y = 0;
             for (int ty = minY; ty < maxY; ty++)
             {
@@ -213,22 +206,22 @@ namespace TheRuinsOfIpsus
                         Visibility visibility = tile.GetComponent<Visibility>();
                         Traversable traversable = tile.GetComponent<Traversable>();
                         Entity sfx = traversable.sfxLayer;
-                        if (sfx != null) 
+                        if (sfx != null)
                         {
-                            sfx.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); 
+                            sfx.GetComponent<Draw>().DrawToScreen(mapConsole, x, y);
                         }
-                        else if (!visibility.visible && !visibility.explored) { mapConsole.Set(x, y, RLColor.Black, RLColor.Black, '?'); }
+                        else if (!visibility.visible && !visibility.explored) { mapConsole.SetCellAppearance(x, y, new Cell(Color.Black, Color.Black, '?')); }
                         else if (!visibility.visible && visibility.explored)
                         {
                             if (traversable.obstacleLayer != null)
                             {
                                 Draw draw = traversable.obstacleLayer.GetComponent<Draw>();
-                                mapConsole.Set(x, y, ColorFinder.ColorPicker("Dark_Gray"), RLColor.Blend(RLColor.Black, ColorFinder.ColorPicker(draw.bColor), .55f), draw.character);
+                                mapConsole.SetCellAppearance(x, y, new Cell(Color.DarkGray, Color.Black, draw.character));
                             }
                             else
                             {
                                 Draw draw = tile.GetComponent<Draw>();
-                                mapConsole.Set(x, y, ColorFinder.ColorPicker("Dark_Gray"), RLColor.Blend(RLColor.Black, ColorFinder.ColorPicker(draw.bColor), .55f), draw.character);
+                                mapConsole.SetCellAppearance(x, y, new Cell(Color.DarkGray, Color.Black, draw.character));
                             }
                         }
                         else if (traversable.actorLayer != null) { traversable.actorLayer.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
@@ -236,7 +229,7 @@ namespace TheRuinsOfIpsus
                         else if (traversable.obstacleLayer != null) { traversable.obstacleLayer.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
                         else { tile.GetComponent<Draw>().DrawToScreen(mapConsole, x, y); }
                     }
-                    else { mapConsole.Set(x, y, RLColor.Black, RLColor.Black, '?'); }
+                    else { mapConsole.SetCellAppearance(x, y, new Cell(Color.Black, Color.Black, '?')); }
                     x++;
                 }
                 y++;
@@ -246,7 +239,7 @@ namespace TheRuinsOfIpsus
             {
                 Entity[] newArray = new Entity[10000];
                 clearList.CopyTo(newArray);
-                foreach(Entity particle in newArray)
+                foreach (Entity particle in newArray)
                 {
                     if (particle != null)
                     {
@@ -260,8 +253,13 @@ namespace TheRuinsOfIpsus
                 }
             }
 
-            CreateConsoleBorder(mapConsole);
-            mapConsole.Print((mapWidth / 2) - 2, 0, " Map ", RLColor.White);
+            CreateConsoleBorder(mapConsole, " Map ");
+
+            Global.CurrentScreen.IsDirty = true;
+            //mapConsole.Print((mapWidth / 2) - 2, 0, " Map ", RLColor.White);
+        }
+        public static void RenderMap()
+        {
         }
         public static void RenderLog()
         {
@@ -271,7 +269,7 @@ namespace TheRuinsOfIpsus
         {
             RLConsole.Blit(rogueConsole, 0, 0, rogueWidth, rogueHeight, rootConsole, mapWidth, 0);
         }
-        public static void CreateConsoleBorder(RLConsole console)
+        public static void CreateConsoleBorder(Console console, string title)
         {
             int h = console.Height - 1;
             int w = console.Width - 1;
@@ -279,14 +277,16 @@ namespace TheRuinsOfIpsus
             {
                 for (int x = 0; x < w + 1; x++)
                 {
-                    if (y == h && x == 0) { console.Set(x, y, RLColor.White, RLColor.Black, (char)192); }
-                    else if (y == h && x == w) { console.Set(x, y, RLColor.White, RLColor.Black, (char)217); }
-                    else if (y == 0 && x == 0) { console.Set(x, y, RLColor.White, RLColor.Black, (char)218); }
-                    else if (x == w && y == 0) { console.Set(x, y, RLColor.White, RLColor.Black, (char)191); }
-                    else if (y == 0 || y == h) { console.Set(x, y, RLColor.White, RLColor.Black, (char)196); }
-                    else if (x == 0 || x == w) { console.Set(x, y, RLColor.White, RLColor.Black, (char)179); }
+                    if (y == h && x == 0) { console.SetCellAppearance(x, y, new Cell(Color.White, Color.Black, 192)); }
+                    else if (y == h && x == w) { console.SetCellAppearance(x, y, new Cell(Color.White, Color.Black, 217)); }
+                    else if (y == 0 && x == 0) { console.SetCellAppearance(x, y, new Cell(Color.White, Color.Black, 218)); }
+                    else if (x == w && y == 0) { console.SetCellAppearance(x, y, new Cell(Color.White, Color.Black, 191)); }
+                    else if (y == 0 || y == h) { console.SetCellAppearance(x, y, new Cell(Color.White, Color.Black, 196)); }
+                    else if (x == 0 || x == w) { console.SetCellAppearance(x, y, new Cell(Color.White, Color.Black, 179)); }
                 }
             }
+
+            console.Print(0, 0, title.Align(HorizontalAlignment.Center, console.Width), Color.Black, Color.White);
         }
     }
     public class ParticleComponent: Component

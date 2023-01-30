@@ -1,5 +1,6 @@
 ﻿using System;
-using RLNET;
+using SadConsole;
+using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,14 +11,12 @@ namespace TheRuinsOfIpsus
     public class Look
     {
         public static Entity player;
-        public static int x { get; set; }
-        public static int y { get; set; }
+        public static Vector2 position { get; set; }
         public static bool looking = false;
         public Look(Entity _player) { player = _player; }
         public static void StartLooking(Vector2 coordinate) 
-        { 
-            x = coordinate.x; 
-            y = coordinate.y;
+        {
+            position = coordinate;
             looking = true; 
             player.GetComponent<TurnFunction>().turnActive = false; 
             Move(0, 0); 
@@ -28,21 +27,21 @@ namespace TheRuinsOfIpsus
             player.GetComponent<TurnFunction>().turnActive = true;
             Renderer.MoveCamera(player.GetComponent<Vector2>());
             looking = false;
-            World.tiles[x, y].sfxLayer = null;
-            Action.PlayerAction(player);
+            World.tiles[position.x, position.y].sfxLayer = null;
+            //Action.PlayerAction(player);
             StatManager.UpdateStats(player);
         }
         public static void Move(int _x, int _y)
         {
-            if (CMath.CheckBounds(x + _x, y + _y))
+            if (CMath.CheckBounds(position.x + _x, position.y + _y))
             {
-                World.tiles[x, y].sfxLayer = null;
-                x += _x; y += _y;
-                Traversable traversable = World.tiles[x, y];
+                World.tiles[position.x, position.y].sfxLayer = null;
+                position.x += _x; position.y += _y;
+                Traversable traversable = World.tiles[position.x, position.y];
                 Description description = null;
-                if (!World.tiles[x, y].entity.GetComponent<Visibility>().visible) 
+                if (!World.tiles[position.x, position.y].entity.GetComponent<Visibility>().visible) 
                 {
-                    CMath.DisplayToConsole(Program.rogueConsole, "You cannot look at what you cannot see.", 1, 1); 
+                    CMath.DisplayToConsole(Program.playerConsole, "You cannot look at what you cannot see.", 1, 1); 
                 }
                 else if (traversable.actorLayer != null) 
                 { 
@@ -58,7 +57,7 @@ namespace TheRuinsOfIpsus
                 }
                 else 
                 { 
-                    description = World.tiles[x, y].entity.GetComponent<Description>();
+                    description = World.tiles[position.x, position.y].entity.GetComponent<Description>();
                 }
                 if (description != null)
                 {
@@ -119,7 +118,7 @@ namespace TheRuinsOfIpsus
                         }
                     }
                     else { display += description.description; }
-                    CMath.DisplayToConsole(Program.rogueConsole, display, 1, 1);
+                    CMath.DisplayToConsole(Program.playerConsole, display, 1, 1);
                     string[] nameParts = description.name.Split(' ');
                     string name = "";
                     foreach (string part in nameParts)
@@ -136,7 +135,7 @@ namespace TheRuinsOfIpsus
                     }
                     int start = 17 - (int)Math.Ceiling((double)name.Length / 2);
 
-                    Program.rogueConsole.Print(start, 0, " ", RLColor.White, RLColor.Black);
+                    Program.playerConsole.Print(start, 0, " ", Color.White);
 
                     start++;
 
@@ -145,27 +144,27 @@ namespace TheRuinsOfIpsus
                         string[] temp = part.Split('*');
                         if (temp.Length == 1)
                         {
-                            Program.rogueConsole.Print(start, 0, temp[0] + " ", RLColor.White, RLColor.Black);
+                            Program.playerConsole.Print(start, 0, temp[0] + " ", Color.White);
                             start += temp[0].Length + 1;
                         }
                         else
                         {
-                            Program.rogueConsole.Print(start, 0, temp[1] + " ", ColorFinder.ColorPicker(temp[0]), RLColor.Black);
+                            Program.playerConsole.Print(start, 0, temp[1] + " ", ColorFinder.ColorPicker(temp[0]), Color.Black);
                             start += temp[1].Length + 1;
                         }
                     }
-                    traversable.sfxLayer = Reticle(x, y, 'X', "Yellow");
+                    traversable.sfxLayer = Reticle(position.x, position.y, 'X', "Yellow");
                 }
                 else
                 {
-                    traversable.sfxLayer = Reticle(x, y, 'X', "Gray");
+                    traversable.sfxLayer = Reticle(position.x, position.y, 'X', "Gray");
                 }
             }
 
-            Renderer.MoveCamera(new Vector2(x, y));
+            Renderer.MoveCamera(new Vector2(position.x, position.y));
 
-            CMath.DisplayToConsole(Program.rogueConsole, $"Move Reticle Yellow*[Arrow Yellow*Keys]", 0, 2, 1, 29, false);
-            CMath.DisplayToConsole(Program.rogueConsole, $"Cancel Look Yellow*[L/Escape]", 0, 2, 1, 32, false);
+            CMath.DisplayToConsole(Program.playerConsole, $"Move Reticle Yellow*[Arrow Yellow*Keys]", 0, 2, 1, 29, false);
+            CMath.DisplayToConsole(Program.playerConsole, $"Cancel Look Yellow*[L/Escape]", 0, 2, 1, 32, false);
         }
         public static Entity Reticle(int x, int y, char character, string fColor)
         {

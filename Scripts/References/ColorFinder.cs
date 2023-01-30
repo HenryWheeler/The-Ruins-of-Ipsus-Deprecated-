@@ -4,48 +4,41 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 
 namespace TheRuinsOfIpsus
 {
     public class ColorFinder
     {
-        public static RLColor ColorPicker(string color)
+        public static Color ColorPicker(string color)
         {
             switch (color)
             {
-                case "Red": return RLColor.Red;
-                case "Red_Orange": return RLColor.Blend(RLColor.Red, ColorPicker("Orange"), 50);
-                case "Blue": return RLColor.Blue;
-                case "Orange": return RLColor.Blend(RLColor.Red, RLColor.Yellow, 50);
-                case "Light_Blue": return RLColor.LightBlue;
-                case "Dark_Blue": return RLColor.Blend(RLColor.Black, RLColor.Blue, 50);
-                case "Yellow": return RLColor.Yellow;
-                case "Yellow_Gray": return RLColor.Blend(RLColor.Yellow, RLColor.Gray, 50);
-                case "Light_Yellow": return RLColor.Blend(RLColor.Yellow, RLColor.White, 50);
-                case "Light_Yellow_Gray": return RLColor.Blend(RLColor.Blend(RLColor.Yellow, RLColor.White, 50), RLColor.Gray, 50);
-                case "Dark_Yellow_Gray": return RLColor.Blend(RLColor.Blend(RLColor.Yellow, RLColor.Black, 50), RLColor.Gray, 50);
-                case "Dark_Yellow": return RLColor.Blend(RLColor.Yellow, RLColor.Black, 50);
-                case "Green": return RLColor.Green;
-                case "Light_Green": return RLColor.LightGreen;
-                case "Dark_Green": return RLColor.Blend(RLColor.Black, RLColor.Green, 50);
-                case "Cyan": return RLColor.Cyan;
-                case "Gray": return RLColor.Gray;
-                case "Light_Gray": return RLColor.LightGray;
-                case "Dark_Gray": return RLColor.Blend(RLColor.Black, RLColor.Gray, 50);
-                case "Gray_Blue": return RLColor.Blend(RLColor.Blue, RLColor.Gray, 50);
-                case "Light_Gray_Blue": return RLColor.Blend(RLColor.LightBlue, RLColor.Gray, 50);
-                case "Purple": return RLColor.Magenta;
-                case "Purple_Gray": return RLColor.Blend(RLColor.Magenta, RLColor.Gray, 50);
-                case "Light_Purple_Gray": return RLColor.Blend(RLColor.LightMagenta, RLColor.Gray, 50);
-                case "Dark_Purple": return RLColor.Blend(RLColor.Magenta, RLColor.Gray, 50);
-                case "White": return RLColor.White;
-                case "Black": return RLColor.Black;
-                case "Dark_Brown": return RLColor.Blend(RLColor.Brown, RLColor.Gray, 50);
-                case "Brown": return RLColor.Brown;
-                case "Pale": return RLColor.Blend(RLColor.White, RLColor.LightRed, 0.75f);
-                case "Pink": return RLColor.Blend(RLColor.White, RLColor.Red, 0.5f);
+                case "Red": return Color.Red;
+                case "Red_Orange": return Color.OrangeRed;
+                case "Blue": return Color.Blue;
+                case "Orange": return Color.Orange;
+                case "Light_Blue": return Color.LightBlue;
+                case "Dark_Blue": return Color.DarkBlue;
+                case "Yellow": return Color.Yellow;
+                case "Light_Yellow": return Color.LightYellow;
+                case "Green": return Color.Green;
+                case "Light_Green": return Color.LightGreen;
+                case "Dark_Green": return Color.DarkGreen;
+                case "Cyan": return Color.Cyan;
+                case "Gray": return Color.Gray;
+                case "Light_Gray": return Color.LightGray;
+                case "Dark_Gray": return Color.DarkGray;
+                case "Purple": return Color.Violet;
+                case "Dark_Purple": return Color.DarkViolet;
+                case "White": return Color.White;
+                case "Black": return Color.Black;
+                case "Dark_Brown": return Color.DarkKhaki;
+                case "Brown": return Color.Brown;
+                case "Pale": return Color.LightPink;
+                case "Pink": return Color.Pink;
             }
-            return RLColor.Black;
+            return Color.Black;
         }
     }
 }

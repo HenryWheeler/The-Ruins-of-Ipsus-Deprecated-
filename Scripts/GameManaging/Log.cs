@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using System.Linq;
 using RLNET;
+using SadConsole;
 
 namespace TheRuinsOfIpsus
 {
     public class Log
     {
-        public static RLConsole console;
+        public static TitleConsole console;
         private static Queue<string> log = new Queue<string>();
         private static int maxLogCount = 15;
         private static string spacer { get; set; }
-        public Log(RLConsole _console) 
+        public Log(TitleConsole _console) 
         { 
             console = _console;
             spacer = " + ";
@@ -22,7 +24,7 @@ namespace TheRuinsOfIpsus
         }
         public static void DisplayLog()
         {
-            ClearLogDisplay();
+            console.Clear();
 
             int m = 0;
             int y = 0;
@@ -44,7 +46,7 @@ namespace TheRuinsOfIpsus
                         else
                         {
                             if (c + split[0].Length > console.Width - 5) { y += 2 + m; c = 1; }
-                            console.Print(c + 1, y, split[0], RLColor.Blend(RLColor.Gray, RLColor.White, 1 - .05f * (i * 2)));
+                            console.Print(c + 1, y, split[0], Color.White);
                             c += split[0].Length + 1;
                         }
                     }
@@ -60,8 +62,8 @@ namespace TheRuinsOfIpsus
                     }
                 }
             }
-            Renderer.CreateConsoleBorder(console);
-            console.Print(11, 0, " Message Log ", RLColor.White);
+            Renderer.CreateConsoleBorder(console, " Message Log ");
+
         }
         public static void OutputParticleLog(string log, string color, Vector2 position)
         {
@@ -114,18 +116,6 @@ namespace TheRuinsOfIpsus
             if (log.Count > maxLogCount)
             {
                 log.Dequeue();
-            }
-        }
-        public static void ClearLogDisplay()
-        {
-            int h = console.Height - 2;
-            int w = console.Width - 2;
-            for (int y = (h); y >= 2; y--)
-            {
-                for (int x = 1; x < w + 1; x++)
-                {
-                    console.SetColor(x, y, RLColor.Black);
-                }
             }
         }
     }

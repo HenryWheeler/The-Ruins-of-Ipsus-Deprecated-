@@ -1,8 +1,8 @@
 ﻿using System;
-using RLNET;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Xna.Framework;
 using System.Threading.Tasks;
 
 namespace TheRuinsOfIpsus
@@ -26,7 +26,7 @@ namespace TheRuinsOfIpsus
             Move(0, 0);
             if (throwing) { Action.throwing = true; }
             else { Action.throwing = false; }
-            RLKey key = RLKey.Unknown; Action.TargetAction(player, key);
+            //Action.TargetAction(player, key);
         }
         private static void ClearSFXPositions()
         {
@@ -38,8 +38,8 @@ namespace TheRuinsOfIpsus
             targeting = false; player.GetComponent<TurnFunction>().turnActive = true;
             ClearSFXPositions();
             Renderer.MoveCamera(player.GetComponent<Vector2>());
-            if (!inInventory) { Action.PlayerAction(player); Log.DisplayLog(); }
-            else { InventoryManager.OpenInventory(); }
+            //if (!inInventory) { Action.PlayerAction(player); Log.DisplayLog(); }
+            //else { InventoryManager.OpenInventory(); }
         }
         public static void Move(int _x, int _y)
         {
@@ -219,7 +219,7 @@ namespace TheRuinsOfIpsus
                                     sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Yellow");
                                 }
                                 CMath.DisplayToConsole(Log.console, "", 1, 1);
-                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                                Renderer.CreateConsoleBorder(Program.logConsole, " Message Log ");
                             }
                             else
                             {
@@ -228,7 +228,7 @@ namespace TheRuinsOfIpsus
                                     sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
                                 }
                                 CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
-                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                                Renderer.CreateConsoleBorder(Program.logConsole, " Message Log ");
                                 check = false;
                             }
                         }
@@ -239,7 +239,7 @@ namespace TheRuinsOfIpsus
                                 sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
                             }
                             CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1);
-                            Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                            Renderer.CreateConsoleBorder(Program.logConsole, " Message Log ");
                             check = false;
                         } 
                     }
@@ -254,7 +254,7 @@ namespace TheRuinsOfIpsus
                                     sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Yellow");
                                 }
                                 CMath.DisplayToConsole(Log.console, "", 1, 1);
-                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                                Renderer.CreateConsoleBorder(Program.logConsole, " Message Log ");
                             }
                             else
                             {
@@ -263,7 +263,7 @@ namespace TheRuinsOfIpsus
                                     sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
                                 }
                                 CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
-                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                                Renderer.CreateConsoleBorder(Program.logConsole, " Message Log ");
                                 check = false;
                             }
                         }
@@ -274,7 +274,7 @@ namespace TheRuinsOfIpsus
                                 sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
                             }
                             CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1);
-                            Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                            Renderer.CreateConsoleBorder(Program.logConsole, " Message Log ");
                             check = false;
                         }
                     }
@@ -301,7 +301,7 @@ namespace TheRuinsOfIpsus
                                     sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Yellow");
                                 }
                                 CMath.DisplayToConsole(Log.console, "", 1, 1);
-                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                                Renderer.CreateConsoleBorder(Program.logConsole, " Message Log ");
                             }
                             else
                             {
@@ -310,7 +310,7 @@ namespace TheRuinsOfIpsus
                                     sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
                                 }
                                 CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
-                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                                Renderer.CreateConsoleBorder(Program.logConsole, " Message Log ");
                                 check = false;
                             }
                         }
@@ -321,7 +321,7 @@ namespace TheRuinsOfIpsus
                                 sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, 'X', "Gray");
                             }
                             CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1);
-                            Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                            Renderer.CreateConsoleBorder(Program.logConsole, " Message Log ");
                             check = false;
                         }
                     }
@@ -336,7 +336,7 @@ namespace TheRuinsOfIpsus
                                     sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Yellow");
                                 }
                                 CMath.DisplayToConsole(Log.console, "", 1, 1);
-                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                                Renderer.CreateConsoleBorder(Program.logConsole, " Message Log ");
                             }
                             else
                             {
@@ -345,7 +345,7 @@ namespace TheRuinsOfIpsus
                                     sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
                                 }
                                 CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1);
-                                Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                                Renderer.CreateConsoleBorder(Program.logConsole, " Message Log ");
                                 check = false;
                             }
                         }
@@ -356,7 +356,7 @@ namespace TheRuinsOfIpsus
                                 sfxPositions.Add(new Vector2(x, y)); World.tiles[x, y].sfxLayer = Reticle(x, y, '.', "Gray");
                             }
                             CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1);
-                            Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White);
+                            Renderer.CreateConsoleBorder(Program.logConsole, " Message Log ");
                             check = false;
                         }
                     }
@@ -398,9 +398,9 @@ namespace TheRuinsOfIpsus
                     StopTargeting();
                     return new Vector2(x, y);
                 }
-                else { CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1); Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White); return null; }
+                else { CMath.DisplayToConsole(Log.console, "Your target is blocked.", 1, 1); Renderer.CreateConsoleBorder(Program.logConsole, " Message Log "); return null; }
             }
-            else { CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1); Program.messageConsole.Print(11, 0, " Message Log ", RLColor.White); return null; }
+            else { CMath.DisplayToConsole(Log.console, "Your target is out of range.", 1, 1); Renderer.CreateConsoleBorder(Program.logConsole, " Message Log "); return null; }
         }
         public static void ThrowWeapon(Entity weaponUsed)
         {

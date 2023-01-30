@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 
 namespace TheRuinsOfIpsus
 {
@@ -205,7 +206,7 @@ namespace TheRuinsOfIpsus
             }
             return null;
         }
-        public static void DisplayToConsole(RLConsole console, string logOut, int a, int b, int m = 0, int y = 2, bool clear = true)
+        public static void DisplayToConsole(TitleConsole console, string logOut, int a, int b, int m = 0, int y = 2, bool clear = true)
         {
             if (clear)
             {
@@ -222,7 +223,7 @@ namespace TheRuinsOfIpsus
                     else
                     {
                         if (c + split[0].Length > console.Width - 4) { y += 2 + m; c = a; }
-                        console.Print(c + b, y, split[0], RLColor.White);
+                        console.Print(c + b, y, split[0], Color.White);
                         c += split[0].Length + 1;
                     }
                 }
@@ -237,27 +238,11 @@ namespace TheRuinsOfIpsus
                     }
                 }
             }
-            if (clear)
-            {
-                Renderer.CreateConsoleBorder(console);
-            }
         }
         public static bool CheckBounds(int x, int y)
         {
             if (x <= 0 || x >= Program.gameMapWidth || y <= 0 || y >= Program.gameMapHeight) return false;
             else return true;
-        }
-        public static void ClearConsole(RLConsole console)
-        {
-            int h = console.Height - 2;
-            int w = console.Width - 2;
-            for (int y = (h); y >= 2; y--)
-            {
-                for (int x = 1; x < w + 1; x++)
-                {
-                    console.SetColor(x, y, RLColor.Black);
-                }
-            }
         }
     }
 }

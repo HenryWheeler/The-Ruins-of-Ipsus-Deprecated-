@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SadConsole.Components;
+using SadConsole.Input;
+using SadConsole;
+using Microsoft.Xna.Framework;
 
 namespace TheRuinsOfIpsus
 {
@@ -21,87 +25,64 @@ namespace TheRuinsOfIpsus
         public static bool throwing = false;
         private static Entity chosenEntity { get; set; }
         private static Vector2 chosenLocation { get; set; }
-        private static RLConsole console { get; set; }
-        public Action(RLConsole _console) { console = _console; }
+        private static TitleConsole console { get; set; }
+        public Action(TitleConsole _console) { console = _console; }
         public static Entity targetWeapon { get; set; }
-        public static void MenuAction(RLKey key, RLRootConsole console)
+        public static void MenuAction(Keyboard keyboard)
         {
-            switch (key)
-            {
-                case RLKey.N: Menu.MakeSelection(0); break;
-                case RLKey.L: Menu.MakeSelection(1); break;
-                case RLKey.Q: Menu.MakeSelection(2); break;
-            }
+            if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.N)) { Menu.MakeSelection(0); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.L)) { Menu.MakeSelection(1); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Q)) { Menu.MakeSelection(2); }
         }
-        public static void PlayerAction(Entity player, RLKey key = RLKey.Unknown)
+        public static void PlayerAction(Entity player, Keyboard keyboard)
         {
-            if (key != RLKey.Unknown)
+            if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Up)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, -1))); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Down)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, 1))); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Left)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, 0))); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Right)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, 0))); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad8)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, -1))); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad9)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, -1))); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad6)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, 0))); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad3)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, 1))); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad2)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, 1))); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad1)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, 1))); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad4)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, 0))); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad7)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, -1))); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.OemPlus)) 
             {
-                switch (key)
+                Vector2 vector2 = player.GetComponent<Vector2>();
+                if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '>') { World.GenerateNewFloor(true); }
+            }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.OemMinus)) 
+            {
+                Vector2 vector2 = player.GetComponent<Vector2>();
+                if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '<') { World.GenerateNewFloor(false); }
+            }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.OemPeriod)) { player.GetComponent<TurnFunction>().EndTurn(); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.L)) { Look.StartLooking(player.GetComponent<Vector2>()); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.I)) { InventoryManager.OpenInventory(); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.E)) { InventoryManager.OpenEquipment(); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.G)) { InventoryManager.GetItem(player); Log.DisplayLog(); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.J)) { SaveDataManager.CreateSave(); Program.gameActive = false; Renderer.running = false; SadConsole.Game.Instance.Exit(); }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.J)) 
+            {
+                foreach (Traversable tile in World.tiles)
                 {
-                    case RLKey.Up: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, -1))); break;
-                    case RLKey.Down: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, 1))); break;
-                    case RLKey.Left: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, 0))); break;
-                    case RLKey.Right:  player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, 0))); break;
-                    case RLKey.Keypad8: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, -1))); break;
-                    case RLKey.Keypad9: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, -1))); break;
-                    case RLKey.Keypad6: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, 0))); break;
-                    case RLKey.Keypad3: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, 1))); break;
-                    case RLKey.Keypad2: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, 1))); break;
-                    case RLKey.Keypad1: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, 1))); break;
-                    case RLKey.Keypad4: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, 0))); break;
-                    case RLKey.Keypad7: player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, -1))); break;
-                    case RLKey.KeypadMinus:
-                        {
-                            Vector2 vector2 = player.GetComponent<Vector2>();
-                            if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '<') { World.GenerateNewFloor(true); }
-                            break;
-                        }
-                    case RLKey.KeypadPlus:
-                        {
-                            Vector2 vector2 = player.GetComponent<Vector2>();
-                            if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '>') { World.GenerateNewFloor(false); }
-                            break;
-                        }
-                    case RLKey.Plus:
-                        {
-                            Vector2 vector2 = player.GetComponent<Vector2>();
-                            if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '>') { World.GenerateNewFloor(true); }
-                            break;
-                        }
-                    case RLKey.Minus:
-                        {
-                            Vector2 vector2 = player.GetComponent<Vector2>();
-                            if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '<') { World.GenerateNewFloor(false); }
-                            break;
-                        }
-                    case RLKey.Period: player.GetComponent<TurnFunction>().EndTurn(); break;
-                    case RLKey.L: Look.StartLooking(player.GetComponent<Vector2>()); break;
-                    case RLKey.I: InventoryManager.OpenInventory(); break;
-                    case RLKey.E: InventoryManager.OpenEquipment(); break;
-                    case RLKey.G: InventoryManager.GetItem(player); Log.DisplayLog(); break;
-                    case RLKey.J: SaveDataManager.CreateSave(); Program.gameActive = false; Renderer.running = false; Program.rootConsole.Close(); break;
-                    case RLKey.V:
-                        foreach (Traversable tile in World.tiles)
-                        {
-                            if (tile != null)
-                            {
-                                Vector2 vector2 = tile.entity.GetComponent<Vector2>();
-                                ShadowcastFOV.SetVisible(vector2, true, 1000, vector2.x, vector2.y, true);
-                            }
-                        }
-                        break;
-                    case RLKey.Space:
-                        {
-                            player.GetComponent<TurnFunction>().turnActive = false;
-                            InventoryManager.inventoryOpen = false;
-                            TargetReticle.targeting = false;
-                            interacting = true;
-                            choosingDirection = true;
-                            Interaction(player);
-                            break;
-                        }
+                    if (tile != null)
+                    {
+                        Vector2 vector2 = tile.entity.GetComponent<Vector2>();
+                        ShadowcastFOV.SetVisible(vector2, true, 1000, vector2.x, vector2.y, true);
+                    }
                 }
+            }
+            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Space)) 
+            {
+                player.GetComponent<TurnFunction>().turnActive = false;
+                InventoryManager.inventoryOpen = false;
+                TargetReticle.targeting = false;
+                interacting = true;
+                choosingDirection = true;
+                Interaction(player);
             }
         }
         public static void EquipmentAction(Entity player, RLKey key = RLKey.Unknown)
@@ -125,10 +106,10 @@ namespace TheRuinsOfIpsus
         }
         public static void Interaction(Entity player, RLKey key = RLKey.Unknown)
         {
-            if (choosingDirection) { CMath.DisplayToConsole(Log.console, "Choose a direction.", 1, 1); DisplayActions("Directions:[NumPad]" + " End Interaction:[Escape]"); }
-            else
+            //if (choosingDirection) { CMath.DisplayToConsole(Log.console, "Choose a direction.", 1, 1); DisplayActions("Directions:[NumPad]" + " End Interaction:[Escape]"); }
+            //else
             {
-                CMath.DisplayToConsole(Log.console, interactionText, 1, 1);
+                //CMath.DisplayToConsole(Log.console, interactionText, 1, 1);
                 DisplayActions(interactionKeyText);
             }
             if (key != RLKey.Unknown)
@@ -226,7 +207,7 @@ namespace TheRuinsOfIpsus
             interacting = false; 
             choosingDirection = false; 
             choosingTarget = false; 
-            PlayerAction(player);
+            PlayerAction(player, null);
             StatManager.UpdateStats(player);
             Log.DisplayLog(); 
         }
@@ -234,7 +215,7 @@ namespace TheRuinsOfIpsus
         {
             if (key != RLKey.Unknown)
             {
-                CMath.DisplayToConsole(Log.console, "", 0, 0);
+                //CMath.DisplayToConsole(Log.console, "", 0, 0);
                 switch (key)
                 {
                     case RLKey.I: InventoryManager.CloseInventory(); break;
@@ -258,7 +239,7 @@ namespace TheRuinsOfIpsus
                                 {
                                     if (InventoryManager.inventoryDisplay[first][second].GetComponent<Equippable>().equipped) { InventoryManager.UnequipItem(player, InventoryManager.inventoryDisplay[first][second], true); }
                                     else { InventoryManager.EquipItem(player, InventoryManager.inventoryDisplay[first][second]); }
-                                } else { CMath.DisplayToConsole(Log.console, "You cannot equip the " + InventoryManager.inventoryDisplay[first][second].GetComponent<Description>().name + ".", 1, 1); }
+                                } //else { CMath.DisplayToConsole(Log.console, "You cannot equip the " + InventoryManager.inventoryDisplay[first][second].GetComponent<Description>().name + ".", 1, 1); }
                             }
                             break;
                         }
@@ -273,7 +254,7 @@ namespace TheRuinsOfIpsus
                                     targetWeapon = InventoryManager.inventoryDisplay[first][second];
                                     InventoryManager.UseItem(player, InventoryManager.inventoryDisplay[first][second]);
                                 }
-                                else { CMath.DisplayToConsole(Log.console, "You cannot use the " + InventoryManager.inventoryDisplay[first][second].GetComponent<Description>().name + ".", 1, 1); }
+                                //else { CMath.DisplayToConsole(Log.console, "You cannot use the " + InventoryManager.inventoryDisplay[first][second].GetComponent<Description>().name + ".", 1, 1); }
                             }
                             break;
                         }
@@ -443,9 +424,9 @@ namespace TheRuinsOfIpsus
                 interactions++;
             }
             else { terrainPresent = false; }
-            if (!actorPresent && !itemPresent && !obstaclePresent && !terrainPresent)
-            { interactionText = "There is nothing there."; CMath.DisplayToConsole(Log.console, interactionText, 1, 1); }
-            else if (interactions == 1)
+            //if (!actorPresent && !itemPresent && !obstaclePresent && !terrainPresent)
+            //{ interactionText = "There is nothing there."; CMath.DisplayToConsole(Log.console, interactionText, 1, 1); }
+            //else if (interactions == 1)
             {
                 choosingDirection = false;
                 if (actorPresent) { ChooseEntity(player, 0); }
@@ -453,7 +434,7 @@ namespace TheRuinsOfIpsus
                 else if (obstaclePresent) { ChooseEntity(player, 2); }
                 else if (terrainPresent) { ChooseEntity(player, 3); }
             }
-            else
+            //else
             {
                 interactionText = "What do you interact with?";
                 interactionKeyText += "End Interaction:[Escape]";
@@ -463,6 +444,8 @@ namespace TheRuinsOfIpsus
             }
         }
         public static void DisplayActions(string actions) 
-        { CMath.ClearConsole(console); CMath.DisplayToConsole(console, actions, 0, 2); console.Print(8, 0, " Actions ", RLColor.White); }
+        {
+            //CMath.ClearConsole(console); CMath.DisplayToConsole(console, actions, 0, 2); console.Print(8, 0, " Actions ", RLColor.White); 
+        }
     }
 }
