@@ -5,7 +5,6 @@ using SadConsole;
 using Console = SadConsole.Console;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using RLNET;
 
 namespace TheRuinsOfIpsus
 {
@@ -69,11 +68,6 @@ namespace TheRuinsOfIpsus
 
             LoadFunctions();
         }
-        public static void CloseGame(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            gameActive = false;
-            Renderer.running = false;
-        }
         public static void LoadFunctions()
         {
             Renderer renderer = new Renderer(mapConsole, mapWidth, mapHeight);
@@ -82,11 +76,11 @@ namespace TheRuinsOfIpsus
             //Menu update = new Menu(rootConsole);
             StatManager stats = new StatManager(playerConsole);
             SaveDataManager saveDataManager = new SaveDataManager();
-            JsonDataManager jsonDataManager = new JsonDataManager();
+            //JsonDataManager jsonDataManager = new JsonDataManager();
             PronounReferences pronounReferences = new PronounReferences();
-            SpawnTableManager spawnTableManager = new SpawnTableManager();
+            //SpawnTableManager spawnTableManager = new SpawnTableManager();
             DijkstraMaps dijkstraMaps = new DijkstraMaps(gameMapWidth, gameMapHeight);
-            EntityManager.LoadAllEntities();
+            //EntityManager.LoadAllEntities();
 
             NewGame();
         }

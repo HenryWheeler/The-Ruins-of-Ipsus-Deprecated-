@@ -1,5 +1,4 @@
 ﻿using System;
-using RLNET;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,57 +35,10 @@ namespace TheRuinsOfIpsus
         }
         public static void PlayerAction(Entity player, Keyboard keyboard)
         {
-            if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Up)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, -1))); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Down)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, 1))); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Left)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, 0))); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Right)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, 0))); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad8)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, -1))); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad9)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, -1))); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad6)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, 0))); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad3)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(1, 1))); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad2)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(0, 1))); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad1)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, 1))); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad4)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, 0))); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.NumPad7)) { player.GetComponent<Movement>().Move(new Vector2(player.GetComponent<Vector2>(), new Vector2(-1, -1))); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.OemPlus)) 
-            {
-                Vector2 vector2 = player.GetComponent<Vector2>();
-                if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '>') { World.GenerateNewFloor(true); }
-            }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.OemMinus)) 
-            {
-                Vector2 vector2 = player.GetComponent<Vector2>();
-                if (World.tiles[vector2.x, vector2.y].entity.GetComponent<Draw>().character == '<') { World.GenerateNewFloor(false); }
-            }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.OemPeriod)) { player.GetComponent<TurnFunction>().EndTurn(); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.L)) { Look.StartLooking(player.GetComponent<Vector2>()); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.I)) { InventoryManager.OpenInventory(); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.E)) { InventoryManager.OpenEquipment(); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.G)) { InventoryManager.GetItem(player); Log.DisplayLog(); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.J)) { SaveDataManager.CreateSave(); Program.gameActive = false; Renderer.running = false; SadConsole.Game.Instance.Exit(); }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.J)) 
-            {
-                foreach (Traversable tile in World.tiles)
-                {
-                    if (tile != null)
-                    {
-                        Vector2 vector2 = tile.entity.GetComponent<Vector2>();
-                        ShadowcastFOV.SetVisible(vector2, true, 1000, vector2.x, vector2.y, true);
-                    }
-                }
-            }
-            else if (keyboard.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Space)) 
-            {
-                player.GetComponent<TurnFunction>().turnActive = false;
-                InventoryManager.inventoryOpen = false;
-                TargetReticle.targeting = false;
-                interacting = true;
-                choosingDirection = true;
-                Interaction(player);
-            }
         }
-        public static void EquipmentAction(Entity player, RLKey key = RLKey.Unknown)
+        public static void EquipmentAction(Entity player)
         {
+            /*
             if (key != RLKey.Unknown)
             {
                 switch (key)
@@ -103,9 +55,11 @@ namespace TheRuinsOfIpsus
                         }
                 }
             }
+            */
         }
-        public static void Interaction(Entity player, RLKey key = RLKey.Unknown)
+        public static void Interaction(Entity player)
         {
+            /*
             //if (choosingDirection) { CMath.DisplayToConsole(Log.console, "Choose a direction.", 1, 1); DisplayActions("Directions:[NumPad]" + " End Interaction:[Escape]"); }
             //else
             {
@@ -196,10 +150,11 @@ namespace TheRuinsOfIpsus
                     }
                 }
             }
+            */
         }
         public static void ReturnFalseMethodMessage()
         {
-            DisplayActions("You cannot interact via that method. Choose another method of interaction");
+            //DisplayActions("You cannot interact via that method. Choose another method of interaction");
         }
         public static void EscapeInteraction(Entity player)
         { 
@@ -211,8 +166,9 @@ namespace TheRuinsOfIpsus
             StatManager.UpdateStats(player);
             Log.DisplayLog(); 
         }
-        public static void InventoryAction(Entity player, RLKey key = RLKey.Unknown)
+        public static void InventoryAction(Entity player)
         {
+            /*
             if (key != RLKey.Unknown)
             {
                 //CMath.DisplayToConsole(Log.console, "", 0, 0);
@@ -277,9 +233,11 @@ namespace TheRuinsOfIpsus
                         }
                 }
             }
+            */
         }
-        public static void TargetAction(Entity player, RLKey key = RLKey.Unknown)
+        public static void TargetAction(Entity player)
         {
+            /*
             if (key != RLKey.Unknown)
             {
                 switch (key)
@@ -303,6 +261,7 @@ namespace TheRuinsOfIpsus
                     case RLKey.Enter: Throw(player); break;
                 }
             }
+            */
         }
         public static void Throw(Entity player)
         {
@@ -325,8 +284,9 @@ namespace TheRuinsOfIpsus
                 }
             }
         }
-        public static void LookAction(RLKey key = RLKey.Unknown)
+        public static void LookAction()
         {
+            /*
             if (key != RLKey.Unknown)
             {
                 switch (key)
@@ -347,6 +307,7 @@ namespace TheRuinsOfIpsus
                     case RLKey.L: Look.StopLooking(); break;
                 }
             }
+            */
         }
         public static void ChooseEntity(Entity player, int type)
         {

@@ -1,5 +1,4 @@
 ﻿using System;
-using RLNET;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
@@ -12,16 +11,9 @@ namespace TheRuinsOfIpsus
 {
     public class Renderer
     {
-        private static RLRootConsole rootConsole;
-        public static TitleConsole mapConsole;
         public static int mapWidth;
         public static int mapHeight;
-        private static RLConsole messageConsole;
-        public static int messageWidth;
-        private static int messageHeight;
-        private static RLConsole rogueConsole;
-        public static int rogueWidth;
-        private static int rogueHeight;
+        public static TitleConsole mapConsole;
         public static bool inventoryOpen = false;
         public static List<ParticleComponent> particles = new List<ParticleComponent>();
         public static List<Entity> clearList = new List<Entity>();
@@ -39,18 +31,6 @@ namespace TheRuinsOfIpsus
             mapConsole = _mapConsole;
             mapWidth = _mapWidth;
             mapHeight = _mapHeight;
-        }
-        public static void Render(object sender, UpdateEventArgs e)
-        {
-            rootConsole.Clear();
-            if (Program.gameActive)
-            {
-                RenderMap();
-                RenderLog();
-                RenderRogue();
-            }
-            else { RenderMenu(); }
-            rootConsole.Draw();
         }
         public static void AddParticle(int x, int y, Entity particle)
         {
@@ -120,6 +100,7 @@ namespace TheRuinsOfIpsus
         }  
         public static void RenderMenu()
         {
+            /*
             if (Menu.openingScreen)
             {
                 rootConsole.Print((rootConsole.Width / 2) - 46, (rootConsole.Height / 3) - 14, " ______  _             ____         __                   ___   __                          ", RLColor.White);
@@ -184,6 +165,7 @@ namespace TheRuinsOfIpsus
                 rootConsole.Print((rootConsole.Width / 2) - 13, (rootConsole.Height / 2) + 16, "New Game: [N] - Quit: [Q]", RLColor.Brown, RLColor.Black);
             }
             //CreateConsoleBorder(rootConsole);
+            */
         }
         public static void MoveCamera(Vector2 vector3)
         {
@@ -263,11 +245,11 @@ namespace TheRuinsOfIpsus
         }
         public static void RenderLog()
         {
-            RLConsole.Blit(messageConsole, 0, 0, messageWidth, messageHeight, rootConsole, mapWidth, rogueHeight);
+            //RLConsole.Blit(messageConsole, 0, 0, messageWidth, messageHeight, rootConsole, mapWidth, rogueHeight);
         }
         public static void RenderRogue()
         {
-            RLConsole.Blit(rogueConsole, 0, 0, rogueWidth, rogueHeight, rootConsole, mapWidth, 0);
+            //RLConsole.Blit(rogueConsole, 0, 0, rogueWidth, rogueHeight, rootConsole, mapWidth, 0);
         }
         public static void CreateConsoleBorder(Console console, string title)
         {
